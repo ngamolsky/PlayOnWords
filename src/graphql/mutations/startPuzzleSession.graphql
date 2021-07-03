@@ -1,0 +1,10 @@
+mutation StartPuzzleSession($puzzleID: String!) {
+  startPuzzleSession(puzzleID: $puzzleID) {
+    sessionID
+    owner {
+      userID
+      displayName
+      username
+    }
+  }
+}

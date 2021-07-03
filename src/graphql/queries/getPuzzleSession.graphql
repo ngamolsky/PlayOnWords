@@ -1,0 +1,29 @@
+query GetPuzzleSession($sessionID: String!) {
+  getPuzzleSession(sessionID: $sessionID) {
+    sessionID
+    participants {
+      displayName
+    }
+    startTime
+    puzzle {
+      puzzleID
+      date
+      clues {
+        horizontal {
+          x
+          y
+          hint
+          length
+        }
+        vertical {
+          x
+          y
+          hint
+          length
+        }
+      }
+      solutions
+      title
+    }
+  }
+}

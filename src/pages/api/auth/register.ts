@@ -2,8 +2,8 @@ import { NextApiResponse } from "next";
 import nextConnect from "next-connect";
 import { withOptions } from "../middleware/withOptions";
 import { withPassport } from "../middleware/withPassport";
-import { registerLocalUser } from "../models/User";
 import { XWordRequest } from "../../../types";
+import { registerLocalUser } from "../resolvers/user";
 
 const registerHandler = nextConnect<XWordRequest, NextApiResponse>(
   withOptions()

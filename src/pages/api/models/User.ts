@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import bcrypt from "bcrypt";
 import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
 import { DateScalar } from "./DateScalar";
 

@@ -15,7 +15,6 @@ import {
   Button,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { XWORD_THUMBNAIL_IMAGE } from "../constants";
 import { toXWordDate } from "../utils/toXWordDate";
 
 interface PuzzleCardProps {
@@ -51,7 +50,7 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({
               borderTopRadius="lg"
               w="100%"
               mx="auto"
-              src={XWORD_THUMBNAIL_IMAGE}
+              src="/images/XWordSquare.svg"
               alt="Crossword Puzzle Image"
               fallback={<Skeleton />}
               overflow="hidden"

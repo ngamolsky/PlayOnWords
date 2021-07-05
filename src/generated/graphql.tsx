@@ -12,10 +12,11 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
-  DateTime: any;
+  BoardState: any;
+  Date: string;
   Solutions: any;
 };
+
 
 export type Clue = {
   __typename?: 'Clue';
@@ -53,7 +54,7 @@ export type Puzzle = {
   puzzleID: Scalars['ID'];
   title?: Maybe<Scalars['String']>;
   clues: ClueList;
-  date: Scalars['DateTime'];
+  date: Scalars['Date'];
   solutions: Scalars['Solutions'];
 };
 
@@ -63,7 +64,8 @@ export type PuzzleSession = {
   puzzle: Puzzle;
   participants: Array<User>;
   owner: User;
-  startTime: Scalars['DateTime'];
+  startTime: Scalars['Date'];
+  boardState: Scalars['BoardState'];
 };
 
 export type Query = {
@@ -99,8 +101,8 @@ export type User = {
   hashedPassword?: Maybe<Scalars['String']>;
   googleID?: Maybe<Scalars['String']>;
   loginType: LoginType;
-  createDate: Scalars['Float'];
-  updateDate: Scalars['Float'];
+  createDate: Scalars['Date'];
+  updateDate: Scalars['Date'];
 };
 
 export type StartPuzzleSessionMutationVariables = Exact<{
@@ -152,7 +154,7 @@ export type GetPuzzleSessionQuery = (
   { __typename?: 'Query' }
   & { getPuzzleSession: (
     { __typename?: 'PuzzleSession' }
-    & Pick<PuzzleSession, 'sessionID' | 'startTime'>
+    & Pick<PuzzleSession, 'sessionID' | 'startTime' | 'boardState'>
     & { participants: Array<(
       { __typename?: 'User' }
       & Pick<User, 'displayName'>
@@ -316,6 +318,7 @@ export const GetPuzzleSessionDocument = gql`
       solutions
       title
     }
+    boardState
   }
 }
     `;

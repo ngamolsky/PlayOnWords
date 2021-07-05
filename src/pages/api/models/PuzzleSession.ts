@@ -1,11 +1,53 @@
-import db from "../config/firebase";
 import "reflect-metadata";
-import { Field, ID, ObjectType } from "type-graphql";
-import { v4 } from "uuid";
-import { PUZZLE_SESSIONS_COLLECTION } from "../../../constants";
-import { firebaseResultToUser, User } from "./User";
-import { firebaseResultToPuzzle, getPuzzle, Puzzle } from "./Puzzle";
+import { Field, ID, ObjectType, registerEnumType } from "type-graphql";
+import { User } from "./User";
+import { Puzzle } from "./Puzzle";
 import { DateScalar } from "./DateScalar";
+import { GraphQLScalarType, Kind } from "graphql";
+
+export class BoardState {
+  [key: string]: CellState;
+}
+
+export class CellState {
+  solutionState: CellSolutionState;
+  currentLetter: string | null;
+}
+
+export enum CellSolutionState {
+  REVEALED = "revealed",
+  WRONG = "wrong",
+  NONE = "none",
+}
+
+registerEnumType(CellSolutionState, {
+  name: "CellSolutionState",
+});
+
+const BoardStateScalar = new GraphQLScalarType({
+  name: "BoardState",
+  serialize(value: unknown): string {
+    if (!(value instanceof Object)) {
+      throw new Error("BoardStateScalar can only serialize Solutions values");
+    }
+    return JSON.stringify(value);
+  },
+  parseValue(value: unknown): BoardState {
+    // check the type of received value
+    if (typeof value !== "string") {
+      throw new Error("BoardStateScalar can only parse string values");
+    }
+    const boardState = JSON.parse(value);
+    return boardState;
+  },
+  parseLiteral(ast): BoardState {
+    // check the type of received value
+    if (ast.kind !== Kind.STRING) {
+      throw new Error("BoardStateScalar can only parse string values");
+    }
+    return JSON.parse(ast.value);
+  },
+});
 
 @ObjectType()
 export class PuzzleSession {
@@ -23,61 +65,7 @@ export class PuzzleSession {
 
   @Field(() => DateScalar)
   startTime: Date;
+
+  @Field(() => BoardStateScalar)
+  boardState: BoardState;
 }
-
-export const startPuzzleSession = async (
-  owner: User,
-  puzzleID: string
-): Promise<PuzzleSession> => {
-  const puzzle = await getPuzzle(puzzleID);
-  const session: PuzzleSession = {
-    sessionID: `puzzleSession.${v4()}`,
-    owner,
-    puzzle,
-    participants: [owner],
-    startTime: new Date(),
-  };
-  await db
-    .collection(PUZZLE_SESSIONS_COLLECTION)
-    .withConverter(puzzleSessionConverter)
-    .doc(session.sessionID)
-    .set(session);
-  return session;
-};
-
-export const getPuzzleSession = async (
-  sessionID: string
-): Promise<PuzzleSession> => {
-  const result = await db
-    .collection(PUZZLE_SESSIONS_COLLECTION)
-    .withConverter(puzzleSessionConverter)
-    .doc(sessionID)
-    .get();
-  return result.data()!;
-};
-
-export const puzzleSessionConverter = {
-  toFirestore(puzzleSession: PuzzleSession) {
-    return puzzleSession;
-  },
-  fromFirestore(
-    snapshot: FirebaseFirestore.QueryDocumentSnapshot
-  ): PuzzleSession {
-    const results = snapshot.data();
-    return firebaseResultToPuzzleSession(results);
-  },
-};
-
-export const firebaseResultToPuzzleSession = (
-  data: FirebaseFirestore.DocumentData
-): PuzzleSession => {
-  return {
-    sessionID: data.sessionID,
-    owner: firebaseResultToUser(data.owner),
-    participants: data.participants.map((participant: any) =>
-      firebaseResultToUser(participant)
-    ),
-    puzzle: firebaseResultToPuzzle(data.puzzle),
-    startTime: data.startTime.toDate(),
-  };
-};

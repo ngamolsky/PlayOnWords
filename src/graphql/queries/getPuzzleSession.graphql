@@ -25,5 +25,6 @@ query GetPuzzleSession($sessionID: String!) {
       solutions
       title
     }
+    boardState
   }
 }

@@ -9,7 +9,6 @@ export const DateScalar = new GraphQLScalarType({
     return value.toISOString();
   },
   parseValue(value: unknown): Date {
-    console.log("parsing", value);
     // check the type of received value
     if (typeof value !== "string") {
       throw new Error("DateScalar can only parse string values");

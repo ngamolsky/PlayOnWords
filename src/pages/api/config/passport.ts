@@ -2,16 +2,15 @@ import passport from "passport";
 import GoogleOAuth from "passport-google-oauth20";
 import { Strategy as LocalStrategy } from "passport-local";
 import { v4 as uuid } from "uuid";
-import {
-  addUser,
-  getUserByUsername,
-  getUserByGoogleID,
-  getUserByID,
-  LoginType,
-  User,
-  verifyPassword,
-} from "../models/User";
+import { LoginType, User } from "../models/User";
 import { XWordErrors } from "../models/XWordError";
+import {
+  getUserByUsername,
+  verifyPassword,
+  getUserByGoogleID,
+  addUser,
+  getUserByID,
+} from "../resolvers/user";
 
 passport.use(
   new LocalStrategy(async (username, password, done) => {

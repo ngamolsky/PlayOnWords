@@ -42,11 +42,18 @@ export enum LoginType {
 export type Mutation = {
   __typename?: 'Mutation';
   startPuzzleSession: PuzzleSession;
+  endPuzzleSession: Scalars['Boolean'];
 };
 
 
 export type MutationStartPuzzleSessionArgs = {
+  sessionID?: Maybe<Scalars['String']>;
   puzzleID: Scalars['String'];
+};
+
+
+export type MutationEndPuzzleSessionArgs = {
+  sessionID: Scalars['String'];
 };
 
 export type Puzzle = {
@@ -74,6 +81,7 @@ export type Query = {
   recentPuzzles: Array<Puzzle>;
   getPuzzle: Puzzle;
   getPuzzleSession: PuzzleSession;
+  getPuzzleSessionsForUser: Array<PuzzleSession>;
 };
 
 
@@ -92,6 +100,11 @@ export type QueryGetPuzzleSessionArgs = {
 };
 
 
+export type QueryGetPuzzleSessionsForUserArgs = {
+  userID: Scalars['String'];
+};
+
+
 export type User = {
   __typename?: 'User';
   userID: Scalars['ID'];
@@ -105,8 +118,19 @@ export type User = {
   updateDate: Scalars['Date'];
 };
 
+export type EndPuzzleSessionMutationVariables = Exact<{
+  sessionID: Scalars['String'];
+}>;
+
+
+export type EndPuzzleSessionMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'endPuzzleSession'>
+);
+
 export type StartPuzzleSessionMutationVariables = Exact<{
   puzzleID: Scalars['String'];
+  sessionID?: Maybe<Scalars['String']>;
 }>;
 
 
@@ -114,7 +138,7 @@ export type StartPuzzleSessionMutation = (
   { __typename?: 'Mutation' }
   & { startPuzzleSession: (
     { __typename?: 'PuzzleSession' }
-    & Pick<PuzzleSession, 'sessionID'>
+    & Pick<PuzzleSession, 'sessionID' | 'boardState' | 'startTime'>
     & { owner: (
       { __typename?: 'User' }
       & Pick<User, 'userID' | 'displayName' | 'username'>
@@ -175,6 +199,23 @@ export type GetPuzzleSessionQuery = (
   ) }
 );
 
+export type GetPuzzleSessionsForUserQueryVariables = Exact<{
+  userID: Scalars['String'];
+}>;
+
+
+export type GetPuzzleSessionsForUserQuery = (
+  { __typename?: 'Query' }
+  & { getPuzzleSessionsForUser: Array<(
+    { __typename?: 'PuzzleSession' }
+    & Pick<PuzzleSession, 'sessionID'>
+    & { puzzle: (
+      { __typename?: 'Puzzle' }
+      & Pick<Puzzle, 'puzzleID'>
+    ) }
+  )> }
+);
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -200,10 +241,43 @@ export type RecentPuzzlesQuery = (
 );
 
 
+export const EndPuzzleSessionDocument = gql`
+    mutation EndPuzzleSession($sessionID: String!) {
+  endPuzzleSession(sessionID: $sessionID)
+}
+    `;
+export type EndPuzzleSessionMutationFn = Apollo.MutationFunction<EndPuzzleSessionMutation, EndPuzzleSessionMutationVariables>;
+
+/**
+ * __useEndPuzzleSessionMutation__
+ *
+ * To run a mutation, you first call `useEndPuzzleSessionMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useEndPuzzleSessionMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [endPuzzleSessionMutation, { data, loading, error }] = useEndPuzzleSessionMutation({
+ *   variables: {
+ *      sessionID: // value for 'sessionID'
+ *   },
+ * });
+ */
+export function useEndPuzzleSessionMutation(baseOptions?: Apollo.MutationHookOptions<EndPuzzleSessionMutation, EndPuzzleSessionMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<EndPuzzleSessionMutation, EndPuzzleSessionMutationVariables>(EndPuzzleSessionDocument, options);
+      }
+export type EndPuzzleSessionMutationHookResult = ReturnType<typeof useEndPuzzleSessionMutation>;
+export type EndPuzzleSessionMutationResult = Apollo.MutationResult<EndPuzzleSessionMutation>;
+export type EndPuzzleSessionMutationOptions = Apollo.BaseMutationOptions<EndPuzzleSessionMutation, EndPuzzleSessionMutationVariables>;
 export const StartPuzzleSessionDocument = gql`
-    mutation StartPuzzleSession($puzzleID: String!) {
-  startPuzzleSession(puzzleID: $puzzleID) {
+    mutation StartPuzzleSession($puzzleID: String!, $sessionID: String) {
+  startPuzzleSession(puzzleID: $puzzleID, sessionID: $sessionID) {
     sessionID
+    boardState
+    startTime
     owner {
       userID
       displayName
@@ -228,6 +302,7 @@ export type StartPuzzleSessionMutationFn = Apollo.MutationFunction<StartPuzzleSe
  * const [startPuzzleSessionMutation, { data, loading, error }] = useStartPuzzleSessionMutation({
  *   variables: {
  *      puzzleID: // value for 'puzzleID'
+ *      sessionID: // value for 'sessionID'
  *   },
  * });
  */
@@ -350,6 +425,44 @@ export function useGetPuzzleSessionLazyQuery(baseOptions?: Apollo.LazyQueryHookO
 export type GetPuzzleSessionQueryHookResult = ReturnType<typeof useGetPuzzleSessionQuery>;
 export type GetPuzzleSessionLazyQueryHookResult = ReturnType<typeof useGetPuzzleSessionLazyQuery>;
 export type GetPuzzleSessionQueryResult = Apollo.QueryResult<GetPuzzleSessionQuery, GetPuzzleSessionQueryVariables>;
+export const GetPuzzleSessionsForUserDocument = gql`
+    query GetPuzzleSessionsForUser($userID: String!) {
+  getPuzzleSessionsForUser(userID: $userID) {
+    sessionID
+    puzzle {
+      puzzleID
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetPuzzleSessionsForUserQuery__
+ *
+ * To run a query within a React component, call `useGetPuzzleSessionsForUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetPuzzleSessionsForUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetPuzzleSessionsForUserQuery({
+ *   variables: {
+ *      userID: // value for 'userID'
+ *   },
+ * });
+ */
+export function useGetPuzzleSessionsForUserQuery(baseOptions: Apollo.QueryHookOptions<GetPuzzleSessionsForUserQuery, GetPuzzleSessionsForUserQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetPuzzleSessionsForUserQuery, GetPuzzleSessionsForUserQueryVariables>(GetPuzzleSessionsForUserDocument, options);
+      }
+export function useGetPuzzleSessionsForUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPuzzleSessionsForUserQuery, GetPuzzleSessionsForUserQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetPuzzleSessionsForUserQuery, GetPuzzleSessionsForUserQueryVariables>(GetPuzzleSessionsForUserDocument, options);
+        }
+export type GetPuzzleSessionsForUserQueryHookResult = ReturnType<typeof useGetPuzzleSessionsForUserQuery>;
+export type GetPuzzleSessionsForUserLazyQueryHookResult = ReturnType<typeof useGetPuzzleSessionsForUserLazyQuery>;
+export type GetPuzzleSessionsForUserQueryResult = Apollo.QueryResult<GetPuzzleSessionsForUserQuery, GetPuzzleSessionsForUserQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {

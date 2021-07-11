@@ -6,7 +6,7 @@ import { XWordRequest } from "../../types";
 import { User } from "../api/models/User";
 import { XWordToolbar } from "../../components/XWordToolbar";
 import { withServerSidePropsProtect } from "../api/middleware/withServerSidePropsProtect";
-import { useGetPuzzleSessionQuery } from "../../generated/graphql";
+import { useStartPuzzleSessionMutation } from "../../generated/graphql";
 import { useRouter } from "next/router";
 import { Board } from "../../components/XBoard/Board";
 
@@ -22,30 +22,44 @@ export const getServerSideProps = async ({
 
 const Index: React.FC<{ user: User }> = ({ user }) => {
   const router = useRouter();
-  const { puzzleSessionID } = router.query;
+  const { puzzleSessionID, puzzleID } = router.query;
 
-  const { data } = useGetPuzzleSessionQuery({
-    variables: {
-      sessionID: puzzleSessionID as string,
-    },
-  });
+  const [startPuzzleSessionMutation, { data, loading }] =
+    useStartPuzzleSessionMutation({
+      variables: {
+        puzzleID: puzzleID as string,
+        sessionID: puzzleSessionID as string,
+      },
+    });
 
-  const screen = !data?.getPuzzleSession.boardState ? (
-    <Spinner size="xl" m="auto" />
-  ) : (
-    <AspectRatio
-      ratio={1}
-      w={["50vh", "70vh", "80vh", "80vh"]}
-      mx="auto"
-      my="16"
-    >
-      <Board boardState={JSON.parse(data?.getPuzzleSession.boardState)} />
-    </AspectRatio>
-  );
+  startPuzzleSessionMutation();
+
+  console.log(loading, data?.startPuzzleSession);
+
+  const screen =
+    loading || !data?.startPuzzleSession ? (
+      <Spinner size="xl" m="auto" />
+    ) : (
+      <AspectRatio
+        ratio={1}
+        w={["50vh", "70vh", "80vh", "80vh"]}
+        mx="auto"
+        my="16"
+      >
+        <Board boardState={JSON.parse(data?.startPuzzleSession.boardState)} />
+      </AspectRatio>
+    );
 
   return (
     <XWordContainer>
-      <XWordToolbar user={user} />
+      <XWordToolbar
+        user={user}
+        puzzleStartTime={
+          data?.startPuzzleSession.startTime
+            ? new Date(data?.startPuzzleSession.startTime)
+            : undefined
+        }
+      />
       {screen}
     </XWordContainer>
   );

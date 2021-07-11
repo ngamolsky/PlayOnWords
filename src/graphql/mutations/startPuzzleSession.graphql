@@ -1,6 +1,8 @@
-mutation StartPuzzleSession($puzzleID: String!) {
-  startPuzzleSession(puzzleID: $puzzleID) {
+mutation StartPuzzleSession($puzzleID: String!, $sessionID: String) {
+  startPuzzleSession(puzzleID: $puzzleID, sessionID: $sessionID) {
     sessionID
+    boardState
+    startTime
     owner {
       userID
       displayName

@@ -2,15 +2,19 @@ import { Box, Spinner, Grid } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { NextApiResponse } from "next";
+
 import { XWordRequest } from "../types";
 import { User } from "./api/models/User";
 import {
+  useEndPuzzleSessionMutation,
+  useGetPuzzleSessionsForUserQuery,
   useRecentPuzzlesQuery,
-  useStartPuzzleSessionMutation,
 } from "../generated/graphql";
 import { XWordToolbar } from "../components/XWordToolbar";
-import { PuzzleCard } from "../components/PuzzleCard";
+import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
 import { withServerSidePropsProtect } from "./api/middleware/withServerSidePropsProtect";
+import { makeVar } from "@apollo/client";
+import { PuzzleSession } from "./api/models/PuzzleSession";
 import { useRouter } from "next/router";
 
 export const getServerSideProps = async ({
@@ -24,46 +28,79 @@ export const getServerSideProps = async ({
 };
 
 const NUM_PUZZLES_TO_LOAD = 10;
+const isMounted = makeVar(false);
 
-const Index: React.FC<{ user: User }> = ({ user }) => {
-  const [
-    startPuzzleSessionMutation,
-    { loading: sessionLoading, data: sessionData },
-  ] = useStartPuzzleSessionMutation();
+const Index: React.FC<{
+  user: User;
+}> = ({ user }) => {
+  useEffect(() => {
+    isMounted(true);
+  }, []);
 
+  // Get recent puzzles
   const { data: puzzlesData, loading: puzzlesLoading } = useRecentPuzzlesQuery({
     variables: {
       limit: NUM_PUZZLES_TO_LOAD,
     },
   });
 
+  // Get user puzzle session data
+  const { data: userSessionsData } = useGetPuzzleSessionsForUserQuery({
+    variables: {
+      userID: user.userID,
+    },
+  });
+
+  const [endPuzzleSessionMutation] = useEndPuzzleSessionMutation();
+
   const router = useRouter();
 
-  useEffect(() => {
-    if (!sessionData) return;
-    router.push(`/solve/${sessionData!.startPuzzleSession.sessionID}`);
-  }, [sessionData, sessionLoading, router]);
-
   const screen =
-    puzzlesLoading || sessionLoading || sessionData ? (
+    puzzlesLoading || !isMounted() ? (
       <Spinner size="xl" m="auto" />
     ) : (
-      <Box w="80%" h="100vh">
+      <Box w="80%">
         <Grid templateColumns="repeat(5, 1fr)" gap={6} mt={8}>
-          {puzzlesData?.recentPuzzles.map((puzzle) => (
-            <PuzzleCard
-              puzzleDate={new Date(puzzle.date)}
-              puzzleID={puzzle.puzzleID}
-              key={puzzle.puzzleID}
-              onClick={async (puzzleID) => {
-                await startPuzzleSessionMutation({
-                  variables: {
-                    puzzleID,
-                  },
-                });
-              }}
-            />
-          ))}
+          {puzzlesData &&
+            puzzlesData.recentPuzzles.map((puzzle) => {
+              const existingSessionData =
+                userSessionsData?.getPuzzleSessionsForUser.filter(
+                  (sessionData) =>
+                    sessionData.puzzle.puzzleID == puzzle.puzzleID
+                );
+
+              const sessionData =
+                existingSessionData?.length == 1
+                  ? existingSessionData[0]
+                  : null;
+              return (
+                <PuzzleCard
+                  hasSession={!!sessionData}
+                  puzzleDate={new Date(puzzle.date)}
+                  key={puzzle.puzzleID}
+                  onClick={async (action) => {
+                    switch (action) {
+                      case PuzzleCardAction.NEW_GAME:
+                        const sessionID = PuzzleSession.generateID();
+                        router.push(
+                          `solve/${sessionID}?puzzleID=${puzzle.puzzleID}`
+                        );
+                        return;
+                      case PuzzleCardAction.CONTINUE_GAME:
+                        // setCurrentSessionID(sessionData!.sessionID);
+                        return;
+                      case PuzzleCardAction.END_GAME:
+                        await endPuzzleSessionMutation({
+                          variables: {
+                            sessionID: sessionData!.sessionID!,
+                          },
+                        });
+                        return;
+                    }
+                  }}
+                />
+              );
+            })}
         </Grid>
       </Box>
     );

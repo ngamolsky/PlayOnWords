@@ -13,16 +13,22 @@ import Link from "next/link";
 import axios from "axios";
 import React from "react";
 import { User } from "../pages/api/models/User";
-import useUser from "../pages/api/hooks";
+import { useUser } from "../pages/api/hooks";
+import { PuzzleTimer } from "./PuzzleTimer";
 
 interface XWordToolbarProps {
   user: User;
+  puzzleStartTime?: Date;
 }
 
-export const XWordToolbar: React.FC<XWordToolbarProps> = ({ user }) => {
+export const XWordToolbar: React.FC<XWordToolbarProps> = ({
+  user,
+  puzzleStartTime,
+}) => {
   const { refetch } = useUser({
     redirectTo: "/login",
   });
+
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
 
@@ -41,6 +47,7 @@ export const XWordToolbar: React.FC<XWordToolbarProps> = ({ user }) => {
           XWord
         </Heading>
       </Link>
+      {puzzleStartTime && <PuzzleTimer puzzleStartTime={puzzleStartTime} />}
       <Box ml="auto">
         <Menu>
           <MenuButton my={2} mr={2}>

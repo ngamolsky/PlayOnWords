@@ -15,7 +15,7 @@ export const Cell: React.FC<CellProps> = ({
   x,
   y,
   size,
-  solutionState = "none",
+  solutionState = CellSolutionState.NONE,
   selectable,
 }) => {
   return (
@@ -27,7 +27,7 @@ export const Cell: React.FC<CellProps> = ({
         height={size}
         fill={selectable ? theme.colors.white : theme.colors.black}
         stroke={theme.colors.gray[400]}
-        strokeWidth={0.2}
+        strokeWidth={selectable ? 0.2 : 0}
       />
       {solutionState == CellSolutionState.WRONG && (
         <path

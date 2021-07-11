@@ -2,10 +2,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useMeQuery } from "../../generated/graphql";
 
-export default function useUser({
-  redirectTo = "",
-  redirectIfFound = false,
-} = {}) {
+export const useUser = ({ redirectTo = "", redirectIfFound = false }) => {
   const { data, loading, refetch } = useMeQuery();
   const user = data?.me;
   const router = useRouter();
@@ -23,4 +20,8 @@ export default function useUser({
     }
   }, [user, redirectIfFound, redirectTo, loading, router]);
   return { user, refetch };
-}
+};
+
+// export const useClientSideHook = ({ hook }) => {
+//   useEffect(() => {});
+// };

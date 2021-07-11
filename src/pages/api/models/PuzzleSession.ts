@@ -4,6 +4,8 @@ import { User } from "./User";
 import { Puzzle } from "./Puzzle";
 import { DateScalar } from "./DateScalar";
 import { GraphQLScalarType, Kind } from "graphql";
+import { BaseModel } from "./BaseModel";
+import { getBoardStateFromSolutions } from "../../../utils/puzzleSessionUtils";
 
 export class BoardState {
   [key: string]: CellState;
@@ -50,7 +52,17 @@ const BoardStateScalar = new GraphQLScalarType({
 });
 
 @ObjectType()
-export class PuzzleSession {
+export class PuzzleSession extends BaseModel {
+  constructor(puzzle: Puzzle, owner: User, sessionID?: string) {
+    super();
+    this.sessionID = sessionID ? sessionID : PuzzleSession.generateID();
+    this.puzzle = puzzle;
+    this.participants = [owner];
+    this.owner = owner;
+    this.startTime = new Date();
+    this.boardState = getBoardStateFromSolutions(puzzle.solutions);
+  }
+
   @Field(() => ID)
   sessionID: string;
 
@@ -68,4 +80,8 @@ export class PuzzleSession {
 
   @Field(() => BoardStateScalar)
   boardState: BoardState;
+
+  static getModelName() {
+    return "puzzleSession";
+  }
 }

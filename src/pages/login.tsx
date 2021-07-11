@@ -6,7 +6,7 @@ import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { getErrorByCode, XWordErrors } from "./api/models/XWordError";
 import { validateUsername } from "../utils/validate";
-import useUser from "./api/hooks";
+import { useUser } from "./api/hooks";
 import { NextApiResponse } from "next";
 import { XWordRequest } from "../types";
 import { withPassport } from "./api/middleware/withPassport";

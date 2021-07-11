@@ -11,7 +11,7 @@ import {
   validatePassword,
   validatePasswordsMatch,
 } from "../utils/validate";
-import useUser from "./api/hooks";
+import { useUser } from "./api/hooks";
 import { XWordRequest } from "../types";
 import { NextApiResponse } from "next";
 import { withPassport } from "./api/middleware/withPassport";

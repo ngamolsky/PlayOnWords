@@ -1,24 +1,40 @@
-import db from "../config/firebase";
-import { Arg, Query, Resolver } from "type-graphql";
+import { Arg, Ctx, Query, Resolver } from "type-graphql";
 import { Puzzle } from "../models/Puzzle";
 import { PUZZLES_COLLECTION } from "../../../constants";
+import { MyContext } from "../../../types";
 
 @Resolver()
 export class PuzzleResolver {
   @Query(() => [Puzzle])
-  async recentPuzzles(@Arg("limit") limit: number): Promise<Puzzle[]> {
-    const puzzles = await getRecentPuzzles(limit);
+  async recentPuzzles(
+    @Arg("limit") limit: number,
+    @Ctx() { fs }: MyContext
+  ): Promise<Puzzle[]> {
+    const results = await fs
+      .collection(PUZZLES_COLLECTION)
+      .withConverter(puzzleConverter)
+      .orderBy("date", "desc")
+      .limit(limit)
+      .get();
+
+    const puzzles = results.docs.map((result) => result.data());
     return puzzles;
   }
 
   @Query(() => Puzzle)
-  async getPuzzle(@Arg("puzzleID") puzzleID: string): Promise<Puzzle> {
-    return await getPuzzle(puzzleID);
+  async getPuzzle(
+    @Arg("puzzleID") puzzleID: string,
+    @Ctx() { fs }: MyContext
+  ): Promise<Puzzle> {
+    return await getPuzzle(fs, puzzleID);
   }
 }
 
-export const addPuzzle = async (puzzle: Puzzle): Promise<boolean> => {
-  await db
+export const addPuzzle = async (
+  fs: FirebaseFirestore.Firestore,
+  puzzle: Puzzle
+): Promise<boolean> => {
+  await fs
     .collection(PUZZLES_COLLECTION)
     .withConverter(puzzleConverter)
     .doc(puzzle.puzzleID)
@@ -26,26 +42,16 @@ export const addPuzzle = async (puzzle: Puzzle): Promise<boolean> => {
   return true;
 };
 
-export const getPuzzle = async (puzzleID: string): Promise<Puzzle> => {
+export const getPuzzle = async (
+  db: FirebaseFirestore.Firestore,
+  puzzleID: string
+): Promise<Puzzle> => {
   const result = await db
     .collection(PUZZLES_COLLECTION)
     .withConverter(puzzleConverter)
     .doc(puzzleID)
     .get();
-
   return result.data()!;
-};
-
-export const getRecentPuzzles = async (limit: number): Promise<Puzzle[]> => {
-  const results = await db
-    .collection(PUZZLES_COLLECTION)
-    .withConverter(puzzleConverter)
-    .orderBy("date", "desc")
-    .limit(limit)
-    .get();
-
-  const puzzles = results.docs.map((result) => result.data());
-  return puzzles;
 };
 
 export const puzzleConverter = {

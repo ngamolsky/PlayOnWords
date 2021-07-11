@@ -1,9 +1,6 @@
-import db from "../config/firebase";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { v4 } from "uuid";
 import { PUZZLE_SESSIONS_COLLECTION } from "../../../constants";
 import { MyContext } from "../../../types";
-import { getBoardStateFromSolutions } from "../../../utils/puzzleSessionUtils";
 import { PuzzleSession } from "../models/PuzzleSession";
 import { User } from "../models/User";
 import { getPuzzle, firebaseResultToPuzzle } from "./puzzle";
@@ -13,34 +10,54 @@ import { firebaseResultToUser } from "./user";
 export class PuzzleSessionResolver {
   @Mutation(() => PuzzleSession)
   async startPuzzleSession(
-    @Ctx() { req }: MyContext,
-    @Arg("puzzleID") puzzleID: string
+    @Ctx() { req, fs }: MyContext,
+    @Arg("puzzleID") puzzleID: string,
+    @Arg("sessionID", { nullable: true }) sessionID?: string
   ): Promise<PuzzleSession> {
-    return await startPuzzleSession(req.user!, puzzleID);
+    return await startPuzzleSession(fs, req.user!, puzzleID, sessionID);
+  }
+
+  @Mutation(() => Boolean)
+  async endPuzzleSession(
+    @Ctx() { fs }: MyContext,
+    @Arg("sessionID") sessionID: string
+  ): Promise<Boolean> {
+    return await deletePuzzleSession(fs, sessionID);
   }
 
   @Query(() => PuzzleSession)
   async getPuzzleSession(
-    @Arg("sessionID") sessionID: string
+    @Arg("sessionID") sessionID: string,
+    @Ctx() { fs }: MyContext
   ): Promise<PuzzleSession> {
-    return await getPuzzleSession(sessionID);
+    return await getPuzzleSession(fs, sessionID);
+  }
+
+  @Query(() => [PuzzleSession])
+  async getPuzzleSessionsForUser(
+    @Arg("userID") userID: string,
+    @Ctx() { fs }: MyContext
+  ): Promise<PuzzleSession[]> {
+    const results = await fs
+      .collection(PUZZLE_SESSIONS_COLLECTION)
+      .withConverter(puzzleSessionConverter)
+      .where("owner.userID", "==", userID)
+      .get();
+    const sessions = results.docs.map((result) => result.data());
+
+    return sessions;
   }
 }
 
 export const startPuzzleSession = async (
+  fs: FirebaseFirestore.Firestore,
   owner: User,
-  puzzleID: string
+  puzzleID: string,
+  sessionID?: string
 ): Promise<PuzzleSession> => {
-  const puzzle = await getPuzzle(puzzleID);
-  const session: PuzzleSession = {
-    sessionID: `puzzleSession.${v4()}`,
-    owner,
-    puzzle,
-    participants: [owner],
-    startTime: new Date(),
-    boardState: getBoardStateFromSolutions(puzzle.solutions),
-  };
-  await db
+  const puzzle = await getPuzzle(fs, puzzleID);
+  const session = new PuzzleSession(puzzle, owner, sessionID);
+  await fs
     .collection(PUZZLE_SESSIONS_COLLECTION)
     .withConverter(puzzleSessionConverter)
     .doc(session.sessionID)
@@ -48,7 +65,20 @@ export const startPuzzleSession = async (
   return session;
 };
 
+export const deletePuzzleSession = async (
+  fs: FirebaseFirestore.Firestore,
+  sessionID: string
+): Promise<boolean> => {
+  await fs
+    .collection(PUZZLE_SESSIONS_COLLECTION)
+    .withConverter(puzzleSessionConverter)
+    .doc(sessionID)
+    .delete();
+  return true;
+};
+
 export const getPuzzleSession = async (
+  db: FirebaseFirestore.Firestore,
   sessionID: string
 ): Promise<PuzzleSession> => {
   const result = await db

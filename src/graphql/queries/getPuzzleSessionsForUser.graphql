@@ -1,0 +1,8 @@
+query GetPuzzleSessionsForUser($userID: String!) {
+  getPuzzleSessionsForUser(userID: $userID) {
+    sessionID
+    puzzle {
+      puzzleID
+    }
+  }
+}

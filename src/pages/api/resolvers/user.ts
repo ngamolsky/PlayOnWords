@@ -1,4 +1,3 @@
-import db from "../config/firebase";
 import { Ctx, Query, Resolver } from "type-graphql";
 import { LoginType, User } from "../models/User";
 import { MyContext } from "../../../types";
@@ -45,21 +44,21 @@ export const firebaseResultToUser = (
   return user;
 };
 
-export const addUser = async (user: User) => {
+export const addUser = async (fs: FirebaseFirestore.Firestore, user: User) => {
   // Check for existing user
   if (user.loginType == LoginType.GOOGLE) {
-    const existingUser = await getUserByGoogleID(user.googleID!);
+    const existingUser = await getUserByGoogleID(fs, user.googleID!);
     if (existingUser) {
       throw XWordErrors.GOOGLE_USER_EXISTS;
     }
   } else if (user.loginType == LoginType.LOCAL) {
-    const existingUser = await getUserByUsername(user.username!);
+    const existingUser = await getUserByUsername(fs, user.username!);
     if (existingUser) {
       throw XWordErrors.LOCAL_USER_EXISTS;
     }
   }
 
-  await db
+  await fs
     .collection(USERS_COLLECTION)
     .withConverter(userConverter)
     .doc(user.userID)
@@ -67,8 +66,11 @@ export const addUser = async (user: User) => {
   return true;
 };
 
-export const getUserByID = async (userID: string): Promise<User> => {
-  const result = await db
+export const getUserByID = async (
+  fs: FirebaseFirestore.Firestore,
+  userID: string
+): Promise<User> => {
+  const result = await fs
     .collection(USERS_COLLECTION)
     .withConverter(userConverter)
     .doc(userID)
@@ -83,9 +85,10 @@ export const getUserByID = async (userID: string): Promise<User> => {
 };
 
 export const getUserByUsername = async (
+  fs: FirebaseFirestore.Firestore,
   username: string
 ): Promise<User | undefined> => {
-  const snapshot = await db
+  const snapshot = await fs
     .collection(USERS_COLLECTION)
     .withConverter(userConverter)
     .where("username", "==", username)
@@ -103,9 +106,10 @@ export const getUserByUsername = async (
 };
 
 export const getUserByGoogleID = async (
+  fs: FirebaseFirestore.Firestore,
   googleID: string
 ): Promise<User | undefined> => {
-  const snapshot = await db
+  const snapshot = await fs
     .collection(USERS_COLLECTION)
     .withConverter(userConverter)
     .where("googleID", "==", googleID)
@@ -124,6 +128,7 @@ export const getUserByGoogleID = async (
 };
 
 export const registerLocalUser = async (
+  fs: FirebaseFirestore.Firestore,
   username: string,
   rawPasswordInput: string,
   displayName?: string
@@ -141,7 +146,7 @@ export const registerLocalUser = async (
     createDate: new Date(),
     updateDate: new Date(),
   };
-  await addUser(user);
+  await addUser(fs, user);
   return user;
 };
 

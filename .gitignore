@@ -27,14 +27,5 @@ yarn-error.log*
 # local env files
 .env
 
-# vercel
-.vercel
-
-# redis
-dump.rdb
-
 # firebase
 xword-b9f56-3ea35ae70ba4.json
-
-#local images
-/images

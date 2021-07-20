@@ -1,6 +1,0 @@
-query RecentPuzzles($limit: Float!) {
-  recentPuzzles(limit: $limit) {
-    puzzleID
-    date
-  }
-}

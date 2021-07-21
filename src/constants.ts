@@ -2,7 +2,7 @@ export const __prod__ = process.env.NODE_ENV === "production";
 export const COOKIE_NAME = "cookieBook";
 
 export const MIN_USERNAME_LENGTH = 3;
-export const MIN_PASSWORD_LENGTH = 3;
+export const MIN_PASSWORD_LENGTH = 6;
 
 export const PUZZLES_COLLECTION = "puzzles";
 export const PUZZLE_SESSIONS_COLLECTION = "puzzleSessions";

@@ -43,9 +43,7 @@ export const XWordToolbar: React.FC<XWordToolbarProps> = ({
         {isSignedIn && (
           <Menu>
             <MenuButton my={2} mr={2}>
-              <Avatar
-                name={user.displayName ? user.displayName : user.username}
-              />
+              <Avatar name={user.displayName ? user.displayName : user.email} />
             </MenuButton>
             <MenuList>
               <MenuItem

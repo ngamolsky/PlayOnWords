@@ -1,14 +1,22 @@
 import { Button, Heading } from "@chakra-ui/react";
 import firebase from "firebase/app";
 import "firebase/auth";
-import { Form, Formik } from "formik";
+import { Form, Formik, FormikErrors } from "formik";
 import React from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
-import { validateEmail, validatePassword } from "../utils/validate";
+import {
+  RegisterInput,
+  validateEmail,
+  validatePassword,
+  validatePasswordsMatch,
+} from "../utils/validate";
+import { Link, useHistory } from "react-router-dom";
 
 const Register: React.FC = () => {
+  const history = useHistory();
+
   return (
     <XWordContainer>
       <ColorModeSwitcher my={4} mr={4} ml="auto" />
@@ -17,24 +25,23 @@ const Register: React.FC = () => {
       </Heading>
       <XWordContainer maxW="400px">
         <Formik
-          initialValues={{ email: "", password: "" }}
-          onSubmit={async ({ email, password }, { setErrors }) => {
-            firebase
+          initialValues={{ email: "", password: "", confirmPassword: "" }}
+          onSubmit={async ({ email, password }) => {
+            await firebase
               .auth()
-              .signInWithEmailAndPassword(email, password)
-              .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-
-                if (errorCode === "auth/user-not-found") {
-                  setErrors({
-                    email: "User does not exist.",
-                  });
-
-                  return;
-                }
-                throw new Error(`(${errorCode}): ${errorMessage}`);
-              });
+              .createUserWithEmailAndPassword(email, password);
+            history.push("/");
+          }}
+          validate={({ password, confirmPassword }) => {
+            const errors: FormikErrors<RegisterInput> = {};
+            const passwordsMatch = validatePasswordsMatch(
+              password,
+              confirmPassword
+            );
+            if (passwordsMatch) {
+              errors.confirmPassword = passwordsMatch;
+            }
+            return errors;
           }}
         >
           {({ isSubmitting }) => (
@@ -54,13 +61,21 @@ const Register: React.FC = () => {
                 validate={validatePassword}
                 required
               />
+
+              <InputField
+                label="Confirm Password"
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                type="password"
+                required
+              />
               <Button
                 type="submit"
                 isLoading={isSubmitting}
                 width="100%"
                 mb={4}
               >
-                Login
+                Sign Up
               </Button>
             </Form>
           )}
@@ -73,11 +88,13 @@ const Register: React.FC = () => {
             firebase.auth().signInWithPopup(googleAuthProvider);
           }}
         >
-          Login with Google
+          Sign Up with Google
         </Button>
-        <Button width="60%" mb={4} mt={16}>
-          Click Here to Register
-        </Button>
+        <Link to="/login">
+          <Button mb={4} mt={16}>
+            Click Here to Login
+          </Button>
+        </Link>
       </XWordContainer>
     </XWordContainer>
   );

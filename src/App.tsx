@@ -18,29 +18,31 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Register from "./pages/Register";
 
-export const App = () => (
-  <ChakraProvider theme={theme}>
-    <Router>
-      <FirebaseAuthProvider firebase={firebase} {...firebaseConfig}>
-        <Box textAlign="center" fontSize="xl">
-          <IfFirebaseUnAuthed>
-            {() => <Redirect to="/login" />}
-          </IfFirebaseUnAuthed>
-          <Switch>
-            <Route path="/login">
-              <Login />
-            </Route>
-            <Route path="/register">
-              <Register />
-            </Route>
-            <Route path="/">
-              <IfFirebaseAuthed>
-                {({ user }) => <Home user={user} />}
-              </IfFirebaseAuthed>
-            </Route>
-          </Switch>
-        </Box>
-      </FirebaseAuthProvider>
-    </Router>
-  </ChakraProvider>
-);
+export const App = () => {
+  return (
+    <ChakraProvider theme={theme}>
+      <Router>
+        <FirebaseAuthProvider firebase={firebase} {...firebaseConfig}>
+          <Box textAlign="center" fontSize="xl">
+            <Switch>
+              <Route path="/login">
+                <Login />
+              </Route>
+              <Route path="/register">
+                <Register />
+              </Route>
+              <Route path="/">
+                <IfFirebaseAuthed>
+                  {({ user }) => <Home user={user} />}
+                </IfFirebaseAuthed>
+                <IfFirebaseUnAuthed>
+                  {() => <Redirect to="/login" />}
+                </IfFirebaseUnAuthed>
+              </Route>
+            </Switch>
+          </Box>
+        </FirebaseAuthProvider>
+      </Router>
+    </ChakraProvider>
+  );
+};

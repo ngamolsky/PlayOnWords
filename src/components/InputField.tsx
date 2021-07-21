@@ -11,7 +11,7 @@ import {
 type InputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string;
   name: string;
-  validate: (value: any | any[]) => undefined | string | Promise<any>;
+  validate?: (value: any | any[]) => undefined | string | Promise<any>;
 };
 
 export const InputField: React.FC<InputFieldProps> = ({

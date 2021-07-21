@@ -7,7 +7,7 @@ import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import { validateEmail, validatePassword } from "../utils/validate";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 const Login: React.FC = () => {
   const history = useHistory();
@@ -78,9 +78,11 @@ const Login: React.FC = () => {
         >
           Login with Google
         </Button>
-        <Button width="60%" mb={4} mt={16}>
-          Click Here to Register
-        </Button>
+        <Link to="/register">
+          <Button mb={4} mt={16}>
+            Click Here to Register
+          </Button>
+        </Link>
       </XWordContainer>
     </XWordContainer>
   );

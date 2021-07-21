@@ -1,4 +1,3 @@
-import { FormikErrors } from "formik";
 import { MIN_PASSWORD_LENGTH } from "../constants";
 
 export type UserPasswordInput = {
@@ -7,7 +6,7 @@ export type UserPasswordInput = {
 };
 
 export type RegisterInput = UserPasswordInput & {
-  confirm_password: string;
+  confirmPassword: string;
 };
 
 export const validateEmail = (email: string): string | undefined => {
@@ -32,14 +31,11 @@ export const validatePassword = (password: string): string | undefined => {
 
 export const validatePasswordsMatch = (
   password: string,
-  confirm_password: string,
-  existingErrors?: FormikErrors<RegisterInput>
-): FormikErrors<RegisterInput> => {
-  const errors: FormikErrors<RegisterInput> = existingErrors
-    ? existingErrors
-    : {};
-  if (password !== confirm_password) {
-    errors.confirm_password = "Passwords don't match";
+  confirmPassword: string
+): string | undefined => {
+  let error;
+  if (password !== confirmPassword) {
+    error = "Passwords don't match";
   }
-  return errors;
+  return error;
 };

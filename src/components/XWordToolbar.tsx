@@ -23,7 +23,6 @@ export const XWordToolbar: React.FC<XWordToolbarProps> = ({
   user,
   isSignedIn,
 }) => {
-  console.log(user, isSignedIn);
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
 
@@ -37,7 +36,7 @@ export const XWordToolbar: React.FC<XWordToolbarProps> = ({
       pos="sticky"
       top={0}
     >
-      <Heading my="auto" ml={4} textAlign="start" as="a">
+      <Heading my="auto" ml={4} textAlign="start" as="a" href="/">
         XWord
       </Heading>
       <Box ml="auto">

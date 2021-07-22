@@ -83,9 +83,9 @@ const Register: React.FC = () => {
         <Button
           width="90%"
           colorScheme="blue"
-          onClick={() => {
+          onClick={async () => {
             const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
-            firebase.auth().signInWithPopup(googleAuthProvider);
+            await firebase.auth().signInWithPopup(googleAuthProvider);
             history.push("/");
           }}
         >

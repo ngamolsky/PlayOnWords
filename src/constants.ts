@@ -8,7 +8,7 @@ export const PUZZLES_COLLECTION = "puzzles";
 export const PUZZLE_SESSIONS_COLLECTION = "puzzleSessions";
 export const USERS_COLLECTION = "users";
 
-export const NUM_SALT_ROUNDS = 10;
+export const NUM_PUZZLES_TO_SHOW_ON_HOME = 10;
 
 export const BOARD_VIEWBOX_SIZE = 100;
 

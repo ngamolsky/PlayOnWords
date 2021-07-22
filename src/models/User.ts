@@ -5,12 +5,11 @@ export enum LoginType {
 
 export type User = {
   userID: string;
-  email?: string;
+  email: string;
   username?: string;
   displayName?: string;
   hashedPassword?: string;
   googleID?: string;
   loginType: LoginType;
   createDate: Date;
-  updateDate: Date;
 };

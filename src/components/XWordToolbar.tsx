@@ -23,6 +23,7 @@ export const XWordToolbar: React.FC<XWordToolbarProps> = ({
   user,
   isSignedIn,
 }) => {
+  console.log(user, isSignedIn);
   const { colorMode } = useColorMode();
   const isDark = colorMode === "dark";
 
@@ -47,6 +48,7 @@ export const XWordToolbar: React.FC<XWordToolbarProps> = ({
             </MenuButton>
             <MenuList>
               <MenuItem
+                mx={1}
                 onClick={() => {
                   firebase.auth().signOut();
                 }}

@@ -86,6 +86,7 @@ const Register: React.FC = () => {
           onClick={() => {
             const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
             firebase.auth().signInWithPopup(googleAuthProvider);
+            history.push("/");
           }}
         >
           Sign Up with Google

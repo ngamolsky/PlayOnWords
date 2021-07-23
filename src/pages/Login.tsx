@@ -1,6 +1,4 @@
 import { Button, Heading } from "@chakra-ui/react";
-import firebase from "firebase/app";
-import "firebase/auth";
 import { Form, Formik } from "formik";
 import React from "react";
 import { XWordContainer } from "../components/XWordContainer";
@@ -8,9 +6,12 @@ import { InputField } from "../components/InputField";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import { validateEmail, validatePassword } from "../utils/validate";
 import { Link, useHistory } from "react-router-dom";
+import useUser from "../hooks/useUser";
+
 
 const Login: React.FC = () => {
   const history = useHistory();
+  const [, { createOrLoginGoogleUser, loginEmailUser }] = useUser();
   return (
     <XWordContainer>
       <ColorModeSwitcher my={4} mr={4} ml="auto" />
@@ -22,7 +23,7 @@ const Login: React.FC = () => {
           initialValues={{ email: "", password: "" }}
           onSubmit={async ({ email, password }, { setErrors }) => {
             try {
-              await firebase.auth().signInWithEmailAndPassword(email, password);
+              await loginEmailUser(email, password)
               history.push("/");
             } catch (error) {
               const errorCode = error.code;
@@ -64,20 +65,19 @@ const Login: React.FC = () => {
               >
                 Login
               </Button>
+              <Button
+                width="100%"
+                colorScheme="blue"
+                onClick={async () => {
+                  await createOrLoginGoogleUser();
+                  history.push("/");
+                }}
+              >
+          Login with Google
+              </Button>
             </Form>
           )}
         </Formik>
-        <Button
-          width="90%"
-          colorScheme="blue"
-          onClick={async () => {
-            const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
-            await firebase.auth().signInWithPopup(googleAuthProvider);
-            history.push("/");
-          }}
-        >
-          Login with Google
-        </Button>
         <Link to="/register">
           <Button mb={4} mt={16}>
             Click Here to Register

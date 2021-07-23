@@ -25,11 +25,11 @@ export const App = () => {
                 <Register />
               </Route>
               <ProtectedRoute path="/solve/:puzzleSessionID">
-                {() => <Solve />}
+                <Solve />
               </ProtectedRoute>
-              <ProtectedRoute path="/solve">{() => <Solve />}</ProtectedRoute>
-
-              <ProtectedRoute path="/">{() => <Home />}</ProtectedRoute>
+              <ProtectedRoute path="/">
+                <Home />
+              </ProtectedRoute>
             </Switch>
           </Box>
         </Router>

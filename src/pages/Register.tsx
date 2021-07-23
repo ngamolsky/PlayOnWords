@@ -88,7 +88,6 @@ const Register: React.FC = () => {
             </Form>
           )}
         </Formik>
-
         <Link to="/login">
           <Button mb={4} mt={16}>
             Click Here to Login

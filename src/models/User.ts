@@ -37,6 +37,7 @@ export const fromFirebaseAuthUser = (firebaseUser: firebase.User): User => {
 export type UserActions = {
   signOut(): Promise<void>;
   createEmailUser(email: string, password: string): Promise<User>;
+  loginEmailUser(email: string, password: string): Promise<void>;
   createOrLoginGoogleUser(): Promise<User>;
 };
 
@@ -58,6 +59,9 @@ export const userActions: UserActions = {
       .set(user);
 
     return user;
+  },
+  loginEmailUser: async (email, password) => {
+    await firebase.auth().signInWithEmailAndPassword(email, password);
   },
   createOrLoginGoogleUser: async () => {
     const googleAuthProvider = new firebase.auth.GoogleAuthProvider();

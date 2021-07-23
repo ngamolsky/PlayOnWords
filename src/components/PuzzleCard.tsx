@@ -13,8 +13,6 @@ import {
   PopoverBody,
   PopoverContent,
   Button,
-  Menu,
-  MenuItem,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { toXWordDate } from "../utils/toXWordDate";
@@ -54,6 +52,7 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({
           boxShadow="lg"
           borderWidth={hasSession ? 3 : 0}
           borderColor={hasSession ? theme.colors.yellow[500] : undefined}
+          textAlign="start"
         >
           <AspectRatio ratio={1}>
             <Image
@@ -70,11 +69,16 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({
           <Box m="2">
             <Heading
               size="md"
-              fontSize={{ base: "10px", lg: "10px", xl: "14px" }}
+              fontSize={{ base: "10px", md: "12", lg: "14px", xl: "16px" }}
+              isTruncated
             >
               {toXWordDate(puzzleDate)}
             </Heading>
-            <Text mt="2" fontSize={{ base: "6px", lg: "10px", xl: "14px" }}>
+            <Text
+              mt="2"
+              fontSize={{ base: "10px", lg: "12px", xl: "14px" }}
+              isTruncated
+            >
               New York Times
             </Text>
           </Box>
@@ -107,19 +111,16 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({
               </Button>
             </>
           ) : (
-            <Menu>
-              <MenuItem
-                variant="ghost"
-                w="100%"
-                onClick={() => {
-                  onClick(PuzzleCardAction.NEW_GAME);
-                  setIsPopoverOpen(false);
-                }}
-                justifyContent="center"
-              >
-                Start Game
-              </MenuItem>
-            </Menu>
+            <Button
+              variant="ghost"
+              w="100%"
+              onClick={() => {
+                onClick(PuzzleCardAction.NEW_GAME);
+                setIsPopoverOpen(false);
+              }}
+            >
+              Start Game
+            </Button>
           )}
         </PopoverBody>
       </PopoverContent>

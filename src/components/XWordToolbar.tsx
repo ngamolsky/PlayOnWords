@@ -10,20 +10,15 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import React from "react";
-import firebase from "firebase/app";
-import { User } from "../models/User";
+import useUser from "../hooks/useUser";
 
 interface XWordToolbarProps {
-  user: User;
   puzzleStartTime?: Date;
-  isSignedIn: boolean;
 }
 
-export const XWordToolbar: React.FC<XWordToolbarProps> = ({
-  user,
-  isSignedIn,
-}) => {
+export const XWordToolbar: React.FC<XWordToolbarProps> = () => {
   const { colorMode } = useColorMode();
+  const [user, { signOut }] = useUser();
   const isDark = colorMode === "dark";
 
   return (
@@ -40,16 +35,15 @@ export const XWordToolbar: React.FC<XWordToolbarProps> = ({
         XWord
       </Heading>
       <Box ml="auto">
-        {isSignedIn && (
+        {user && (
           <Menu>
             <MenuButton my={2} mr={2}>
               <Avatar name={user.displayName ? user.displayName : user.email} />
             </MenuButton>
             <MenuList>
               <MenuItem
-                mx={1}
                 onClick={() => {
-                  firebase.auth().signOut();
+                  return signOut();
                 }}
               >
                 Logout

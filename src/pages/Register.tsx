@@ -1,5 +1,4 @@
 import { Button, Heading } from "@chakra-ui/react";
-import firebase from "firebase/app";
 import "firebase/auth";
 import { Form, Formik, FormikErrors } from "formik";
 import React from "react";
@@ -13,10 +12,11 @@ import {
   validatePasswordsMatch,
 } from "../utils/validate";
 import { Link, useHistory } from "react-router-dom";
+import useUser from "../hooks/useUser";
 
 const Register: React.FC = () => {
   const history = useHistory();
-
+  const [, { createEmailUser, createOrLoginGoogleUser }] = useUser();
   return (
     <XWordContainer>
       <ColorModeSwitcher my={4} mr={4} ml="auto" />
@@ -27,9 +27,7 @@ const Register: React.FC = () => {
         <Formik
           initialValues={{ email: "", password: "", confirmPassword: "" }}
           onSubmit={async ({ email, password }) => {
-            await firebase
-              .auth()
-              .createUserWithEmailAndPassword(email, password);
+            await createEmailUser(email, password);
             history.push("/");
           }}
           validate={({ password, confirmPassword }) => {
@@ -77,20 +75,20 @@ const Register: React.FC = () => {
               >
                 Sign Up
               </Button>
+              <Button
+                width="100%"
+                colorScheme="blue"
+                onClick={async () => {
+                  await createOrLoginGoogleUser();
+                  history.push("/");
+                }}
+              >
+                Sign Up with Google
+              </Button>
             </Form>
           )}
         </Formik>
-        <Button
-          width="90%"
-          colorScheme="blue"
-          onClick={async () => {
-            const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
-            await firebase.auth().signInWithPopup(googleAuthProvider);
-            history.push("/");
-          }}
-        >
-          Sign Up with Google
-        </Button>
+
         <Link to="/login">
           <Button mb={4} mt={16}>
             Click Here to Login

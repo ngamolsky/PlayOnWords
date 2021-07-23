@@ -9,6 +9,7 @@ import { firebaseConfig } from "./config/firebase";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Register from "./pages/Register";
+import Solve from "./pages/Solve";
 
 export const App = () => {
   return (
@@ -23,9 +24,12 @@ export const App = () => {
               <Route path="/register">
                 <Register />
               </Route>
-              <ProtectedRoute path="/">
-                {(user) => <Home user={user} />}
+              <ProtectedRoute path="/solve/:puzzleSessionID">
+                {() => <Solve />}
               </ProtectedRoute>
+              <ProtectedRoute path="/solve">{() => <Solve />}</ProtectedRoute>
+
+              <ProtectedRoute path="/">{() => <Home />}</ProtectedRoute>
             </Switch>
           </Box>
         </Router>

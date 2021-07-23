@@ -1,29 +1,26 @@
 import firebase from "firebase/app";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { LoginType, User } from "../models/User";
+import {
+  fromFirebaseAuthUser,
+  userActions,
+  User,
+  UserActions,
+} from "../models/User";
 
 const useUser = (): [
   User | undefined,
+  UserActions,
   boolean,
   firebase.auth.Error | undefined
 ] => {
-  const [firebaseUser, loading, error] = useAuthState(firebase.auth());
+  const auth = firebase.auth();
+  const [firebaseUser, loading, error] = useAuthState(auth);
+
   const user: User | undefined = firebaseUser
-    ? {
-        userID: firebaseUser.uid,
-        email: firebaseUser.email!,
-        displayName: firebaseUser.displayName
-          ? firebaseUser.displayName
-          : undefined,
-        createDate: new Date(firebaseUser.metadata.creationTime!),
-        loginType:
-          firebaseUser.providerId === "google.com"
-            ? LoginType.GOOGLE
-            : LoginType.LOCAL,
-      }
+    ? fromFirebaseAuthUser(firebaseUser)
     : undefined;
 
-  return [user, loading, error];
+  return [user, userActions, loading, error];
 };
 
 export default useUser;

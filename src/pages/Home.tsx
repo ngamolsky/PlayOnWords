@@ -5,13 +5,12 @@ import { useCollectionDataOnce } from "react-firebase-hooks/firestore";
 
 import { XWordContainer } from "../components/XWordContainer";
 import { XWordToolbar } from "../components/XWordToolbar";
-import { User } from "../models/User";
-import { fromFirebasePuzzle } from "../models/Puzzles";
+import { fromFirebasePuzzle } from "../models/Puzzle";
 import { Grid, Spinner } from "@chakra-ui/react";
 import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
 import { NUM_PUZZLES_TO_SHOW_ON_HOME, PUZZLES_COLLECTION } from "../constants";
 
-const Home: React.FC<{ user: User }> = ({ user }) => {
+const Home: React.FC = () => {
   const [puzzles, loading] = useCollectionDataOnce(
     firebase
       .firestore()
@@ -55,7 +54,7 @@ const Home: React.FC<{ user: User }> = ({ user }) => {
 
   return (
     <XWordContainer>
-      <XWordToolbar isSignedIn={!!user} user={user} />
+      <XWordToolbar />
       {screen}
     </XWordContainer>
   );

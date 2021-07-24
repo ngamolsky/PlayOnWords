@@ -13,6 +13,7 @@ import {
 } from "../utils/validate";
 import { Link, useHistory } from "react-router-dom";
 import useUser from "../hooks/useUser";
+import { APP_NAME } from "../constants";
 
 const Register: React.FC = () => {
   const history = useHistory();
@@ -21,7 +22,7 @@ const Register: React.FC = () => {
     <XWordContainer>
       <ColorModeSwitcher my={4} mr={4} ml="auto" />
       <Heading mb={16} mt={8}>
-        XWord
+        {APP_NAME}
       </Heading>
       <XWordContainer maxW="400px">
         <Formik

@@ -10,6 +10,7 @@ import {
   useColorMode,
 } from "@chakra-ui/react";
 import React from "react";
+import { APP_NAME } from "../constants";
 import useUser from "../hooks/useUser";
 
 interface XWordToolbarProps {
@@ -32,7 +33,7 @@ export const XWordToolbar: React.FC<XWordToolbarProps> = () => {
       top={0}
     >
       <Heading my="auto" ml={4} textAlign="start" as="a" href="/">
-        XWord
+        {APP_NAME}
       </Heading>
       <Box ml="auto">
         {user && (

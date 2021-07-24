@@ -7,7 +7,7 @@ import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import { validateEmail, validatePassword } from "../utils/validate";
 import { Link, useHistory } from "react-router-dom";
 import useUser from "../hooks/useUser";
-
+import { APP_NAME } from "../constants";
 
 const Login: React.FC = () => {
   const history = useHistory();
@@ -16,14 +16,14 @@ const Login: React.FC = () => {
     <XWordContainer>
       <ColorModeSwitcher my={4} mr={4} ml="auto" />
       <Heading mb={16} mt={8}>
-        XWord
+        {APP_NAME}
       </Heading>
       <XWordContainer maxW="400px">
         <Formik
           initialValues={{ email: "", password: "" }}
           onSubmit={async ({ email, password }, { setErrors }) => {
             try {
-              await loginEmailUser(email, password)
+              await loginEmailUser(email, password);
               history.push("/");
             } catch (error) {
               const errorCode = error.code;
@@ -73,7 +73,7 @@ const Login: React.FC = () => {
                   history.push("/");
                 }}
               >
-          Login with Google
+                Login with Google
               </Button>
             </Form>
           )}

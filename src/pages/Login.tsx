@@ -4,7 +4,7 @@ import React from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
-import { validateEmail, validatePassword } from "../utils/validate";
+import { validateEmail, validatePassword } from "../utils/validationUtils";
 import { Link, useHistory } from "react-router-dom";
 import useUser from "../hooks/useUser";
 import { APP_NAME } from "../constants";

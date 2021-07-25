@@ -10,7 +10,7 @@ import {
   validateEmail,
   validatePassword,
   validatePasswordsMatch,
-} from "../utils/validate";
+} from "../utils/validationUtils";
 import { Link, useHistory } from "react-router-dom";
 import useUser from "../hooks/useUser";
 import { APP_NAME } from "../constants";

@@ -1,6 +1,5 @@
 import firebase from "firebase/app";
 import { useDocumentDataOnce } from "react-firebase-hooks/firestore";
-import { useParams } from "react-router-dom";
 import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
 import {
   fromFirebasePuzzleSession,
@@ -9,14 +8,14 @@ import {
   puzzleSessionActions,
 } from "../models/PuzzleSession";
 
-const usePuzzleSession = (): [
+const usePuzzleSession = (
+  puzzleSessionID: string
+): [
   PuzzleSession | undefined,
   PuzzleSessionActions,
   boolean,
   firebase.auth.Error | undefined
 ] => {
-  const { puzzleSessionID } = useParams<{ puzzleSessionID?: string }>();
-
   const [puzzleSession, loading, error] = useDocumentDataOnce(
     firebase
       .firestore()

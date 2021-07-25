@@ -15,7 +15,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { toXWordDate } from "../utils/toXWordDate";
+import { toXWordDate } from "../utils/timeAndDateUtils";
 import puzzleSVG from "../images/XWordSquare.svg";
 
 interface PuzzleCardProps {
@@ -67,18 +67,10 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({
             />
           </AspectRatio>
           <Box m="2">
-            <Heading
-              size="md"
-              fontSize={{ base: "10px", md: "12", lg: "14px", xl: "16px" }}
-              isTruncated
-            >
+            <Heading size="md" fontSize="16px" isTruncated>
               {toXWordDate(puzzleDate)}
             </Heading>
-            <Text
-              mt="2"
-              fontSize={{ base: "10px", lg: "12px", xl: "14px" }}
-              isTruncated
-            >
+            <Text mt="2" fontSize="14px" isTruncated>
               New York Times
             </Text>
           </Box>

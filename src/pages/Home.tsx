@@ -1,32 +1,21 @@
 import React from "react";
-import firebase from "firebase/app";
 import "firebase/firestore";
-import { useCollectionDataOnce } from "react-firebase-hooks/firestore";
 
 import { XWordContainer } from "../components/XWordContainer";
 import { XWordToolbar } from "../components/XWordToolbar";
-import { fromFirebasePuzzle } from "../models/Puzzle";
-import { Grid, Spinner } from "@chakra-ui/react";
+import { SimpleGrid, Spinner } from "@chakra-ui/react";
 import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
-import { NUM_PUZZLES_TO_SHOW_ON_HOME, PUZZLES_COLLECTION } from "../constants";
+import useRecentPuzzles from "../hooks/useRecentPuzzles";
+import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../constants";
 
 const Home: React.FC = () => {
-  const [puzzles, loading] = useCollectionDataOnce(
-    firebase
-      .firestore()
-      .collection(PUZZLES_COLLECTION)
-      .orderBy("date", "desc")
-      .limit(NUM_PUZZLES_TO_SHOW_ON_HOME),
-    {
-      transform: fromFirebasePuzzle,
-    }
-  );
+  const [puzzles, loading] = useRecentPuzzles(NUM_PUZZLES_TO_SHOW_ON_HOME);
 
   let screen;
   if (loading) screen = <Spinner size="xl" m="auto" />;
   else if (puzzles)
     screen = (
-      <Grid templateColumns="repeat(5, 1fr)" gap={6} mt={8} w={"80%"}>
+      <SimpleGrid minChildWidth="220px" gap={6} my={8} w={"80%"}>
         {puzzles.map((puzzle) => {
           return (
             <PuzzleCard
@@ -49,7 +38,7 @@ const Home: React.FC = () => {
             />
           );
         })}
-      </Grid>
+      </SimpleGrid>
     );
 
   return (

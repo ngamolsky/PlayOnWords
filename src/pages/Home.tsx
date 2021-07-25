@@ -1,5 +1,4 @@
 import React from "react";
-import "firebase/firestore";
 import { XWordContainer } from "../components/XWordContainer";
 import { XWordToolbar } from "../components/XWordToolbar";
 import { SimpleGrid, Spinner } from "@chakra-ui/react";

@@ -1,15 +1,10 @@
 import firebase from "firebase/app";
 import { useAuthState } from "react-firebase-hooks/auth";
-import {
-  fromFirebaseAuthUser,
-  userActions,
-  User,
-  UserActions,
-} from "../models/User";
+import { fromFirebaseAuthUser, userActions, User } from "../models/User";
 
 const useUser = (): [
   User | undefined,
-  UserActions,
+  typeof userActions,
   boolean,
   firebase.auth.Error | undefined
 ] => {

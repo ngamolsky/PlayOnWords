@@ -4,15 +4,14 @@ import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
 import {
   fromFirebasePuzzleSession,
   PuzzleSession,
-  PuzzleSessionActions,
   puzzleSessionActions,
 } from "../models/PuzzleSession";
 
 const usePuzzleSession = (
   puzzleSessionID: string
 ): [
-  PuzzleSession | undefined,
-  PuzzleSessionActions,
+  PuzzleSession,
+  typeof puzzleSessionActions,
   boolean,
   firebase.auth.Error | undefined
 ] => {
@@ -24,7 +23,7 @@ const usePuzzleSession = (
     { transform: fromFirebasePuzzleSession }
   );
 
-  return [puzzleSession, puzzleSessionActions, loading, error];
+  return [puzzleSession!, puzzleSessionActions, loading, error];
 };
 
 export default usePuzzleSession;

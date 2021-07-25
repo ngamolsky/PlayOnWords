@@ -2,7 +2,6 @@ import firebase from "firebase/app";
 import { User } from "./User";
 import { Puzzle } from "./Puzzle";
 import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
-import { v4 } from "uuid";
 import { getBoardStateFromSolutions } from "../utils/puzzleSessionUtils";
 
 export type BoardState = {
@@ -40,12 +39,8 @@ export const fromFirebasePuzzleSession = (
   };
 };
 
-export type PuzzleSessionActions = {
-  startPuzzleSession(puzzle: Puzzle, user: User): Promise<PuzzleSession>;
-};
-
-export const puzzleSessionActions: PuzzleSessionActions = {
-  startPuzzleSession: async (puzzle, user) => {
+export const puzzleSessionActions = {
+  startPuzzleSession: async (puzzle: Puzzle, user: User) => {
     const session = {
       puzzle: puzzle,
       participants: [user],
@@ -56,8 +51,7 @@ export const puzzleSessionActions: PuzzleSessionActions = {
     await firebase
       .firestore()
       .collection(PUZZLE_SESSIONS_COLLECTION)
-      .doc(`puzzleSession.${v4()}`)
-      .set(session);
+      .add(session);
 
     return session;
   },

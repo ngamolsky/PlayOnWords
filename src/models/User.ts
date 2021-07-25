@@ -1,6 +1,5 @@
 import firebase from "firebase/app";
 import { USERS_COLLECTION } from "../constants";
-import { v4 } from "uuid";
 
 export enum LoginType {
   EMAIL = "email",
@@ -34,33 +33,22 @@ export const fromFirebaseAuthUser = (firebaseUser: firebase.User): User => {
   };
 };
 
-export type UserActions = {
-  signOut(): Promise<void>;
-  createEmailUser(email: string, password: string): Promise<User>;
-  loginEmailUser(email: string, password: string): Promise<void>;
-  createOrLoginGoogleUser(): Promise<User>;
-};
-
-export const userActions: UserActions = {
+export const userActions = {
   signOut: async () => {
     return firebase.auth().signOut();
   },
-  createEmailUser: async (email, password) => {
+  createEmailUser: async (email: string, password: string) => {
     const user = {
       email,
       loginType: LoginType.EMAIL,
       createDate: new Date(),
     };
     await firebase.auth().createUserWithEmailAndPassword(email, password);
-    await firebase
-      .firestore()
-      .collection(USERS_COLLECTION)
-      .doc(`user.${v4()}`)
-      .set(user);
+    await firebase.firestore().collection(USERS_COLLECTION).add(user);
 
     return user;
   },
-  loginEmailUser: async (email, password) => {
+  loginEmailUser: async (email: string, password: string) => {
     await firebase.auth().signInWithEmailAndPassword(email, password);
   },
   createOrLoginGoogleUser: async () => {
@@ -76,7 +64,7 @@ export const userActions: UserActions = {
       await firebase
         .firestore()
         .collection(USERS_COLLECTION)
-        .doc(`user.${v4()}`)
+        .doc(firebaseUser.uid)
         .set(user);
     }
 

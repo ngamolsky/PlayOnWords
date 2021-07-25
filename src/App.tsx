@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import firebase from "firebase/app";
 import "firebase/auth";
+import "firebase/firestore";
 import { ChakraProvider, Box, theme } from "@chakra-ui/react";
 import { FirebaseAuthProvider } from "@react-firebase/auth";
 import { firebaseConfig } from "./config/firebase";

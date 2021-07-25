@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import { useDocumentDataOnce } from "react-firebase-hooks/firestore";
+import { useDocument } from "react-firebase-hooks/firestore";
 import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
 import {
   fromFirebasePuzzleSession,
@@ -15,14 +15,14 @@ const usePuzzleSession = (
   boolean,
   firebase.auth.Error | undefined
 ] => {
-  const [puzzleSession, loading, error] = useDocumentDataOnce(
+  const [sessionSnapshot, loading, error] = useDocument(
     firebase
       .firestore()
       .collection(PUZZLE_SESSIONS_COLLECTION)
-      .doc(puzzleSessionID),
-    { transform: fromFirebasePuzzleSession }
+      .doc(puzzleSessionID)
   );
 
+  const puzzleSession = fromFirebasePuzzleSession(sessionSnapshot!);
   return [puzzleSession!, puzzleSessionActions, loading, error];
 };
 

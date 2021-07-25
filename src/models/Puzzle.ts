@@ -26,10 +26,11 @@ export type Puzzle = {
 };
 
 export const fromFirebasePuzzle = (
-  puzzleData: firebase.firestore.DocumentData
+  puzzleSnapshot: firebase.firestore.DocumentSnapshot
 ): Puzzle => {
+  const puzzleData = puzzleSnapshot.data()!;
   return {
-    puzzleID: puzzleData.puzzleID,
+    puzzleID: puzzleSnapshot.id,
     clues: puzzleData.clues,
     date: puzzleData.date.toDate(),
     solutions: puzzleData.solutions,

@@ -20,6 +20,7 @@ export enum CellSolutionState {
 }
 
 export type PuzzleSession = {
+  sessionID: string;
   puzzle: Puzzle;
   participants: User[];
   owner: User;
@@ -28,9 +29,11 @@ export type PuzzleSession = {
 };
 
 export const fromFirebasePuzzleSession = (
-  sessionData: firebase.firestore.DocumentData
+  sessionSnapshot: firebase.firestore.DocumentSnapshot
 ): PuzzleSession => {
+  const sessionData = sessionSnapshot.data()!;
   return {
+    sessionID: sessionSnapshot.id,
     puzzle: sessionData.puzzle,
     participants: sessionData.participants,
     owner: sessionData.owner,

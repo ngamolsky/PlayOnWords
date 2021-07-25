@@ -7,6 +7,7 @@ export enum LoginType {
 }
 
 export type User = {
+  userID: string;
   email: string;
   username?: string;
   displayName?: string;
@@ -17,6 +18,7 @@ export type User = {
 
 export const fromFirebaseAuthUser = (firebaseUser: firebase.User): User => {
   return {
+    userID: firebaseUser.uid,
     email: firebaseUser.email!,
     displayName: firebaseUser.displayName
       ? firebaseUser.displayName

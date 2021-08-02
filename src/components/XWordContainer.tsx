@@ -10,7 +10,6 @@ export const XWordContainer: React.FC<FlexProps> = (props) => {
       h="100vh"
       w="100%"
       mx="auto"
-      overflow="auto"
       {...props}
     />
   );

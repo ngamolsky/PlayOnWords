@@ -5,8 +5,13 @@ import { SimpleGrid, Spinner } from "@chakra-ui/react";
 import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
 import useRecentPuzzles from "../hooks/useRecentPuzzles";
 import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../constants";
+import useUser from "../hooks/useUser";
+import { puzzleSessionActions } from "../models/PuzzleSession";
+import { useHistory } from "react-router-dom";
 
 const Home: React.FC = () => {
+  const [user] = useUser();
+  const history = useHistory();
   const [puzzles, loading] = useRecentPuzzles(NUM_PUZZLES_TO_SHOW_ON_HOME);
 
   let screen;
@@ -23,7 +28,13 @@ const Home: React.FC = () => {
               onClick={async (action) => {
                 switch (action) {
                   case PuzzleCardAction.NEW_GAME:
-                    console.log("NEW GAME");
+                    const { puzzleSessionID } =
+                      await puzzleSessionActions.startPuzzleSession(
+                        puzzle,
+                        user!
+                      );
+
+                    history.push(`/solve/${puzzleSessionID}`);
                     return;
                   case PuzzleCardAction.CONTINUE_GAME:
                     console.log("CONTINUE GAME");

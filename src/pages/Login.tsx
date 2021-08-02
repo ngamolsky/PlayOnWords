@@ -6,12 +6,11 @@ import { InputField } from "../components/InputField";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import { validateEmail, validatePassword } from "../utils/validationUtils";
 import { Link, useHistory } from "react-router-dom";
-import useUser from "../hooks/useUser";
 import { APP_NAME } from "../constants";
+import { userActions } from "../models/User";
 
 const Login: React.FC = () => {
   const history = useHistory();
-  const [, { createOrLoginGoogleUser, loginEmailUser }] = useUser();
   return (
     <XWordContainer>
       <ColorModeSwitcher my={4} mr={4} ml="auto" />
@@ -23,7 +22,7 @@ const Login: React.FC = () => {
           initialValues={{ email: "", password: "" }}
           onSubmit={async ({ email, password }, { setErrors }) => {
             try {
-              await loginEmailUser(email, password);
+              await userActions.loginEmailUser(email, password);
               history.push("/");
             } catch (error) {
               const errorCode = error.code;
@@ -69,7 +68,7 @@ const Login: React.FC = () => {
                 width="100%"
                 colorScheme="blue"
                 onClick={async () => {
-                  await createOrLoginGoogleUser();
+                  await userActions.createOrLoginGoogleUser();
                   history.push("/");
                 }}
               >

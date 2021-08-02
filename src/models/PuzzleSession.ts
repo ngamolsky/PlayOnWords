@@ -3,6 +3,7 @@ import { User } from "./User";
 import { Puzzle } from "./Puzzle";
 import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
 import { getBoardStateFromSolutions } from "../utils/puzzleSessionUtils";
+import { v4 } from "uuid";
 
 export type BoardState = {
   [key: string]: CellState;
@@ -20,7 +21,7 @@ export enum CellSolutionState {
 }
 
 export type PuzzleSession = {
-  sessionID: string;
+  puzzleSessionID: string;
   puzzle: Puzzle;
   participants: User[];
   owner: User;
@@ -29,11 +30,10 @@ export type PuzzleSession = {
 };
 
 export const fromFirebasePuzzleSession = (
-  sessionSnapshot: firebase.firestore.DocumentSnapshot
+  sessionData: firebase.firestore.DocumentData
 ): PuzzleSession => {
-  const sessionData = sessionSnapshot.data()!;
   return {
-    sessionID: sessionSnapshot.id,
+    puzzleSessionID: sessionData.puzzleSessionID,
     puzzle: sessionData.puzzle,
     participants: sessionData.participants,
     owner: sessionData.owner,
@@ -43,9 +43,14 @@ export const fromFirebasePuzzleSession = (
 };
 
 export const puzzleSessionActions = {
-  startPuzzleSession: async (puzzle: Puzzle, user: User) => {
+  startPuzzleSession: async (
+    puzzle: Puzzle,
+    user: User
+  ): Promise<PuzzleSession> => {
+    const puzzleSessionID = `puzzleSession.${v4()}`;
     const session = {
-      puzzle: puzzle,
+      puzzleSessionID,
+      puzzle,
       participants: [user],
       owner: user,
       startTime: new Date(),
@@ -54,7 +59,8 @@ export const puzzleSessionActions = {
     await firebase
       .firestore()
       .collection(PUZZLE_SESSIONS_COLLECTION)
-      .add(session);
+      .doc(puzzleSessionID)
+      .set(session);
 
     return session;
   },

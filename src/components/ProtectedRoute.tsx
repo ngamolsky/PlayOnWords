@@ -5,8 +5,7 @@ import useUser from "../hooks/useUser";
 import { XWordContainer } from "./XWordContainer";
 
 export const ProtectedRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
-  const [user, , loading] = useUser();
-
+  const [user, loading] = useUser();
   if (loading)
     return (
       <XWordContainer>

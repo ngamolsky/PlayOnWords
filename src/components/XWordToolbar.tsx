@@ -12,6 +12,7 @@ import {
 import React from "react";
 import { APP_NAME } from "../constants";
 import useUser from "../hooks/useUser";
+import { userActions } from "../models/User";
 
 interface XWordToolbarProps {
   puzzleStartTime?: Date;
@@ -19,8 +20,10 @@ interface XWordToolbarProps {
 
 export const XWordToolbar: React.FC<XWordToolbarProps> = () => {
   const { colorMode } = useColorMode();
-  const [user, { signOut }] = useUser();
+  const [user] = useUser();
   const isDark = colorMode === "dark";
+
+  console.log(user);
 
   return (
     <Box
@@ -44,7 +47,7 @@ export const XWordToolbar: React.FC<XWordToolbarProps> = () => {
             <MenuList>
               <MenuItem
                 onClick={() => {
-                  return signOut();
+                  return userActions.signOut();
                 }}
               >
                 Logout

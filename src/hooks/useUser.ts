@@ -1,61 +1,35 @@
 import firebase from "firebase/app";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
+import { useCollectionData } from "react-firebase-hooks/firestore";
+import { USERS_COLLECTION } from "../constants";
 import UserContext from "../contexts/UserContext";
-import {
-  getUserIDFromFirebaseAuthUser,
-  listenForUserChanges,
-  User,
-} from "../models/User";
+import { User } from "../models/User";
 
 const useUser = (): [
   User | undefined,
   boolean,
   firebase.auth.Error | undefined
 ] => {
-  const { firebaseUser, authLoading, authError } = useContext(UserContext);
-  const [userID, setUserID] = useState<string>();
-  const [{ user, userLoading }, setUserState] = useState<{
-    user: User | undefined;
-    userLoading: boolean;
-  }>({
-    user: undefined,
-    userLoading: true,
-  });
+  const { firebaseUser, authError } = useContext(UserContext);
+  const [userData, userLoading] = useCollectionData<User>(
+    firebase
+      .firestore()
+      .collection(USERS_COLLECTION)
+      .where("firebaseAuthID", "==", firebaseUser?.uid)
+  );
 
-  useEffect(() => {
-    const getUserIDFromAuthUser = async (firebaseUser: firebase.User) => {
-      const userID = await getUserIDFromFirebaseAuthUser(firebaseUser);
-      setUserID(userID);
-    };
-
-    if (authLoading) return;
-    if (firebaseUser) {
-      getUserIDFromAuthUser(firebaseUser);
+  let user: User | undefined;
+  if (!userLoading) {
+    if (!userData) {
+      throw new Error(`No user found for firebase ID: ${firebaseUser?.uid}`);
+    } else if (userData.length > 1) {
+      throw new Error(
+        `More than one user found for firebase ID: ${firebaseUser?.uid}`
+      );
     } else {
-      setUserState({
-        user: undefined,
-        userLoading: false,
-      });
+      user = userData[0];
     }
-  }, [firebaseUser, authLoading]);
-
-  useEffect(() => {
-    let unsubscribe: () => void;
-    if (userID) {
-      unsubscribe = listenForUserChanges(userID, (user) => {
-        setUserState({
-          user,
-          userLoading: false,
-        });
-      });
-    }
-
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, [userID]);
+  }
 
   return [user, userLoading, authError];
 };

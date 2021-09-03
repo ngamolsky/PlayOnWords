@@ -1,7 +1,7 @@
 import { Button, Heading } from "@chakra-ui/react";
 import "firebase/auth";
 import { Form, Formik, FormikErrors } from "formik";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
@@ -13,10 +13,21 @@ import {
 } from "../utils/validationUtils";
 import { Link, useHistory } from "react-router-dom";
 import { APP_NAME } from "../constants";
-import { userActions } from "../models/User";
+import { createEmailUser, createOrLoginGoogleUser } from "../models/User";
+import useQueryParams from "../hooks/useQueryParams";
+import UserContext from "../contexts/UserContext";
 
 const Register: React.FC = () => {
   const history = useHistory();
+  const queryParams = useQueryParams();
+  const { firebaseUser } = useContext(UserContext);
+  const continueUrl = queryParams.get("continueUrl");
+  useEffect(() => {
+    if (firebaseUser) {
+      const nextURL = continueUrl ? `${continueUrl}/` : "/";
+      history.push(nextURL);
+    }
+  }, [firebaseUser, continueUrl, history]);
   return (
     <XWordContainer>
       <ColorModeSwitcher my={4} mr={4} ml="auto" />
@@ -27,8 +38,9 @@ const Register: React.FC = () => {
         <Formik
           initialValues={{ email: "", password: "", confirmPassword: "" }}
           onSubmit={async ({ email, password }) => {
-            await userActions.createEmailUser(email, password);
-            history.push("/");
+            await createEmailUser(email, password);
+            const nextURL = continueUrl ? `/${continueUrl}` : "/";
+            history.push(nextURL);
           }}
           validate={({ password, confirmPassword }) => {
             const errors: FormikErrors<RegisterInput> = {};
@@ -79,8 +91,9 @@ const Register: React.FC = () => {
                 width="100%"
                 colorScheme="blue"
                 onClick={async () => {
-                  await userActions.createOrLoginGoogleUser();
-                  history.push("/");
+                  await createOrLoginGoogleUser();
+                  const nextURL = continueUrl ? `/${continueUrl}` : "/";
+                  history.push(nextURL);
                 }}
               >
                 Sign Up with Google

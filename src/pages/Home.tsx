@@ -5,13 +5,14 @@ import { SimpleGrid, Spinner } from "@chakra-ui/react";
 import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
 import useRecentPuzzles from "../hooks/useRecentPuzzles";
 import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../constants";
-import useUser from "../hooks/useUser";
-import { puzzleSessionActions } from "../models/PuzzleSession";
+import { startPuzzleSession } from "../models/PuzzleSession";
 import { useHistory } from "react-router-dom";
+import { UserGroup } from "../components/UserGroup";
+import useUser from "../hooks/useUser";
 
 const Home: React.FC = () => {
-  const [user] = useUser();
   const history = useHistory();
+  const [user] = useUser();
   const [puzzles, loading] = useRecentPuzzles(NUM_PUZZLES_TO_SHOW_ON_HOME);
 
   let screen;
@@ -28,11 +29,10 @@ const Home: React.FC = () => {
               onClick={async (action) => {
                 switch (action) {
                   case PuzzleCardAction.NEW_GAME:
-                    const { puzzleSessionID } =
-                      await puzzleSessionActions.startPuzzleSession(
-                        puzzle,
-                        user!
-                      );
+                    const { puzzleSessionID } = await startPuzzleSession(
+                      puzzle,
+                      user!
+                    );
 
                     history.push(`/solve/${puzzleSessionID}`);
                     return;
@@ -52,7 +52,7 @@ const Home: React.FC = () => {
 
   return (
     <XWordContainer>
-      <XWordToolbar />
+      <XWordToolbar>{user && <UserGroup currentUser={user} />}</XWordToolbar>
       {screen}
     </XWordContainer>
   );

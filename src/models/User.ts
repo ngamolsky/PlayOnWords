@@ -15,113 +15,138 @@ export type User = {
   firebaseAuthID: string;
   loginType: LoginType;
   createDate: Date;
+  activeSessionIDs: string[];
 };
 
-export const fromFirebaseAuthUser = (firebaseUser: firebase.User): User => {
-  const userID = `user.${v4()}`;
+// User Actions
+export const getUserIDFromFirebaseAuthUser = async (
+  firebaseUser: firebase.User
+): Promise<string | undefined> => {
+  const userResult = await firebase
+    .firestore()
+    .collection(USERS_COLLECTION)
+    .where("firebaseAuthID", "==", firebaseUser.uid)
+    .get();
 
-  return {
-    userID,
-    email: firebaseUser.email!,
-    displayName: firebaseUser.displayName
-      ? firebaseUser.displayName
-      : undefined,
-    createDate: new Date(firebaseUser.metadata.creationTime!),
-    loginType:
-      firebaseUser.providerData[0]!.providerId === "google.com"
-        ? LoginType.GOOGLE
-        : LoginType.EMAIL,
-    firebaseAuthID: firebaseUser.uid,
-  };
+  if (userResult.docs.length === 0) return;
+  if (userResult.docs.length > 1) {
+    throw Error(
+      `Found more than one user with firebaseAuthID: ${firebaseUser.uid}`
+    );
+  }
+
+  const firstResult = userResult.docs[0].data();
+  return firstResult.userID;
 };
 
-export const userActions = {
-  signOut: async () => {
-    return firebase.auth().signOut();
-  },
-  createEmailUser: async (email: string, password: string): Promise<User> => {
-    const { user: firebaseUser } = await firebase
-      .auth()
-      .createUserWithEmailAndPassword(email, password);
-    const user: User = {
-      userID: `user.${v4()}`,
-      firebaseAuthID: firebaseUser!.uid,
-      email,
-      loginType: LoginType.EMAIL,
-      createDate: new Date(),
-    };
-    await firebase.firestore().collection(USERS_COLLECTION).add(user);
+export const listenForUserChanges = (
+  userID: string,
+  callback: (user: User | undefined) => void
+) => {
+  const unsubscribe = firebase
+    .firestore()
+    .collection(USERS_COLLECTION)
+    .doc(userID)
+    .onSnapshot((userResult) => {
+      const userData = userResult.data();
+      if (userData) {
+        let user: User = {
+          userID: userData.userID,
+          email: userData.email,
+          createDate: userData.createDate.toDate(),
+          loginType: userData.loginType,
+          firebaseAuthID: userData.firebaseAuthID,
+          activeSessionIDs: userData.activeSessionIDs,
+        };
 
-    return user;
-  },
-  loginEmailUser: async (email: string, password: string): Promise<void> => {
-    await firebase.auth().signInWithEmailAndPassword(email, password);
-  },
-  createOrLoginGoogleUser: async (): Promise<User> => {
-    const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
-    const { user: firebaseUser } = await firebase
-      .auth()
-      .signInWithPopup(googleAuthProvider);
+        if (userData.displayName) {
+          user.displayName = userData.displayName;
+        }
 
-    let user: User;
-    if (firebaseUser) {
-      user = fromFirebaseAuthUser(firebaseUser);
+        if (userData.username) {
+          user.username = userData.username;
+        }
+        callback(user);
+      }
+    });
+  return unsubscribe;
+};
 
-      const userResult = await firebase
+export const createOrLoginGoogleUser = async (): Promise<string> => {
+  const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+  const { user: firebaseUser } = await firebase
+    .auth()
+    .signInWithPopup(googleAuthProvider);
+
+  let userID: string | undefined;
+  if (firebaseUser) {
+    userID = await getUserIDFromFirebaseAuthUser(firebaseUser);
+    if (!userID) {
+      userID = `user.${v4()}`;
+      const user = {
+        userID,
+        email: firebaseUser.email!,
+        displayName: firebaseUser.displayName
+          ? firebaseUser.displayName
+          : undefined,
+        createDate: new Date(firebaseUser.metadata.creationTime!),
+        loginType:
+          firebaseUser.providerData[0]!.providerId === "google.com"
+            ? LoginType.GOOGLE
+            : LoginType.EMAIL,
+        firebaseAuthID: firebaseUser.uid,
+        activeSessionIDs: [],
+      };
+      await firebase
         .firestore()
         .collection(USERS_COLLECTION)
-        .where("firebaseAuthID", "==", firebaseUser.uid)
-        .get();
-
-      if (userResult.docs.length === 0) {
-        await firebase
-          .firestore()
-          .collection(USERS_COLLECTION)
-          .doc(user.userID)
-          .set(user);
-      } else if (userResult.docs.length > 1) {
-        throw Error(
-          `Found more than one user with firebaseAuthID: ${firebaseUser.uid}`
-        );
-      } else {
-        const firstResult = userResult.docs[0].data();
-        user = {
-          userID: firstResult.userID,
-          firebaseAuthID: firstResult.firebaseAuthID,
-          displayName: firstResult.displayName,
-          email: firstResult.email,
-          loginType: firstResult.loginType,
-          createDate: firstResult.createDate.toDate(),
-        };
-      }
+        .doc(user.userID)
+        .set(user);
     }
+  }
+  return userID!;
+};
 
-    return user!;
-  },
-  getUserByFirebaseAuthID: async (
-    firebaseAuthID: string
-  ): Promise<User | undefined> => {
-    const userResult = await firebase
-      .firestore()
-      .collection(USERS_COLLECTION)
-      .where("firebaseAuthID", "==", firebaseAuthID)
-      .get();
+export const createEmailUser = async (
+  email: string,
+  password: string
+): Promise<User> => {
+  const { user: firebaseUser } = await firebase
+    .auth()
+    .createUserWithEmailAndPassword(email, password);
+  const user: User = {
+    userID: `user.${v4()}`,
+    firebaseAuthID: firebaseUser!.uid,
+    email,
+    loginType: LoginType.EMAIL,
+    createDate: new Date(),
+    activeSessionIDs: [],
+  };
+  await firebase
+    .firestore()
+    .collection(USERS_COLLECTION)
+    .doc(user.userID)
+    .set(user);
 
-    if (userResult.docs.length === 0) return;
-    if (userResult.docs.length > 1) {
-      throw Error(
-        `Found more than one user with firebaseAuthID: ${firebaseAuthID}`
-      );
-    }
+  return user;
+};
 
-    const firstResult = userResult.docs[0].data();
-    return {
-      userID: firstResult.userID,
-      firebaseAuthID: firstResult.firebaseAuthID,
-      displayName: firstResult.displayName,
-      email: firstResult.email,
-      loginType: firstResult.loginType,
-      createDate: firstResult.createDate.toDate(),
-    };
-  },
+export const loginEmailUser = async (
+  email: string,
+  password: string
+): Promise<string | undefined> => {
+  // Sign in using firebase
+  const { user: firebaseUser } = await firebase
+    .auth()
+    .signInWithEmailAndPassword(email, password);
+  if (!firebaseUser) {
+    throw new Error("Couldn't sign in with firebase");
+  }
+
+  const userID = getUserIDFromFirebaseAuthUser(firebaseUser);
+  return userID;
+};
+
+export const signOut = async () => {
+  return firebase.auth().signOut();
 };

@@ -1,16 +1,28 @@
 import { Button, Heading } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
-import React from "react";
+import React, { useEffect, useContext } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import { validateEmail, validatePassword } from "../utils/validationUtils";
 import { Link, useHistory } from "react-router-dom";
 import { APP_NAME } from "../constants";
-import { userActions } from "../models/User";
+import { loginEmailUser, createOrLoginGoogleUser } from "../models/User";
+import useQueryParams from "../hooks/useQueryParams";
+import UserContext from "../contexts/UserContext";
 
 const Login: React.FC = () => {
   const history = useHistory();
+  const queryParams = useQueryParams();
+  const { firebaseUser } = useContext(UserContext);
+  const continueUrl = queryParams.get("continueUrl");
+
+  useEffect(() => {
+    if (firebaseUser) {
+      const nextURL = continueUrl ? `${continueUrl}/` : "/";
+      history.push(nextURL);
+    }
+  }, [firebaseUser, continueUrl, history]);
   return (
     <XWordContainer>
       <ColorModeSwitcher my={4} mr={4} ml="auto" />
@@ -22,15 +34,25 @@ const Login: React.FC = () => {
           initialValues={{ email: "", password: "" }}
           onSubmit={async ({ email, password }, { setErrors }) => {
             try {
-              await userActions.loginEmailUser(email, password);
-              history.push("/");
+              await loginEmailUser(email, password);
+              const nextURL = continueUrl ? `${continueUrl}/` : "/";
+              history.push(nextURL);
             } catch (error) {
               const errorCode = error.code;
               const errorMessage = error.message;
+              console.log(errorCode);
 
               if (errorCode === "auth/user-not-found") {
                 setErrors({
                   email: "User does not exist.",
+                });
+
+                return;
+              }
+
+              if (errorCode === "auth/wrong-password") {
+                setErrors({
+                  password: "Password is incorrect.",
                 });
 
                 return;
@@ -68,8 +90,7 @@ const Login: React.FC = () => {
                 width="100%"
                 colorScheme="blue"
                 onClick={async () => {
-                  await userActions.createOrLoginGoogleUser();
-                  history.push("/");
+                  await createOrLoginGoogleUser();
                 }}
               >
                 Login with Google

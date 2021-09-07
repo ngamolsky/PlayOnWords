@@ -131,22 +131,27 @@ export const createEmailUser = async (
   return user;
 };
 
-export const loginEmailUser = async (
-  email: string,
-  password: string
-): Promise<string | undefined> => {
+export const loginEmailUser = async (email: string, password: string) => {
   // Sign in using firebase
-  const { user: firebaseUser } = await firebase
-    .auth()
-    .signInWithEmailAndPassword(email, password);
-  if (!firebaseUser) {
-    throw new Error("Couldn't sign in with firebase");
-  }
-
-  const userID = getUserIDFromFirebaseAuthUser(firebaseUser);
-  return userID;
+  await firebase.auth().signInWithEmailAndPassword(email, password);
 };
 
 export const signOut = async () => {
   return firebase.auth().signOut();
+};
+
+export const userConverter: firebase.firestore.FirestoreDataConverter<User> = {
+  fromFirestore: (snapshot) => {
+    const userData = snapshot.data();
+    return {
+      userID: userData.userID,
+      displayName: userData.displayName,
+      email: userData.email,
+      createDate: userData.createDate.toDate(),
+      loginType: userData.loginType,
+      firebaseAuthID: userData.firebaseAuthID,
+      activeSessionIDs: userData.activeSessionIDs,
+    };
+  },
+  toFirestore: (user) => user,
 };

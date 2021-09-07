@@ -1,12 +1,9 @@
-import firebase from "firebase/app";
 import { createContext } from "react";
+import { User } from "../models/User";
 
-const UserContext = createContext<
-  Partial<{
-    firebaseUser: firebase.User | undefined | null;
-    authLoading: boolean;
-    authError: firebase.auth.Error;
-  }>
->({});
+const UserContext = createContext<[User | undefined, boolean]>([
+  undefined,
+  true,
+]);
 
 export default UserContext;

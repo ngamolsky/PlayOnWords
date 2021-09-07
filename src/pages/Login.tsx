@@ -14,15 +14,15 @@ import UserContext from "../contexts/UserContext";
 const Login: React.FC = () => {
   const history = useHistory();
   const queryParams = useQueryParams();
-  const { firebaseUser } = useContext(UserContext);
+  const [user] = useContext(UserContext);
   const continueUrl = queryParams.get("continueUrl");
 
   useEffect(() => {
-    if (firebaseUser) {
+    if (user) {
       const nextURL = continueUrl ? `${continueUrl}/` : "/";
       history.push(nextURL);
     }
-  }, [firebaseUser, continueUrl, history]);
+  }, [user, continueUrl, history]);
   return (
     <XWordContainer>
       <ColorModeSwitcher my={4} mr={4} ml="auto" />

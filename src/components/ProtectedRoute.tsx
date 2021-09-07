@@ -7,15 +7,15 @@ import { XWordContainer } from "./XWordContainer";
 
 export const ProtectedRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
   const queryParams = useQueryParams();
-  const { firebaseUser, authLoading } = useContext(UserContext);
+  const [user, userLoading] = useContext(UserContext);
   const continueUrl = queryParams.get("continueUrl");
-  if (authLoading)
+  if (userLoading)
     return (
       <XWordContainer>
         <Spinner size="xl" m="auto" />
       </XWordContainer>
     );
-  if (!firebaseUser) {
+  if (!user) {
     const nextUrl = continueUrl
       ? `/login?continueUrl=${continueUrl}`
       : "/login";

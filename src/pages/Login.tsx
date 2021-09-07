@@ -33,11 +33,7 @@ const Login: React.FC = () => {
         <Formik
           initialValues={{ email: "", password: "" }}
           onSubmit={async ({ email, password }, { setErrors }) => {
-            try {
-              await loginEmailUser(email, password);
-              const nextURL = continueUrl ? `${continueUrl}/` : "/";
-              history.push(nextURL);
-            } catch (error) {
+            await loginEmailUser(email, password).catch((error) => {
               const errorCode = error.code;
               const errorMessage = error.message;
               console.log(errorCode);
@@ -58,7 +54,7 @@ const Login: React.FC = () => {
                 return;
               }
               throw new Error(`(${errorCode}): ${errorMessage}`);
-            }
+            });
           }}
         >
           {({ isSubmitting }) => (

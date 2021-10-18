@@ -1,14 +1,12 @@
 import { Spinner } from "@chakra-ui/react";
 import React, { useContext } from "react";
-import { Redirect, Route, RouteProps } from "react-router-dom";
+import { Redirect, Route, RouteProps, useLocation } from "react-router-dom";
 import UserContext from "../contexts/UserContext";
-import useQueryParams from "../hooks/useQueryParams";
 import { XWordContainer } from "./XWordContainer";
 
 export const ProtectedRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
-  const queryParams = useQueryParams();
+  const path = useLocation().pathname;
   const [user, userLoading] = useContext(UserContext);
-  const continueUrl = queryParams.get("continueUrl");
   if (userLoading)
     return (
       <XWordContainer>
@@ -16,9 +14,7 @@ export const ProtectedRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
       </XWordContainer>
     );
   if (!user) {
-    const nextUrl = continueUrl
-      ? `/login?continueUrl=${continueUrl}`
-      : "/login";
+    const nextUrl = path !== "/" ? `/login?continueUrl=${path}` : "/login";
     return <Redirect to={nextUrl} />;
   }
   return <Route {...rest}>{children}</Route>;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { XWordToolbar } from "../components/XWordToolbar";
 import { SimpleGrid, Spinner } from "@chakra-ui/react";
@@ -8,11 +8,11 @@ import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../constants";
 import { startPuzzleSession } from "../models/PuzzleSession";
 import { useHistory } from "react-router-dom";
 import { UserGroup } from "../components/UserGroup";
-import useUser from "../hooks/useUser";
+import UserContext from "../contexts/UserContext";
 
 const Home: React.FC = () => {
   const history = useHistory();
-  const [user] = useUser();
+  const [user] = useContext(UserContext);
   const [puzzles, loading] = useRecentPuzzles(NUM_PUZZLES_TO_SHOW_ON_HOME);
 
   let screen;

@@ -143,15 +143,19 @@ export const signOut = async () => {
 export const userConverter: firebase.firestore.FirestoreDataConverter<User> = {
   fromFirestore: (snapshot) => {
     const userData = snapshot.data();
-    return {
+    const user: User = {
       userID: userData.userID,
-      displayName: userData.displayName,
       email: userData.email,
       createDate: userData.createDate.toDate(),
       loginType: userData.loginType,
       firebaseAuthID: userData.firebaseAuthID,
       activeSessionIDs: userData.activeSessionIDs,
     };
+
+    if (userData.displayName) {
+      user.displayName = userData.displayName;
+    }
+    return user;
   },
   toFirestore: (user) => user,
 };

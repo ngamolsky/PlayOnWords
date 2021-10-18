@@ -11,6 +11,7 @@ import useUser from "./hooks/useUser";
 
 export const App = () => {
   const [user, userLoading] = useUser();
+  console.log("Rendering app for user: ", user);
   return (
     <UserContext.Provider value={[user, userLoading]}>
       <Router>

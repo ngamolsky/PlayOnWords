@@ -64,7 +64,7 @@ export const startPuzzleSession = async (
   return session;
 };
 
-export const joinPuzzleSession = async (
+export const joinPuzzleSessionParticipants = async (
   puzzleSessionID: string,
   user: User
 ) => {
@@ -72,13 +72,6 @@ export const joinPuzzleSession = async (
     ...user,
     activeSessionIDs: user.activeSessionIDs.concat(puzzleSessionID),
   };
-
-  await firebase
-    .firestore()
-    .collection(USERS_COLLECTION)
-    .doc(updatedUser.userID)
-    .set(updatedUser);
-
   return firebase
     .firestore()
     .collection(PUZZLE_SESSIONS_COLLECTION)
@@ -88,11 +81,26 @@ export const joinPuzzleSession = async (
     });
 };
 
-export const leavePuzzleSession = async (
+export const addSessionToUserActiveSessions = async (
   puzzleSessionID: string,
   user: User
 ) => {
-  console.log("leaving puzzle session", puzzleSessionID, user.userID);
+  const updatedUser: User = {
+    ...user,
+    activeSessionIDs: user.activeSessionIDs.concat(puzzleSessionID),
+  };
+
+  return await firebase
+    .firestore()
+    .collection(USERS_COLLECTION)
+    .doc(updatedUser.userID)
+    .set(updatedUser);
+};
+
+export const removeSessionFromUserActiveSessions = async (
+  puzzleSessionID: string,
+  user: User
+) => {
   const updatedUser: User = {
     ...user,
     activeSessionIDs: user.activeSessionIDs.filter(
@@ -100,19 +108,11 @@ export const leavePuzzleSession = async (
     ),
   };
 
-  await firebase
+  return await firebase
     .firestore()
     .collection(USERS_COLLECTION)
     .doc(updatedUser.userID)
     .set(updatedUser);
-
-  return firebase
-    .firestore()
-    .collection(PUZZLE_SESSIONS_COLLECTION)
-    .doc(puzzleSessionID)
-    .update({
-      participants: firebase.firestore.FieldValue.arrayRemove(user),
-    });
 };
 
 export const isUserInSession = (
@@ -120,7 +120,18 @@ export const isUserInSession = (
   user: User
 ): boolean => {
   const matchingUser = session.participants.find(
-    (sessionUser) => sessionUser.userID === user.userID
+    (currentUser) => currentUser.userID === user.userID
   );
   return !!matchingUser;
+};
+
+export const isSessionActiveForUser = (
+  session: PuzzleSession,
+  user: User
+): boolean => {
+  const matchingSession = user.activeSessionIDs.find(
+    (sessionID) => sessionID === session.puzzleSessionID
+  );
+
+  return !!matchingSession;
 };

@@ -1,9 +1,16 @@
-import firebase from "firebase/app";
 import { User } from "./User";
 import { Puzzle } from "./Puzzle";
 import { PUZZLE_SESSIONS_COLLECTION, USERS_COLLECTION } from "../constants";
 import { getBoardStateFromSolutions } from "../utils/puzzleSessionUtils";
 import { v4 } from "uuid";
+import {
+  onSnapshot,
+  doc,
+  FirestoreDataConverter,
+  setDoc,
+} from "firebase/firestore";
+import { db } from "../config/firebase";
+import { useState, useEffect } from "react";
 
 export type BoardState = {
   [key: string]: CellState;
@@ -23,8 +30,8 @@ export enum CellSolutionState {
 export type PuzzleSession = {
   puzzleSessionID: string;
   puzzle: Puzzle;
-  participants: User[];
-  owner: User;
+  participantIDs: string[];
+  ownerID: string;
   startTime: Date;
   boardState: BoardState;
 };
@@ -35,92 +42,89 @@ export const startPuzzleSession = async (
 ): Promise<PuzzleSession> => {
   const puzzleSessionID = `puzzleSession.${v4()}`;
 
-  const updatedUser: User = {
-    ...user,
-    activeSessionIDs: user.activeSessionIDs.concat(puzzleSessionID),
-  };
-
-  await firebase
-    .firestore()
-    .collection(USERS_COLLECTION)
-    .doc(updatedUser.userID)
-    .set(updatedUser);
-
   const session = {
     puzzleSessionID,
     puzzle,
-    participants: [updatedUser],
-    owner: updatedUser,
+    participantIDs: [user.userID],
+    ownerID: user.userID,
     startTime: new Date(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),
   };
 
-  await firebase
-    .firestore()
-    .collection(PUZZLE_SESSIONS_COLLECTION)
-    .doc(puzzleSessionID)
-    .set(session);
+  await setDoc(doc(db, PUZZLE_SESSIONS_COLLECTION, puzzleSessionID), session);
+  console.log(`startPuzzleSession: Created session ${puzzleSessionID}`);
+
+  const updatedUser: User = {
+    ...user,
+    activeSessionIDs: user.activeSessionIDs.concat(puzzleSessionID),
+  };
+
+  await setDoc(doc(db, USERS_COLLECTION, updatedUser.userID), updatedUser);
+  console.log(
+    `startPuzzleSession: Added sessionID ${puzzleSessionID} to users active sessions for user ${updatedUser.userID}`
+  );
 
   return session;
 };
 
-export const joinPuzzleSessionParticipants = async (
-  puzzleSessionID: string,
-  user: User
-) => {
-  const updatedUser: User = {
-    ...user,
-    activeSessionIDs: user.activeSessionIDs.concat(puzzleSessionID),
-  };
-  return firebase
-    .firestore()
-    .collection(PUZZLE_SESSIONS_COLLECTION)
-    .doc(puzzleSessionID)
-    .update({
-      participants: firebase.firestore.FieldValue.arrayUnion(updatedUser),
-    });
+// #region Hooks
+
+export const usePuzzleSession = (
+  puzzleSessionID: string
+): [PuzzleSession | undefined, boolean] => {
+  const [sessionState, setSessionState] = useState<{
+    session: PuzzleSession | undefined;
+    loading: boolean;
+  }>({
+    session: undefined,
+    loading: true,
+  });
+
+  useEffect(() => {
+    const unsub = onSnapshot(
+      doc(db, PUZZLE_SESSIONS_COLLECTION, puzzleSessionID).withConverter(
+        sessionConverter
+      ),
+      (doc) => {
+        console.log(`usePuzzleSession: Snapshot: ${doc.data()}`);
+        setSessionState({
+          session: doc.data(),
+          loading: false,
+        });
+      }
+    );
+
+    return unsub();
+  });
+
+  return [sessionState.session, sessionState.loading];
 };
 
-export const addSessionToUserActiveSessions = async (
-  puzzleSessionID: string,
-  user: User
-) => {
-  const updatedUser: User = {
-    ...user,
-    activeSessionIDs: user.activeSessionIDs.concat(puzzleSessionID),
-  };
+// #endregion
 
-  return await firebase
-    .firestore()
-    .collection(USERS_COLLECTION)
-    .doc(updatedUser.userID)
-    .set(updatedUser);
-};
+const sessionConverter: FirestoreDataConverter<PuzzleSession> = {
+  fromFirestore: (snapshot) => {
+    const sessionData = snapshot.data();
+    const session = {
+      puzzleSessionID: sessionData.puzzleSessionID,
+      puzzle: sessionData.puzzle,
+      participantIDs: sessionData.participantIDs,
+      ownerID: sessionData.ownerID,
+      startTime: sessionData.startTime.toDate(),
+      boardState: sessionData.boardState,
+    };
 
-export const removeSessionFromUserActiveSessions = async (
-  puzzleSessionID: string,
-  user: User
-) => {
-  const updatedUser: User = {
-    ...user,
-    activeSessionIDs: user.activeSessionIDs.filter(
-      (sessionID) => sessionID !== puzzleSessionID
-    ),
-  };
-
-  return await firebase
-    .firestore()
-    .collection(USERS_COLLECTION)
-    .doc(updatedUser.userID)
-    .set(updatedUser);
+    return session;
+  },
+  toFirestore: (session) => session,
 };
 
 export const isUserInSession = (
   session: PuzzleSession,
   user: User
 ): boolean => {
-  const matchingUser = session.participants.find(
-    (currentUser) => currentUser.userID === user.userID
+  const matchingUser = session.participantIDs.find(
+    (currentUserID) => currentUserID === user.userID
   );
   return !!matchingUser;
 };

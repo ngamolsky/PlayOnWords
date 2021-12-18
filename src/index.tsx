@@ -1,12 +1,8 @@
 import { ChakraProvider, ColorModeScript, theme } from "@chakra-ui/react";
-import { FirebaseAuthProvider } from "@react-firebase/auth";
-import firebase from "firebase/app";
-import "firebase/auth";
-import "firebase/firestore";
+import "./config/firebase";
 import * as React from "react";
 import ReactDOM from "react-dom";
 import { App } from "./App";
-import { firebaseConfig } from "./config/firebase";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorker from "./serviceWorker";
 
@@ -14,9 +10,7 @@ ReactDOM.render(
   <React.StrictMode>
     <ColorModeScript />
     <ChakraProvider theme={theme}>
-      <FirebaseAuthProvider firebase={firebase} {...firebaseConfig}>
-        <App />
-      </FirebaseAuthProvider>
+      <App />
     </ChakraProvider>
   </React.StrictMode>,
   document.getElementById("root")

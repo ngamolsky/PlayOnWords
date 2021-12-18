@@ -1,20 +1,23 @@
 import { Button, Heading } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
-import React, { useEffect, useContext } from "react";
+import React, { useEffect } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import { validateEmail, validatePassword } from "../utils/validationUtils";
 import { Link, useHistory } from "react-router-dom";
 import { APP_NAME } from "../constants";
-import { loginEmailUser, createOrLoginGoogleUser } from "../models/User";
+import {
+  loginEmailUser,
+  createOrLoginGoogleUser,
+  useCurrentUser,
+} from "../models/User";
 import useQueryParams from "../hooks/useQueryParams";
-import UserContext from "../contexts/UserContext";
 
 const Login: React.FC = () => {
   const history = useHistory();
   const queryParams = useQueryParams();
-  const [user] = useContext(UserContext);
+  const [user] = useCurrentUser();
   const continueUrl = queryParams.get("continueUrl");
 
   useEffect(() => {

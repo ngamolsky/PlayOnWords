@@ -1,52 +1,34 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 
 import { XWordContainer } from "../components/XWordContainer";
 import { XWordToolbar } from "../components/XWordToolbar";
 import { Spinner } from "@chakra-ui/react";
-import usePuzzleSession from "../hooks/usePuzzleSession";
 import { useParams } from "react-router-dom";
 import {
-  addSessionToUserActiveSessions,
   isSessionActiveForUser,
   isUserInSession,
-  joinPuzzleSessionParticipants,
-  removeSessionFromUserActiveSessions,
+  usePuzzleSession,
 } from "../models/PuzzleSession";
 import { UserGroup } from "../components/UserGroup";
-import UserContext from "../contexts/UserContext";
+import { useCurrentUser } from "../models/User";
 
 const Solve: React.FC = () => {
   const { puzzleSessionID } = useParams<{ puzzleSessionID?: string }>();
-  const [user] = useContext(UserContext);
+  const [user] = useCurrentUser();
   const [session] = usePuzzleSession(puzzleSessionID!);
-
-  console.log("Rendering solve for parc", session?.participants);
 
   useEffect(() => {
     const joinPuzzleSessionIfNeeded = async () => {
       if (user && session) {
-        if (!isUserInSession(session, user)) {
-          console.log(
-            "joining session: ",
-            session.puzzleSessionID,
-            "for user: ",
-            user.userID
-          );
-          await joinPuzzleSessionParticipants(session.puzzleSessionID, user);
-        } else {
-          console.log(
-            "in session: ",
-            session.puzzleSessionID,
-            "for user: ",
-            user.userID
-          );
-        }
-
-        if (!isSessionActiveForUser(session, user)) {
-          addSessionToUserActiveSessions(session.puzzleSessionID, user);
-        } else {
-          console.log("session is active");
-        }
+        // if (!isUserInSession(session, user)) {
+        //   await joinPuzzleSessionParticipants(
+        //     session.puzzleSessionID,
+        //     user.userID
+        //   );
+        // }
+        // if (!isSessionActiveForUser(session, user)) {
+        //   addSessionToUserActiveSessions(session.puzzleSessionID, user);
+        // }
       }
     };
 
@@ -54,9 +36,7 @@ const Solve: React.FC = () => {
       if (user && session) {
         if (isUserInSession(session, user)) {
           if (isSessionActiveForUser(session, user)) {
-            console.log("leaving", user, session);
-
-            removeSessionFromUserActiveSessions(session.puzzleSessionID, user);
+            // removeSessionFromUserActiveSessions(session.puzzleSessionID, user);
           }
         }
       }
@@ -65,11 +45,11 @@ const Solve: React.FC = () => {
     joinPuzzleSessionIfNeeded();
 
     return leavePuzzleSessionIfNeeded;
-  });
+  }, [session, user]);
 
   return (
     <XWordContainer>
-      <XWordToolbar>
+      {/* <XWordToolbar>
         {user && session?.participants && (
           <UserGroup
             currentUser={user}
@@ -77,7 +57,7 @@ const Solve: React.FC = () => {
             currentSessionID={session.puzzleSessionID}
           />
         )}
-      </XWordToolbar>
+      </XWordToolbar> */}
       <Spinner size="xl" m="auto" />
     </XWordContainer>
   );

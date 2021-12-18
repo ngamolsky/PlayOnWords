@@ -1,12 +1,12 @@
 import { Spinner } from "@chakra-ui/react";
-import React, { useContext } from "react";
+import React from "react";
 import { Redirect, Route, RouteProps, useLocation } from "react-router-dom";
-import UserContext from "../contexts/UserContext";
+import { useCurrentUser } from "../models/User";
 import { XWordContainer } from "./XWordContainer";
 
 export const ProtectedRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
   const path = useLocation().pathname;
-  const [user, userLoading] = useContext(UserContext);
+  const [user, userLoading] = useCurrentUser();
   if (userLoading)
     return (
       <XWordContainer>

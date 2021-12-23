@@ -3,8 +3,7 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
-    "start": "node -r yamlenv/config node_modules/@google-cloud/functions-framework --source=lib/ --target=XWordScraper",
-    "dev": "concurrently \"tsc -w\" \"nodemon --watch ./lib/ --exec npm run start\"",
+    "start": "concurrently \"tsc -w\" \"nodemon --watch ./lib/ -- exec node -r yamlenv/config node_modules/@google-cloud/functions-framework --source=lib/ --target=XWordScraper\" ",
     "deploy": "gcloud functions deploy XWordScraper --runtime=nodejs16 --trigger-http"
   },
   "main": "lib/index.js",

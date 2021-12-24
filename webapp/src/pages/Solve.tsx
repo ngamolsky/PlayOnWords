@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 
 import { XWordContainer } from "../components/XWordContainer";
-import { XWordToolbar } from "../components/XWordToolbar";
 import { Spinner } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import {
@@ -9,7 +8,6 @@ import {
   isUserInSession,
   usePuzzleSession,
 } from "../models/PuzzleSession";
-import { UserGroup } from "../components/UserGroup";
 import { useCurrentUser } from "../models/User";
 
 const Solve: React.FC = () => {

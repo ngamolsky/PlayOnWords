@@ -17,16 +17,12 @@ import {
   doc,
   setDoc,
   getDocs,
+  Timestamp,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { v4 } from "uuid";
 import { auth, db } from "../config/firebase";
 import { USERS_COLLECTION } from "../constants";
-
-export enum LoginType {
-  EMAIL = "email",
-  GOOGLE = "google",
-}
 
 export type User = {
   userID: string;
@@ -35,9 +31,14 @@ export type User = {
   displayName?: string;
   firebaseAuthID: string;
   loginType: LoginType;
-  createDate: Date;
+  createDate: Timestamp;
   activeSessionIDs: string[];
 };
+
+export enum LoginType {
+  EMAIL = "email",
+  GOOGLE = "google",
+}
 
 export const getUserIDFromFirebaseAuthUser = async (
   firebaseUser: FirebaseUser
@@ -126,7 +127,7 @@ export const createEmailUser = async (
     firebaseAuthID: firebaseUser.uid,
     email,
     loginType: LoginType.EMAIL,
-    createDate: new Date(),
+    createDate: Timestamp.now(),
     activeSessionIDs: [],
   };
   await setDoc(doc(db, USERS_COLLECTION, user.userID), user);

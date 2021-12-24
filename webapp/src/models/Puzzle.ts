@@ -5,6 +5,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  Timestamp,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../config/firebase";
@@ -14,7 +15,7 @@ export type Puzzle = {
   puzzleID: string;
   title?: string;
   clues: ClueList;
-  date: Date;
+  timestamp: Timestamp;
   solutions: Solutions;
   nytID: string;
 };
@@ -86,7 +87,7 @@ const puzzleConverter: FirestoreDataConverter<Puzzle> = {
     const puzzle: Puzzle = {
       puzzleID: puzzleData.puzzleID,
       clues: puzzleData.clues,
-      date: puzzleData.date.toDate(),
+      timestamp: puzzleData.timestamp,
       solutions: puzzleData.solutions,
       nytID: puzzleData.nytID,
     };

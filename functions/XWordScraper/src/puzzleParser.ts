@@ -1,9 +1,6 @@
-import type {
-  Solutions,
-  Puzzle,
-  ClueList,
-} from "../../../webapp/src/models/Puzzle";
 import { v4 } from "uuid";
+import { Timestamp } from "firebase-admin/firestore";
+import { ClueList, Puzzle, Solutions } from "./models/Puzzle";
 
 type NYTClue = {
   clueNum: number;
@@ -65,7 +62,7 @@ export const convertPuzzleDataToPuzzle = async ({
 
   const puzzle: Puzzle = {
     puzzleID: `puzzle.${v4()}`,
-    date,
+    timestamp: Timestamp.fromDate(date),
     clues,
     solutions,
     nytID,

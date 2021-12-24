@@ -8,9 +8,19 @@ import {
   doc,
   FirestoreDataConverter,
   setDoc,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { useState, useEffect } from "react";
+
+export type PuzzleSession = {
+  puzzleSessionID: string;
+  puzzle: Puzzle;
+  participantIDs: string[];
+  ownerID: string;
+  startTime: Timestamp;
+  boardState: BoardState;
+};
 
 export type BoardState = {
   [key: string]: CellState;
@@ -27,15 +37,6 @@ export enum CellSolutionState {
   NONE = "none",
 }
 
-export type PuzzleSession = {
-  puzzleSessionID: string;
-  puzzle: Puzzle;
-  participantIDs: string[];
-  ownerID: string;
-  startTime: Date;
-  boardState: BoardState;
-};
-
 export const startPuzzleSession = async (
   puzzle: Puzzle,
   user: User
@@ -47,7 +48,7 @@ export const startPuzzleSession = async (
     puzzle,
     participantIDs: [user.userID],
     ownerID: user.userID,
-    startTime: new Date(),
+    startTime: Timestamp.now(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),
   };
 

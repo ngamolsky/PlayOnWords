@@ -1,10 +1,11 @@
+import { Timestamp } from "firebase-admin/firestore";
 import db from "../config/firebase";
 
 export type Puzzle = {
   puzzleID: string;
   title?: string;
   clues: ClueList;
-  date: Date;
+  timestamp: Timestamp;
   solutions: Solutions;
   nytID: string;
 };

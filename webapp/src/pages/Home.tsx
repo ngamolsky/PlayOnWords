@@ -25,7 +25,7 @@ const Home: React.FC = () => {
             <PuzzleCard
               key={puzzle.puzzleID}
               hasSession={false}
-              puzzleDate={puzzle.date}
+              puzzleDate={puzzle.timestamp.toDate()}
               onClick={async (action) => {
                 switch (action) {
                   case PuzzleCardAction.NEW_GAME:

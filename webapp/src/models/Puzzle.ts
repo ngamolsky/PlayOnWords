@@ -6,6 +6,7 @@ import {
   orderBy,
   query,
   Timestamp,
+  WithFieldValue,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../config/firebase";
@@ -98,5 +99,5 @@ const puzzleConverter: FirestoreDataConverter<Puzzle> = {
 
     return puzzle;
   },
-  toFirestore: (puzzle) => puzzle,
+  toFirestore: (puzzle: WithFieldValue<Puzzle>) => puzzle,
 };

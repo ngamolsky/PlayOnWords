@@ -9,6 +9,7 @@ import {
   FirestoreDataConverter,
   setDoc,
   Timestamp,
+  WithFieldValue,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { useState, useEffect } from "react";
@@ -117,7 +118,7 @@ const sessionConverter: FirestoreDataConverter<PuzzleSession> = {
 
     return session;
   },
-  toFirestore: (session) => session,
+  toFirestore: (session: WithFieldValue<PuzzleSession>) => session,
 };
 
 export const isUserInSession = (

@@ -6,26 +6,32 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Solve from "./pages/Solve";
+import { UserContext } from "./contexts/UserContext";
+import { useCurrentUser } from "./models/User";
 
 export const App = () => {
+  const [user, userLoading] = useCurrentUser();
+
   return (
-    <Router>
-      <Box textAlign="center" fontSize="xl">
-        <Switch>
-          <Route path="/login">
-            <Login />
-          </Route>
-          <Route path="/register">
-            <Register />
-          </Route>
-          <ProtectedRoute path="/solve/:puzzleSessionID">
-            <Solve />
-          </ProtectedRoute>
-          <ProtectedRoute path="/">
-            <Home />
-          </ProtectedRoute>
-        </Switch>
-      </Box>
-    </Router>
+    <UserContext.Provider value={{ user, userLoading }}>
+      <Router>
+        <Box textAlign="center" fontSize="xl">
+          <Switch>
+            <Route path="/login">
+              <Login />
+            </Route>
+            <Route path="/register">
+              <Register />
+            </Route>
+            <ProtectedRoute path="/solve/:puzzleSessionID">
+              <Solve />
+            </ProtectedRoute>
+            <ProtectedRoute path="/">
+              <Home />
+            </ProtectedRoute>
+          </Switch>
+        </Box>
+      </Router>
+    </UserContext.Provider>
   );
 };

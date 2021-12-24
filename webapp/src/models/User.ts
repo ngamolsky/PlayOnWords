@@ -18,6 +18,7 @@ import {
   setDoc,
   getDocs,
   Timestamp,
+  WithFieldValue,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { v4 } from "uuid";
@@ -268,5 +269,5 @@ const userConverter: FirestoreDataConverter<User> = {
     }
     return user;
   },
-  toFirestore: (user) => user,
+  toFirestore: (user: WithFieldValue<User>) => user,
 };

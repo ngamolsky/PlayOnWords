@@ -24,9 +24,11 @@ export type Clue = {
 
 export type Solutions = Record<string, string | null>;
 
+const PUZZLES_COLLECTION = "puzzles";
+
 export const addPuzzle = async (puzzle: Puzzle): Promise<boolean> => {
   await db
-    .collection("puzzles")
+    .collection(PUZZLES_COLLECTION)
     .withConverter(puzzleConverter)
     .doc(puzzle.puzzleID)
     .set(puzzle);

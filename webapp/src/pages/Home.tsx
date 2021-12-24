@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { XWordToolbar } from "../components/XWordToolbar";
 import { SimpleGrid, Spinner } from "@chakra-ui/react";
@@ -7,13 +7,14 @@ import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../constants";
 import { startPuzzleSession } from "../models/PuzzleSession";
 import { useHistory } from "react-router-dom";
 import { UserGroup } from "../components/UserGroup";
-import { useCurrentUser } from "../models/User";
 import { useRecentPuzzles } from "../models/Puzzle";
+import { UserContext } from "../contexts/UserContext";
 
 const Home: React.FC = () => {
   const history = useHistory();
-  const [user] = useCurrentUser();
   const [puzzles, loading] = useRecentPuzzles(NUM_PUZZLES_TO_SHOW_ON_HOME);
+
+  const [user] = useContext(UserContext);
 
   let screen;
   if (loading) screen = <Spinner size="xl" m="auto" />;
@@ -28,14 +29,20 @@ const Home: React.FC = () => {
               puzzleDate={puzzle.timestamp.toDate()}
               onClick={async (action) => {
                 switch (action) {
-                  case PuzzleCardAction.NEW_GAME:
-                    const { puzzleSessionID } = await startPuzzleSession(
-                      puzzle,
-                      user!
-                    );
+                  case PuzzleCardAction.NEW_GAME: {
+                    if (user) {
+                      const { puzzleSessionID } = await startPuzzleSession(
+                        puzzle,
+                        user
+                      );
+                      history.push(`/solve/${puzzleSessionID}`);
+                    } else {
+                      throw new Error("No User Found");
+                    }
 
-                    history.push(`/solve/${puzzleSessionID}`);
                     return;
+                  }
+
                   case PuzzleCardAction.CONTINUE_GAME:
                     console.log("CONTINUE GAME");
                     return;

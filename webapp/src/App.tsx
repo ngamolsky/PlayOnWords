@@ -13,7 +13,7 @@ export const App = () => {
   const [user, userLoading] = useCurrentUser();
 
   return (
-    <UserContext.Provider value={{ user, userLoading }}>
+    <UserContext.Provider value={[user, userLoading]}>
       <Router>
         <Box textAlign="center" fontSize="xl">
           <Switch>

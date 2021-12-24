@@ -50,13 +50,13 @@ export const getPuzzleByNYTPuzzleID = async (
       .get()
   ).docs;
 
-  if (results.length == 1) {
+  if (results.length > 1) {
+    throw new Error(
+      `Found more than one result for nytID ${nytID}. Num results: ${results.length}`
+    );
+  } else if (results.length == 1) {
     puzzle = results[0].data();
     console.log(`Found puzzle with ID ${puzzle.puzzleID} for nytID: ${nytID}`);
-  } else {
-    throw new Error(
-      `Didn't find exactly one result for nytID ${nytID}. Num results: ${results.length}`
-    );
   }
 
   return puzzle;

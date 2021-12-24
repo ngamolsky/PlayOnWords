@@ -15,4 +15,4 @@
 
 node_modules
 #!include:.gitignore
-!lib/**/*.js
+!build/

@@ -1,5 +1,14 @@
 import db from "../config/firebase";
 
+export type Puzzle = {
+  puzzleID: string;
+  title?: string;
+  clues: ClueList;
+  date: Date;
+  solutions: Solutions;
+  nytID: string;
+};
+
 export type ClueList = {
   horizontal: Clue[];
   vertical: Clue[];
@@ -14,15 +23,6 @@ export type Clue = {
 };
 
 export type Solutions = Record<string, string | null>;
-
-export type Puzzle = {
-  puzzleID: string;
-  title?: string;
-  clues: ClueList;
-  date: Date;
-  solutions: Solutions;
-  nytID: string;
-};
 
 export const addPuzzle = async (puzzle: Puzzle): Promise<boolean> => {
   await db

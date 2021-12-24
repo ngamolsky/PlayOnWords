@@ -1,4 +1,8 @@
-import { Solutions, Puzzle, ClueList } from "./models/Puzzle";
+import type {
+  Solutions,
+  Puzzle,
+  ClueList,
+} from "../../../webapp/src/models/Puzzle";
 import { v4 } from "uuid";
 
 type NYTClue = {

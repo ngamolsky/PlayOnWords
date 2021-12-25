@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { ReactElement } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { XWordToolbar } from "../components/XWordToolbar";
 import { SimpleGrid, Spinner } from "@chakra-ui/react";
@@ -8,15 +8,15 @@ import { startPuzzleSession } from "../models/PuzzleSession";
 import { useHistory } from "react-router-dom";
 import { UserGroup } from "../components/UserGroup";
 import { useRecentPuzzles } from "../models/Puzzle";
-import { UserContext } from "../contexts/UserContext";
+import { useLoggedInUser } from "../models/User";
 
 const Home: React.FC = () => {
   const history = useHistory();
   const [puzzles, loading] = useRecentPuzzles(NUM_PUZZLES_TO_SHOW_ON_HOME);
 
-  const [user] = useContext(UserContext);
+  const user = useLoggedInUser();
 
-  let screen;
+  let screen: ReactElement;
   if (loading) screen = <Spinner size="xl" m="auto" />;
   else if (puzzles)
     screen = (

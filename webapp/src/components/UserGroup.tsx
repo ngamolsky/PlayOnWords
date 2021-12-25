@@ -22,17 +22,13 @@ export const UserGroup: React.FC<UserGroupProps> = ({
   users,
   currentSessionID,
 }) => {
-  let orderedUsers: User[] = [currentUser];
+  const orderedUsers: User[] = [currentUser];
 
   users?.forEach((user) => {
     if (user.userID !== currentUser.userID) {
-      console.log(user, currentUser);
       orderedUsers.push(user);
     }
   });
-
-  console.log("Users", users);
-  console.log("Ordered Users", orderedUsers);
 
   return (
     orderedUsers && (

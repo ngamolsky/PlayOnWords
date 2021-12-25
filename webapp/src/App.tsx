@@ -7,11 +7,10 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Solve from "./pages/Solve";
 import { UserContext } from "./contexts/UserContext";
-import { useCurrentUser } from "./models/User";
+import { useAuth } from "./models/User";
 
 export const App = () => {
-  const [user, userLoading] = useCurrentUser();
-
+  const [user, userLoading] = useAuth();
   return (
     <UserContext.Provider value={[user, userLoading]}>
       <Router>

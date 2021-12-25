@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 
 import { XWordContainer } from "../components/XWordContainer";
 import { Spinner } from "@chakra-ui/react";
@@ -8,12 +8,12 @@ import {
   isUserInSession,
   usePuzzleSession,
 } from "../models/PuzzleSession";
-import { useCurrentUser } from "../models/User";
+import { UserContext } from "../contexts/UserContext";
 
 const Solve: React.FC = () => {
   const { puzzleSessionID } = useParams<{ puzzleSessionID?: string }>();
-  const [user] = useCurrentUser();
-  const [session] = usePuzzleSession(puzzleSessionID!);
+  const [user] = useContext(UserContext);
+  const [session] = usePuzzleSession(puzzleSessionID);
 
   useEffect(() => {
     const joinPuzzleSessionIfNeeded = async () => {

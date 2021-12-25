@@ -1,7 +1,7 @@
 import { Button, Heading } from "@chakra-ui/react";
 import "firebase/auth";
 import { Form, Formik, FormikErrors } from "formik";
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
@@ -13,17 +13,14 @@ import {
 } from "../utils/validationUtils";
 import { Link, useHistory } from "react-router-dom";
 import { APP_NAME } from "../constants";
-import {
-  createEmailUser,
-  createOrLoginGoogleUser,
-  useCurrentUser,
-} from "../models/User";
+import { createEmailUser, createOrLoginGoogleUser } from "../models/User";
 import useQueryParams from "../hooks/useQueryParams";
+import { UserContext } from "../contexts/UserContext";
 
 const Register: React.FC = () => {
   const history = useHistory();
   const queryParams = useQueryParams();
-  const [user] = useCurrentUser();
+  const [user] = useContext(UserContext);
   const continueUrl = queryParams.get("continueUrl");
   useEffect(() => {
     if (user) {

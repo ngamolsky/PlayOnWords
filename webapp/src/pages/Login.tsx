@@ -1,23 +1,20 @@
-import { Button, Heading } from "@chakra-ui/react";
+import { Button, Heading, Spinner } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
-import React, { useEffect } from "react";
+import React, { ReactElement, useContext, useEffect } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import { validateEmail, validatePassword } from "../utils/validationUtils";
 import { Link, useHistory } from "react-router-dom";
 import { APP_NAME } from "../constants";
-import {
-  loginEmailUser,
-  createOrLoginGoogleUser,
-  useCurrentUser,
-} from "../models/User";
+import { loginEmailUser, createOrLoginGoogleUser } from "../models/User";
 import useQueryParams from "../hooks/useQueryParams";
+import { UserContext } from "../contexts/UserContext";
 
 const Login: React.FC = () => {
   const history = useHistory();
   const queryParams = useQueryParams();
-  const [user] = useCurrentUser();
+  const [user, userLoading] = useContext(UserContext);
   const continueUrl = queryParams.get("continueUrl");
 
   useEffect(() => {
@@ -26,12 +23,11 @@ const Login: React.FC = () => {
       history.push(nextURL);
     }
   }, [user, continueUrl, history]);
-  return (
-    <XWordContainer>
-      <ColorModeSwitcher my={4} mr={4} ml="auto" />
-      <Heading mb={16} mt={8}>
-        {APP_NAME}
-      </Heading>
+
+  let screen: ReactElement;
+  if (userLoading) screen = <Spinner size="xl" m="auto" />;
+  else
+    screen = (
       <XWordContainer maxW="400px">
         <Formik
           initialValues={{ email: "", password: "" }}
@@ -103,6 +99,14 @@ const Login: React.FC = () => {
           </Button>
         </Link>
       </XWordContainer>
+    );
+  return (
+    <XWordContainer>
+      <ColorModeSwitcher my={4} mr={4} ml="auto" />
+      <Heading mb={16} mt={8}>
+        {APP_NAME}
+      </Heading>
+      {screen}
     </XWordContainer>
   );
 };

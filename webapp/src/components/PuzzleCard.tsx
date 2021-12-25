@@ -47,6 +47,7 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({
           bgColor={isDark ? theme.colors.gray[700] : theme.colors.gray[400]}
           m="auto"
           w="90%"
+          maxW="300px"
           borderRadius="lg"
           cursor="pointer"
           boxShadow="lg"

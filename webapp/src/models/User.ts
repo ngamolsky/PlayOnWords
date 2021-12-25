@@ -5,6 +5,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
+  Unsubscribe,
   User as FirebaseUser,
 } from "firebase/auth";
 import {
@@ -18,12 +19,12 @@ import {
   setDoc,
   getDocs,
   Timestamp,
-  WithFieldValue,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import { auth, db } from "../config/firebase";
 import { USERS_COLLECTION } from "../constants";
+import { UserContext } from "../contexts/UserContext";
 
 export type User = {
   userID: string;
@@ -86,15 +87,17 @@ export const createOrLoginGoogleUser = async (): Promise<string> => {
     userID = await getUserIDFromFirebaseAuthUser(firebaseUser);
     if (!userID) {
       userID = `user.${v4()}`;
-      const user = {
+      const user: User = {
         userID,
-        email: firebaseUser.email!,
+        email: firebaseUser.email,
         displayName: firebaseUser.displayName
           ? firebaseUser.displayName
           : undefined,
-        createDate: new Date(firebaseUser.metadata.creationTime!),
+        createDate: Timestamp.fromDate(
+          new Date(firebaseUser.metadata.creationTime)
+        ),
         loginType:
-          firebaseUser.providerData[0]!.providerId === "google.com"
+          firebaseUser.providerData[0].providerId === "google.com"
             ? LoginType.GOOGLE
             : LoginType.EMAIL,
         firebaseAuthID: firebaseUser.uid,
@@ -107,7 +110,7 @@ export const createOrLoginGoogleUser = async (): Promise<string> => {
       console.log(`createOrLoginGoogleUser: User already exists: ${userID}`);
     }
   }
-  return userID!;
+  return userID;
 };
 
 export const createEmailUser = async (
@@ -148,7 +151,7 @@ export const signOut = async () => {
 
 //#region Hooks
 
-export const useCurrentUser = (): [User | undefined, boolean] => {
+export const useAuth = (): [User | undefined, boolean] => {
   const [userState, setUserState] = useState<{
     user: User | undefined;
     userLoading: boolean;
@@ -158,8 +161,9 @@ export const useCurrentUser = (): [User | undefined, boolean] => {
   });
 
   useEffect(() => {
-    console.log("Use Effect Running");
-    const unsub = onAuthStateChanged(auth, (authUser) => {
+    let snapshotUnsub: Unsubscribe;
+
+    const authUnsub = onAuthStateChanged(auth, (authUser) => {
       if (authUser) {
         const q = query(
           collection(db, USERS_COLLECTION).withConverter(userConverter),
@@ -167,9 +171,9 @@ export const useCurrentUser = (): [User | undefined, boolean] => {
         );
 
         console.log(
-          `useCurrentUser: Querying Users Collection for User with firebaseAuthID: ${authUser.uid}`
+          `useAuth: Querying Users Collection for User with firebaseAuthID: ${authUser.uid}`
         );
-        const unsub = onSnapshot(q, (querySnapshot) => {
+        snapshotUnsub = onSnapshot(q, (querySnapshot) => {
           if (authUser) {
             const users: User[] = [];
             querySnapshot.forEach((doc) => {
@@ -184,7 +188,7 @@ export const useCurrentUser = (): [User | undefined, boolean] => {
             } else {
               const user = users[0];
               console.log(
-                `useCurrentUser: Updating UserState: ${JSON.stringify({
+                `useAuth: Updating UserState: ${JSON.stringify({
                   user,
                   userLoading: false,
                 })}`
@@ -197,11 +201,14 @@ export const useCurrentUser = (): [User | undefined, boolean] => {
             }
           }
         });
-
-        return unsub;
       } else {
+        // If we are signed out, remove the snapsho
+        if (snapshotUnsub) {
+          snapshotUnsub();
+        }
+
         console.log(
-          `useCurrentUser: Updating UserState: ${JSON.stringify({
+          `useAuth: Updating UserState: ${JSON.stringify({
             user: undefined,
             userLoading: false,
           })}`
@@ -213,7 +220,7 @@ export const useCurrentUser = (): [User | undefined, boolean] => {
       }
     });
 
-    return unsub;
+    return authUnsub;
   }, []);
 
   return [userState.user, userState.userLoading];
@@ -246,28 +253,18 @@ export const useUsersByID = (userIDs: string[] | undefined): User[] => {
 
   return userState;
 };
+
+export const useLoggedInUser = (): User => {
+  const [user] = useContext(UserContext);
+  if (user === undefined) {
+    throw new Error("useLoggedInUser used without a valid user");
+  }
+
+  return user;
+};
 //#endregion
 
 const userConverter: FirestoreDataConverter<User> = {
-  fromFirestore: (snapshot) => {
-    const userData = snapshot.data();
-    const user: User = {
-      userID: userData.userID,
-      email: userData.email,
-      createDate: userData.createDate.toDate(),
-      loginType: userData.loginType,
-      firebaseAuthID: userData.firebaseAuthID,
-      activeSessionIDs: userData.activeSessionIDs,
-    };
-
-    if (userData.displayName) {
-      user.displayName = userData.displayName;
-    }
-
-    if (userData.username) {
-      user.username = userData.username;
-    }
-    return user;
-  },
-  toFirestore: (user: WithFieldValue<User>) => user,
+  fromFirestore: (snapshot) => snapshot.data() as User,
+  toFirestore: (user: User) => user,
 };

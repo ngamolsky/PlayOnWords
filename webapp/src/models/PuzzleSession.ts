@@ -9,7 +9,6 @@ import {
   FirestoreDataConverter,
   setDoc,
   Timestamp,
-  WithFieldValue,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { useState, useEffect } from "react";
@@ -104,23 +103,6 @@ export const usePuzzleSession = (
 
 // #endregion
 
-const sessionConverter: FirestoreDataConverter<PuzzleSession> = {
-  fromFirestore: (snapshot) => {
-    const sessionData = snapshot.data();
-    const session = {
-      puzzleSessionID: sessionData.puzzleSessionID,
-      puzzle: sessionData.puzzle,
-      participantIDs: sessionData.participantIDs,
-      ownerID: sessionData.ownerID,
-      startTime: sessionData.startTime.toDate(),
-      boardState: sessionData.boardState,
-    };
-
-    return session;
-  },
-  toFirestore: (session: WithFieldValue<PuzzleSession>) => session,
-};
-
 export const isUserInSession = (
   session: PuzzleSession,
   user: User
@@ -140,4 +122,9 @@ export const isSessionActiveForUser = (
   );
 
   return !!matchingSession;
+};
+
+const sessionConverter: FirestoreDataConverter<PuzzleSession> = {
+  fromFirestore: (snapshot) => snapshot.data() as PuzzleSession,
+  toFirestore: (session: PuzzleSession) => session,
 };

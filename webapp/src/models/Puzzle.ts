@@ -6,7 +6,6 @@ import {
   orderBy,
   query,
   Timestamp,
-  WithFieldValue,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../config/firebase";
@@ -50,54 +49,28 @@ export const useRecentPuzzles = (
   useEffect(() => {
     const q = query(
       collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
-      orderBy("date", "desc"),
+      orderBy("timestamp", "desc"),
       limit(num_puzzles)
     );
 
-    console.log(
-      `useRecentPuzzles: Querying Puzzles Collection for most recent puzzles`
-    );
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      const puzzles: Puzzle[] = [];
+      querySnapshot.forEach((doc) => {
+        puzzles.push(doc.data());
+      });
 
-    const unsub = onSnapshot(
-      q,
-      (querySnapshot) => {
-        const puzzles: Puzzle[] = [];
-        querySnapshot.forEach((doc) => {
-          puzzles.push(doc.data());
-          console.log(`useRecentPuzzles: Setting puzzleState: ${puzzles}`);
-        });
-        console.log(`useRecentPuzzles: Setting puzzleState: ${puzzles}`);
-        setPuzzleState({
-          puzzles,
-          loading: false,
-        });
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
-    return unsub();
-  }, [num_puzzles, puzzleState]);
+      setPuzzleState({
+        puzzles,
+        loading: false,
+      });
+    });
+    return unsub;
+  }, []);
 
   return [puzzleState.puzzles, puzzleState.loading];
 };
 
 const puzzleConverter: FirestoreDataConverter<Puzzle> = {
-  fromFirestore: (snapshot) => {
-    const puzzleData = snapshot.data();
-    const puzzle: Puzzle = {
-      puzzleID: puzzleData.puzzleID,
-      clues: puzzleData.clues,
-      timestamp: puzzleData.timestamp,
-      solutions: puzzleData.solutions,
-      nytID: puzzleData.nytID,
-    };
-
-    if (puzzleData.title) {
-      puzzle.title = puzzleData.title;
-    }
-
-    return puzzle;
-  },
-  toFirestore: (puzzle: WithFieldValue<Puzzle>) => puzzle,
+  fromFirestore: (snapshot) => snapshot.data() as Puzzle,
+  toFirestore: (puzzle: Puzzle) => puzzle,
 };

@@ -36,7 +36,7 @@ export type Clue = {
 export type Solutions = Record<string, string | null>;
 
 export const useRecentPuzzles = (
-  num_puzzles: number
+  numPuzzles: number
 ): [Puzzle[] | undefined, boolean] => {
   const [puzzleState, setPuzzleState] = useState<{
     puzzles: Puzzle[];
@@ -50,7 +50,7 @@ export const useRecentPuzzles = (
     const q = query(
       collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
       orderBy("timestamp", "desc"),
-      limit(num_puzzles)
+      limit(numPuzzles)
     );
 
     const unsub = onSnapshot(q, (querySnapshot) => {
@@ -65,7 +65,7 @@ export const useRecentPuzzles = (
       });
     });
     return unsub;
-  }, []);
+  }, [numPuzzles]);
 
   return [puzzleState.puzzles, puzzleState.loading];
 };

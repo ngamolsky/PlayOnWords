@@ -23,5 +23,7 @@ const MONTHS = [
 ];
 
 export const toXWordDate = (date: Date): string => {
-  return `${DAYS[date.getDay()]}, ${MONTHS[date.getMonth()]} ${date.getDate()}`;
+  return `${DAYS[date.getUTCDay()]}, ${
+    MONTHS[date.getUTCMonth()]
+  } ${date.getUTCDate()}`;
 };

@@ -18,6 +18,7 @@ export type Puzzle = {
   timestamp: Timestamp;
   solutions: Solutions;
   nytID: string;
+  collection: string;
 };
 
 export type ClueList = {

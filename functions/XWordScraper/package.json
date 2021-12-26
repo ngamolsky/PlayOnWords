@@ -4,7 +4,7 @@
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
     "start": "concurrently \"tsc -w\" \"nodemon --watch ./build/ -- exec node -r yamlenv/config node_modules/@google-cloud/functions-framework --source=build/ --target=XWordScraper\" ",
-    "deploy": "npm run build && gcloud functions deploy XWordScraper --runtime=nodejs16 --trigger-http"
+    "deploy": "yarn build && gcloud functions deploy XWordScraper --runtime=nodejs16 --trigger-http"
   },
   "main": "build/index.js",
   "dependencies": {

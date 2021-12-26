@@ -66,6 +66,7 @@ export const convertPuzzleDataToPuzzle = async ({
     clues,
     solutions,
     nytID,
+    collection: "nyt",
   };
 
   if (title) {

@@ -4,58 +4,83 @@ import { XWordContainer } from "../components/XWordContainer";
 import { Spinner } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import {
+  addSessionToUserActiveSessions,
   isSessionActiveForUser,
   isUserInSession,
+  joinPuzzleSessionParticipants,
+  removeSessionFromUserActiveSessions,
   usePuzzleSession,
 } from "../models/PuzzleSession";
 import { UserContext } from "../contexts/UserContext";
+import { XWordToolbar } from "../components/XWordToolbar";
+import { useUsersByID } from "../models/User";
+import { UserGroup } from "../components/UserGroup";
 
 const Solve: React.FC = () => {
   const { puzzleSessionID } = useParams<{ puzzleSessionID?: string }>();
-  const [user] = useContext(UserContext);
-  const [session] = usePuzzleSession(puzzleSessionID);
 
+  if (!puzzleSessionID) {
+    throw new Error("Puzzle Session ID not found");
+  }
+
+  const [user] = useContext(UserContext);
+  const [session, sessionLoading] = usePuzzleSession(puzzleSessionID);
+  const sessionUsers = useUsersByID(session?.participantIDs);
+
+  // Join puzzle session if the user isn't already in it when joining
   useEffect(() => {
     const joinPuzzleSessionIfNeeded = async () => {
       if (user && session) {
-        // if (!isUserInSession(session, user)) {
-        //   await joinPuzzleSessionParticipants(
-        //     session.puzzleSessionID,
-        //     user.userID
-        //   );
-        // }
-        // if (!isSessionActiveForUser(session, user)) {
-        //   addSessionToUserActiveSessions(session.puzzleSessionID, user);
-        // }
-      }
-    };
-
-    const leavePuzzleSessionIfNeeded = () => {
-      if (user && session) {
-        if (isUserInSession(session, user)) {
-          if (isSessionActiveForUser(session, user)) {
-            // removeSessionFromUserActiveSessions(session.puzzleSessionID, user);
-          }
+        if (!isUserInSession(session, user.userID)) {
+          await joinPuzzleSessionParticipants(
+            session.puzzleSessionID,
+            user.userID
+          );
         }
       }
     };
 
     joinPuzzleSessionIfNeeded();
+  }, [user, session]);
 
-    return leavePuzzleSessionIfNeeded;
-  }, [session, user]);
+  // Add puzzle session to user active sessions and remove it when leaving the page
+  useEffect(() => {
+    if (
+      !sessionLoading &&
+      user &&
+      session &&
+      !isSessionActiveForUser(session, user)
+    ) {
+      addSessionToUserActiveSessions(session.puzzleSessionID, user.userID);
+    }
+  }, [sessionLoading]);
+
+  window.onbeforeunload = async () => {
+    console.log("unloading", sessionLoading, user?.activeSessionIDs, session);
+    if (
+      !sessionLoading &&
+      user &&
+      session &&
+      isSessionActiveForUser(session, user)
+    ) {
+      await removeSessionFromUserActiveSessions(
+        session.puzzleSessionID,
+        user.userID
+      );
+    }
+  };
 
   return (
     <XWordContainer>
-      {/* <XWordToolbar>
-        {user && session?.participants && (
+      <XWordToolbar>
+        {user && sessionUsers && (
           <UserGroup
             currentUser={user}
-            users={session?.participants}
-            currentSessionID={session.puzzleSessionID}
+            users={sessionUsers}
+            currentSessionID={session?.puzzleSessionID}
           />
         )}
-      </XWordToolbar> */}
+      </XWordToolbar>
       <Spinner size="xl" m="auto" />
     </XWordContainer>
   );

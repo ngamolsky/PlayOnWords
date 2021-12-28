@@ -1,4 +1,4 @@
-import { User } from "./User";
+import { User, userConverter } from "./User";
 import { Puzzle } from "./Puzzle";
 import { PUZZLE_SESSIONS_COLLECTION, USERS_COLLECTION } from "../constants";
 import { getBoardStateFromSolutions } from "../utils/puzzleSessionUtils";
@@ -9,6 +9,9 @@ import {
   FirestoreDataConverter,
   setDoc,
   Timestamp,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { useState, useEffect } from "react";
@@ -68,6 +71,55 @@ export const startPuzzleSession = async (
   return session;
 };
 
+export const joinPuzzleSessionParticipants = async (
+  puzzleSessionID: string,
+  userID: string
+) => {
+  console.log(puzzleSessionID);
+  const sessionRef = doc(
+    db,
+    PUZZLE_SESSIONS_COLLECTION,
+    puzzleSessionID
+  ).withConverter(sessionConverter);
+  await updateDoc(sessionRef, {
+    participantIDs: arrayUnion(userID),
+  });
+
+  console.log(`Added user ${userID} to puzzle session ${puzzleSessionID} `);
+};
+
+export const addSessionToUserActiveSessions = async (
+  puzzleSessionID: string,
+  userID: string
+) => {
+  const userRef = doc(db, USERS_COLLECTION, userID).withConverter(
+    userConverter
+  );
+  await updateDoc(userRef, {
+    activeSessionIDs: arrayUnion(puzzleSessionID),
+  });
+
+  console.log(
+    `Added session ${puzzleSessionID} to active sessions for user ${userID}`
+  );
+};
+
+export const removeSessionFromUserActiveSessions = async (
+  puzzleSessionID: string,
+  userID: string
+) => {
+  console.log("removinh", userID, puzzleSessionID);
+  const userRef = doc(db, USERS_COLLECTION, userID).withConverter(
+    userConverter
+  );
+  await updateDoc(userRef, {
+    activeSessionIDs: arrayRemove(puzzleSessionID),
+  });
+
+  console.log(
+    `Removed session ${puzzleSessionID} from active sessions for user ${userID}`
+  );
+};
 // #region Hooks
 
 export const usePuzzleSession = (
@@ -87,7 +139,7 @@ export const usePuzzleSession = (
         sessionConverter
       ),
       (doc) => {
-        console.log(`usePuzzleSession: Snapshot: ${doc.data()}`);
+        console.log(`usePuzzleSession: Snapshot`);
         setSessionState({
           session: doc.data(),
           loading: false,
@@ -95,8 +147,8 @@ export const usePuzzleSession = (
       }
     );
 
-    return unsub();
-  });
+    return unsub;
+  }, []);
 
   return [sessionState.session, sessionState.loading];
 };
@@ -105,10 +157,10 @@ export const usePuzzleSession = (
 
 export const isUserInSession = (
   session: PuzzleSession,
-  user: User
+  userID: string
 ): boolean => {
   const matchingUser = session.participantIDs.find(
-    (currentUserID) => currentUserID === user.userID
+    (currentUserID) => currentUserID === userID
   );
   return !!matchingUser;
 };

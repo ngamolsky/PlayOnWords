@@ -5,7 +5,7 @@ export type Puzzle = {
   puzzleID: string;
   title?: string;
   clues: ClueList;
-  timestamp: Timestamp;
+  puzzleTimestamp: Timestamp;
   solutions: Solutions;
   nytID: string;
   collection: string;

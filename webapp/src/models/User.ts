@@ -60,6 +60,8 @@ export const getUserIDFromFirebaseAuthUser = async (
     console.log(
       `getUserIDFromFirebaseAuthUser: No user found for firebaseUser: ${firebaseUser}`
     );
+
+    return undefined;
   }
   if (userResult.docs.length > 1) {
     throw Error(
@@ -72,7 +74,7 @@ export const getUserIDFromFirebaseAuthUser = async (
 };
 
 export const createOrLoginGoogleUser = async (): Promise<string> => {
-  console.log(`createOrLoginGoogleUser: Creating/loging in google user`);
+  console.log(`createOrLoginGoogleUser: Creating/logging in google user`);
 
   const googleAuthProvider = new GoogleAuthProvider();
   const { user: firebaseUser } = await signInWithPopup(
@@ -84,6 +86,13 @@ export const createOrLoginGoogleUser = async (): Promise<string> => {
 
   let userID: string | undefined;
   if (firebaseUser) {
+    if (!firebaseUser.email) {
+      throw new Error("No email set on firebaseUser");
+    }
+
+    if (!firebaseUser.metadata.creationTime) {
+      throw new Error("No creatime time set on firebaseUser");
+    }
     userID = await getUserIDFromFirebaseAuthUser(firebaseUser);
     if (!userID) {
       userID = `user.${v4()}`;
@@ -109,6 +118,9 @@ export const createOrLoginGoogleUser = async (): Promise<string> => {
     } else {
       console.log(`createOrLoginGoogleUser: User already exists: ${userID}`);
     }
+  }
+  if (!userID) {
+    throw new Error("No user ID found");
   }
   return userID;
 };
@@ -237,19 +249,21 @@ export const useUsersByID = (userIDs: string[] | undefined): User[] => {
       );
 
       console.log(
-        `useUsersByID: Querying Users Collection for Users with IDs: ${userIDs}`
+        `useUsersByID: Watching Users Collection for Users with IDs: ${userIDs}`
       );
       const unsub = onSnapshot(q, (querySnapshot) => {
         const users: User[] = [];
-        querySnapshot.forEach((doc) => {
+        querySnapshot.docs.forEach((doc) => {
           users.push(doc.data());
         });
-        console.log(`useUsersByID: Setting userState: ${userState}`);
+        console.log(
+          `useUsersByID: Setting userState: ${JSON.stringify(users)}`
+        );
         setUserState(users);
       });
-      return unsub();
+      return unsub;
     }
-  }, [userIDs, userState]);
+  }, [userIDs]);
 
   return userState;
 };
@@ -264,7 +278,7 @@ export const useLoggedInUser = (): User => {
 };
 //#endregion
 
-const userConverter: FirestoreDataConverter<User> = {
+export const userConverter: FirestoreDataConverter<User> = {
   fromFirestore: (snapshot) => snapshot.data() as User,
   toFirestore: (user: User) => user,
 };

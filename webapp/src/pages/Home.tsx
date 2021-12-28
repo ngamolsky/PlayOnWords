@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import React from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { XWordToolbar } from "../components/XWordToolbar";
 import { SimpleGrid, Spinner } from "@chakra-ui/react";
@@ -16,7 +16,7 @@ const Home: React.FC = () => {
 
   const user = useLoggedInUser();
 
-  let screen: ReactElement;
+  let screen = undefined;
   if (loading) screen = <Spinner size="xl" m="auto" />;
   else if (puzzles)
     screen = (
@@ -26,7 +26,7 @@ const Home: React.FC = () => {
             <PuzzleCard
               key={puzzle.puzzleID}
               hasSession={false}
-              puzzleDate={puzzle.timestamp.toDate()}
+              puzzleDate={puzzle.puzzleTimestamp.toDate()}
               onClick={async (action) => {
                 switch (action) {
                   case PuzzleCardAction.NEW_GAME: {

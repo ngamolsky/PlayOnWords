@@ -1,6 +1,6 @@
 import { HttpFunction } from "@google-cloud/functions-framework/build/src/functions";
 import axios from "axios";
-import { addPuzzle, getPuzzleByNYTPuzzleID } from "./models/Puzzle";
+import { addPuzzle, getPuzzleByNYTPuzzleID, Puzzle } from "./models/Puzzle";
 import { convertPuzzleDataToPuzzle } from "./puzzleParser";
 
 const LATEST_PUZZLE_URL =
@@ -47,7 +47,7 @@ export const XWordScraper: HttpFunction = async (_, response) => {
 
       console.log(`Loaded latest puzzle data for puzzle ID: ${latestPuzzleID}`);
 
-      const puzzle = await convertPuzzleDataToPuzzle({
+      const puzzle: Puzzle = await convertPuzzleDataToPuzzle({
         ...latestPuzzleData,
         title: latestPuzzleTitle,
         date: latestPuzzleDate,

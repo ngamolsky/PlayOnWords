@@ -1,7 +1,12 @@
 import React from "react";
-import { Flex, FlexProps } from "@chakra-ui/react";
+import { Flex, FlexProps, Spinner } from "@chakra-ui/react";
 
-export const XWordContainer: React.FC<FlexProps> = (props) => {
+export const XWordContainer: React.FC<
+  FlexProps & {
+    isLoading: boolean;
+  }
+> = (props) => {
+  const { isLoading, children, ...rest } = props;
   return (
     <Flex
       direction="column"
@@ -10,7 +15,9 @@ export const XWordContainer: React.FC<FlexProps> = (props) => {
       h="100vh"
       w="100%"
       mx="auto"
-      {...props}
-    />
+      {...rest}
+    >
+      {isLoading ? <Spinner size="xl" m="auto" /> : children}
+    </Flex>
   );
 };

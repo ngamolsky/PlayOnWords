@@ -1,7 +1,7 @@
 import React from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { XWordToolbar } from "../components/XWordToolbar";
-import { SimpleGrid, Spinner } from "@chakra-ui/react";
+import { SimpleGrid } from "@chakra-ui/react";
 import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
 import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../constants";
 import { startPuzzleSession } from "../models/PuzzleSession";
@@ -16,12 +16,11 @@ const Home: React.FC = () => {
 
   const user = useLoggedInUser();
 
-  let screen = undefined;
-  if (loading) screen = <Spinner size="xl" m="auto" />;
-  else if (puzzles)
-    screen = (
-      <SimpleGrid minChildWidth="220px" gap={6} my={8} w={"80%"}>
-        {puzzles.map((puzzle) => {
+  return (
+    <XWordContainer isLoading={loading}>
+      <XWordToolbar>{user && <UserGroup currentUser={user} />}</XWordToolbar>
+      <SimpleGrid minChildWidth="250px" gap={6} my={8} w={"80%"}>
+        {puzzles?.map((puzzle) => {
           return (
             <PuzzleCard
               key={puzzle.puzzleID}
@@ -55,12 +54,6 @@ const Home: React.FC = () => {
           );
         })}
       </SimpleGrid>
-    );
-
-  return (
-    <XWordContainer>
-      <XWordToolbar>{user && <UserGroup currentUser={user} />}</XWordToolbar>
-      {screen}
     </XWordContainer>
   );
 };

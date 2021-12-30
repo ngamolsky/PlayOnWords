@@ -29,12 +29,12 @@ const Register: React.FC = () => {
     }
   }, [user, continueUrl, history]);
   return (
-    <XWordContainer>
+    <XWordContainer isLoading={false}>
       <ColorModeSwitcher my={4} mr={4} ml="auto" />
       <Heading mb={16} mt={8}>
         {APP_NAME}
       </Heading>
-      <XWordContainer maxW="400px">
+      <XWordContainer maxW="400px" isLoading={false}>
         <Formik
           initialValues={{ email: "", password: "", confirmPassword: "" }}
           onSubmit={async ({ email, password }) => {

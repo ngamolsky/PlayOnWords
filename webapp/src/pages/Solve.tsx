@@ -1,7 +1,6 @@
 import React, { useContext, useEffect } from "react";
 
 import { XWordContainer } from "../components/XWordContainer";
-import { Spinner } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import {
   addSessionToUserActiveSessions,
@@ -53,10 +52,23 @@ const Solve: React.FC = () => {
     ) {
       addSessionToUserActiveSessions(session.puzzleSessionID, user.userID);
     }
+
+    return () => {
+      if (
+        !sessionLoading &&
+        user &&
+        session &&
+        isSessionActiveForUser(session, user)
+      ) {
+        removeSessionFromUserActiveSessions(
+          session.puzzleSessionID,
+          user.userID
+        );
+      }
+    };
   }, [sessionLoading]);
 
-  window.onbeforeunload = async () => {
-    console.log("unloading", sessionLoading, user?.activeSessionIDs, session);
+  window.onunload = async () => {
     if (
       !sessionLoading &&
       user &&
@@ -71,7 +83,7 @@ const Solve: React.FC = () => {
   };
 
   return (
-    <XWordContainer>
+    <XWordContainer isLoading={sessionLoading}>
       <XWordToolbar>
         {user && sessionUsers && (
           <UserGroup
@@ -81,7 +93,6 @@ const Solve: React.FC = () => {
           />
         )}
       </XWordToolbar>
-      <Spinner size="xl" m="auto" />
     </XWordContainer>
   );
 };

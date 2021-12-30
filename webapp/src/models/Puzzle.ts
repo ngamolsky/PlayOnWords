@@ -50,7 +50,7 @@ export const useRecentPuzzles = (
   useEffect(() => {
     const q = query(
       collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
-      orderBy("timestamp", "desc"),
+      orderBy("puzzleTimestamp", "desc"),
       limit(numPuzzles)
     );
 

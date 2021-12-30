@@ -1,6 +1,6 @@
-import { Button, Heading, Spinner } from "@chakra-ui/react";
+import { Button, Heading } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
-import React, { ReactElement, useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
@@ -24,11 +24,13 @@ const Login: React.FC = () => {
     }
   }, [user, continueUrl, history]);
 
-  let screen: ReactElement;
-  if (userLoading) screen = <Spinner size="xl" m="auto" />;
-  else
-    screen = (
-      <XWordContainer maxW="400px">
+  return (
+    <XWordContainer isLoading={false}>
+      <ColorModeSwitcher my={4} mr={4} ml="auto" />
+      <Heading mb={16} mt={8}>
+        {APP_NAME}
+      </Heading>
+      <XWordContainer maxW="400px" isLoading={userLoading}>
         <Formik
           initialValues={{ email: "", password: "" }}
           onSubmit={async ({ email, password }, { setErrors }) => {
@@ -99,14 +101,6 @@ const Login: React.FC = () => {
           </Button>
         </Link>
       </XWordContainer>
-    );
-  return (
-    <XWordContainer>
-      <ColorModeSwitcher my={4} mr={4} ml="auto" />
-      <Heading mb={16} mt={8}>
-        {APP_NAME}
-      </Heading>
-      {screen}
     </XWordContainer>
   );
 };

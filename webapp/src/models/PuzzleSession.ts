@@ -108,7 +108,7 @@ export const removeSessionFromUserActiveSessions = async (
   puzzleSessionID: string,
   userID: string
 ) => {
-  console.log("removinh", userID, puzzleSessionID);
+  console.log("removing", userID, puzzleSessionID);
   const userRef = doc(db, USERS_COLLECTION, userID).withConverter(
     userConverter
   );

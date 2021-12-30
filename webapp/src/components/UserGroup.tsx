@@ -47,7 +47,7 @@ export const UserGroup: React.FC<UserGroupProps> = ({
               >
                 {currentSessionID &&
                   user.activeSessionIDs.includes(currentSessionID) && (
-                    <AvatarBadge boxSize="1em" bg="green.500" />
+                    <AvatarBadge boxSize=".8em" bg="green.500" />
                   )}
               </Avatar>
             ))}

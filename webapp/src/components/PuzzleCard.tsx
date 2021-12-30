@@ -67,7 +67,7 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({
               overflow="hidden"
             />
           </AspectRatio>
-          <Box m="2">
+          <Box m="3">
             <Heading size="md" fontSize="16px" isTruncated>
               {toXWordDate(puzzleDate)}
             </Heading>

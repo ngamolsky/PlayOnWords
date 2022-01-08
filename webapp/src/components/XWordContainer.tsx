@@ -1,11 +1,11 @@
 import React from "react";
 import { Flex, FlexProps, Spinner } from "@chakra-ui/react";
 
-export const XWordContainer: React.FC<
-  FlexProps & {
-    isLoading: boolean;
-  }
-> = (props) => {
+type XWordContainerProps = FlexProps & {
+  isLoading: boolean;
+};
+
+export const XWordContainer = (props: XWordContainerProps) => {
   const { isLoading, children, ...rest } = props;
   return (
     <Flex

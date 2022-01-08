@@ -6,7 +6,6 @@ import {
   theme,
   MenuList,
   MenuItem,
-  AvatarBadge,
 } from "@chakra-ui/react";
 import React from "react";
 import { signOut, User } from "../models/User";
@@ -17,11 +16,7 @@ interface UserGroupProps {
   currentSessionID?: string;
 }
 
-export const UserGroup: React.FC<UserGroupProps> = ({
-  currentUser,
-  users,
-  currentSessionID,
-}) => {
+export const UserGroup: React.FC<UserGroupProps> = ({ currentUser, users }) => {
   const orderedUsers: User[] = [currentUser];
 
   users?.forEach((user) => {
@@ -44,12 +39,7 @@ export const UserGroup: React.FC<UserGroupProps> = ({
                 }
                 key={user.userID}
                 name={user.displayName ? user.displayName : user.email}
-              >
-                {currentSessionID &&
-                  user.activeSessionIDs.includes(currentSessionID) && (
-                    <AvatarBadge boxSize=".8em" bg="green.500" />
-                  )}
-              </Avatar>
+              ></Avatar>
             ))}
           </AvatarGroup>
         </MenuButton>

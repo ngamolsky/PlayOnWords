@@ -1,6 +1,6 @@
-import { User, userConverter } from "./User";
+import { User } from "./User";
 import { Puzzle } from "./Puzzle";
-import { PUZZLE_SESSIONS_COLLECTION, USERS_COLLECTION } from "../constants";
+import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
 import { getBoardStateFromSolutions } from "../utils/puzzleSessionUtils";
 import { v4 } from "uuid";
 import {
@@ -11,7 +11,6 @@ import {
   Timestamp,
   updateDoc,
   arrayUnion,
-  arrayRemove,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { useState, useEffect } from "react";
@@ -58,16 +57,6 @@ export const startPuzzleSession = async (
   await setDoc(doc(db, PUZZLE_SESSIONS_COLLECTION, puzzleSessionID), session);
   console.log(`startPuzzleSession: Created session ${puzzleSessionID}`);
 
-  const updatedUser: User = {
-    ...user,
-    activeSessionIDs: user.activeSessionIDs.concat(puzzleSessionID),
-  };
-
-  await setDoc(doc(db, USERS_COLLECTION, updatedUser.userID), updatedUser);
-  console.log(
-    `startPuzzleSession: Added sessionID ${puzzleSessionID} to users active sessions for user ${updatedUser.userID}`
-  );
-
   return session;
 };
 
@@ -88,38 +77,6 @@ export const joinPuzzleSessionParticipants = async (
   console.log(`Added user ${userID} to puzzle session ${puzzleSessionID} `);
 };
 
-export const addSessionToUserActiveSessions = async (
-  puzzleSessionID: string,
-  userID: string
-) => {
-  const userRef = doc(db, USERS_COLLECTION, userID).withConverter(
-    userConverter
-  );
-  await updateDoc(userRef, {
-    activeSessionIDs: arrayUnion(puzzleSessionID),
-  });
-
-  console.log(
-    `Added session ${puzzleSessionID} to active sessions for user ${userID}`
-  );
-};
-
-export const removeSessionFromUserActiveSessions = async (
-  puzzleSessionID: string,
-  userID: string
-) => {
-  console.log("removing", userID, puzzleSessionID);
-  const userRef = doc(db, USERS_COLLECTION, userID).withConverter(
-    userConverter
-  );
-  await updateDoc(userRef, {
-    activeSessionIDs: arrayRemove(puzzleSessionID),
-  });
-
-  console.log(
-    `Removed session ${puzzleSessionID} from active sessions for user ${userID}`
-  );
-};
 // #region Hooks
 
 export const usePuzzleSession = (
@@ -163,17 +120,6 @@ export const isUserInSession = (
     (currentUserID) => currentUserID === userID
   );
   return !!matchingUser;
-};
-
-export const isSessionActiveForUser = (
-  session: PuzzleSession,
-  user: User
-): boolean => {
-  const matchingSession = user.activeSessionIDs.find(
-    (sessionID) => sessionID === session.puzzleSessionID
-  );
-
-  return !!matchingSession;
 };
 
 const sessionConverter: FirestoreDataConverter<PuzzleSession> = {

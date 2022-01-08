@@ -1,19 +1,20 @@
-import React, { useContext, useEffect } from "react";
+import React, { MutableRefObject, useContext, useEffect, useRef } from "react";
 
 import { XWordContainer } from "../components/XWordContainer";
 import { useParams } from "react-router-dom";
 import {
-  addSessionToUserActiveSessions,
-  isSessionActiveForUser,
   isUserInSession,
   joinPuzzleSessionParticipants,
-  removeSessionFromUserActiveSessions,
   usePuzzleSession,
 } from "../models/PuzzleSession";
 import { UserContext } from "../contexts/UserContext";
 import { XWordToolbar } from "../components/XWordToolbar";
 import { useUsersByID } from "../models/User";
 import { UserGroup } from "../components/UserGroup";
+import { XBoard } from "../components/XBoard/XBoard";
+import { Box } from "@chakra-ui/react";
+import { Keyboard } from "../components/mobile/Keyboard";
+import { SimpleKeyboard } from "react-simple-keyboard";
 
 const Solve: React.FC = () => {
   const { puzzleSessionID } = useParams<{ puzzleSessionID?: string }>();
@@ -24,6 +25,8 @@ const Solve: React.FC = () => {
 
   const [user] = useContext(UserContext);
   const [session, sessionLoading] = usePuzzleSession(puzzleSessionID);
+  const keyboardRef: MutableRefObject<SimpleKeyboard | null> =
+    useRef<SimpleKeyboard>(null);
   const sessionUsers = useUsersByID(session?.participantIDs);
 
   // Join puzzle session if the user isn't already in it when joining
@@ -42,46 +45,6 @@ const Solve: React.FC = () => {
     joinPuzzleSessionIfNeeded();
   }, [user, session]);
 
-  // Add puzzle session to user active sessions and remove it when leaving the page
-  useEffect(() => {
-    if (
-      !sessionLoading &&
-      user &&
-      session &&
-      !isSessionActiveForUser(session, user)
-    ) {
-      addSessionToUserActiveSessions(session.puzzleSessionID, user.userID);
-    }
-
-    return () => {
-      if (
-        !sessionLoading &&
-        user &&
-        session &&
-        isSessionActiveForUser(session, user)
-      ) {
-        removeSessionFromUserActiveSessions(
-          session.puzzleSessionID,
-          user.userID
-        );
-      }
-    };
-  }, [sessionLoading]);
-
-  window.onunload = async () => {
-    if (
-      !sessionLoading &&
-      user &&
-      session &&
-      isSessionActiveForUser(session, user)
-    ) {
-      await removeSessionFromUserActiveSessions(
-        session.puzzleSessionID,
-        user.userID
-      );
-    }
-  };
-
   return (
     <XWordContainer isLoading={sessionLoading}>
       <XWordToolbar>
@@ -93,6 +56,21 @@ const Solve: React.FC = () => {
           />
         )}
       </XWordToolbar>
+      {session && (
+        <Box w={"100%"}>
+          <XBoard
+            boardState={session.boardState}
+            solutions={session.puzzle.solutions}
+          />
+          <Keyboard
+            onChange={(input: string): void => {
+              console.log(input, keyboardRef.current);
+              keyboardRef?.current?.setInput(input);
+            }}
+            keyboardRef={keyboardRef}
+          />
+        </Box>
+      )}
     </XWordContainer>
   );
 };

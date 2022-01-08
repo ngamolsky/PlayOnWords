@@ -34,7 +34,6 @@ export type User = {
   firebaseAuthID: string;
   loginType: LoginType;
   createDate: Timestamp;
-  activeSessionIDs: string[];
 };
 
 export enum LoginType {
@@ -110,7 +109,6 @@ export const createOrLoginGoogleUser = async (): Promise<string> => {
             ? LoginType.GOOGLE
             : LoginType.EMAIL,
         firebaseAuthID: firebaseUser.uid,
-        activeSessionIDs: [],
       };
 
       await setDoc(doc(db, USERS_COLLECTION, user.userID), user);
@@ -144,7 +142,6 @@ export const createEmailUser = async (
     email,
     loginType: LoginType.EMAIL,
     createDate: Timestamp.now(),
-    activeSessionIDs: [],
   };
   await setDoc(doc(db, USERS_COLLECTION, user.userID), user);
   console.log(`createEmailUser: Created user: ${user}`);

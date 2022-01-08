@@ -8809,6 +8809,11 @@ react-scripts@^5.0.0:
   optionalDependencies:
     fsevents "^2.3.2"
 
+react-simple-keyboard@^3.4.31:
+  version "3.4.31"
+  resolved "https://registry.yarnpkg.com/react-simple-keyboard/-/react-simple-keyboard-3.4.31.tgz#d1e03bb4b27fcef62e3f8d1811761aeeb6bf8bbb"
+  integrity sha512-z8eQBmsk4m1/+gG6J0cM5wF/Ir3fM45nldzeqwt7U5FbkS7YHH7piteBt/q3gOZsm6yQiPQn6Q1CtYZ4iCqW+Q==
+
 react-style-singleton@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/react-style-singleton/-/react-style-singleton-2.1.1.tgz#ce7f90b67618be2b6b94902a30aaea152ce52e66"

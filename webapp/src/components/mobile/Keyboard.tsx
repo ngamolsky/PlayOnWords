@@ -6,7 +6,7 @@ import "react-simple-keyboard/build/css/index.css";
 import { Box } from "@chakra-ui/react";
 
 type KeyboardProps = {
-  onChange: (input: string) => void;
+  onChange: (input: string, event?: MouseEvent) => void;
   keyboardRef: MutableRefObject<SimpleKeyboard | null>;
 };
 
@@ -20,7 +20,12 @@ export const Keyboard = ({ onChange, keyboardRef }: KeyboardProps) => {
   };
 
   return (
-    <Box sx={{ ".keyboard": { textColor: "black" } }}>
+    <Box
+      sx={{
+        ".keyboard": { textColor: "black" },
+        ".rebus": { width: "40px !important" },
+      }}
+    >
       <KeyboardLib
         keyboardRef={(r) => (keyboardRef.current = r)}
         layout={{
@@ -31,15 +36,20 @@ export const Keyboard = ({ onChange, keyboardRef }: KeyboardProps) => {
             "{space}",
           ],
         }}
-        maxLength={1}
         theme={`hg-theme-default keyboard`}
         onChange={onChange}
         onKeyPress={onKeyPress}
         mergeDisplay={true}
         display={{
           "{space}": "Space",
-          "{bksp}": "Backspace",
+          "{bksp}": "⌫",
         }}
+        buttonTheme={[
+          {
+            class: "rebus",
+            buttons: "Rebus",
+          },
+        ]}
       />
     </Box>
   );

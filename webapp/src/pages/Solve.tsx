@@ -12,7 +12,7 @@ import { XWordToolbar } from "../components/XWordToolbar";
 import { useUsersByID } from "../models/User";
 import { UserGroup } from "../components/UserGroup";
 import { XBoard } from "../components/XBoard/XBoard";
-import { Box } from "@chakra-ui/react";
+import { Box, Flex, Spacer } from "@chakra-ui/react";
 import { Keyboard } from "../components/mobile/Keyboard";
 import { SimpleKeyboard } from "react-simple-keyboard";
 
@@ -57,19 +57,21 @@ const Solve: React.FC = () => {
         )}
       </XWordToolbar>
       {session && (
-        <Box w={"100%"}>
-          <XBoard
-            boardState={session.boardState}
-            solutions={session.puzzle.solutions}
-          />
+        <Flex w="100%" h="100%" direction="column">
+          <Box w="100%">
+            <XBoard
+              boardState={session.boardState}
+              solutions={session.puzzle.solutions}
+            />
+          </Box>
+          <Spacer />
           <Keyboard
             onChange={(input: string): void => {
               console.log(input, keyboardRef.current);
-              keyboardRef?.current?.setInput(input);
             }}
             keyboardRef={keyboardRef}
           />
-        </Box>
+        </Flex>
       )}
     </XWordContainer>
   );

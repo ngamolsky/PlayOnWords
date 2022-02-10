@@ -15,6 +15,7 @@ import { XBoard } from "../components/XBoard/XBoard";
 import { Box, Flex, Spacer } from "@chakra-ui/react";
 import { Keyboard } from "../components/mobile/Keyboard";
 import { SimpleKeyboard } from "react-simple-keyboard";
+import { ClueSelector } from "../components/mobile/ClueSelector";
 
 const Solve: React.FC = () => {
   const { puzzleSessionID } = useParams<{ puzzleSessionID?: string }>();
@@ -65,6 +66,7 @@ const Solve: React.FC = () => {
             />
           </Box>
           <Spacer />
+          <ClueSelector clue={session.puzzle.clues.horizontal[0]} />
           <Keyboard
             onChange={(input: string): void => {
               console.log(input, keyboardRef.current);

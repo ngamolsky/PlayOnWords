@@ -1,9 +1,7 @@
-import { Button, Heading } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import React, { useContext, useEffect } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
-import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import { validateEmail, validatePassword } from "../utils/validationUtils";
 import { Link, useHistory } from "react-router-dom";
 import { APP_NAME } from "../constants";
@@ -26,11 +24,8 @@ const Login: React.FC = () => {
 
   return (
     <XWordContainer isLoading={false}>
-      <ColorModeSwitcher my={4} mr={4} ml="auto" />
-      <Heading mb={16} mt={8}>
-        {APP_NAME}
-      </Heading>
-      <XWordContainer maxW="400px" isLoading={userLoading}>
+      <h1>{APP_NAME}</h1>
+      <XWordContainer isLoading={true}>
         <Formik
           initialValues={{ email: "", password: "" }}
           onSubmit={async ({ email, password }, { setErrors }) => {
@@ -75,30 +70,19 @@ const Login: React.FC = () => {
                 validate={validatePassword}
                 required
               />
-              <Button
-                type="submit"
-                isLoading={isSubmitting}
-                width="100%"
-                mb={4}
-              >
-                Login
-              </Button>
-              <Button
-                width="100%"
-                colorScheme="blue"
+              <button type="submit">Login</button>
+              <button
                 onClick={async () => {
                   await createOrLoginGoogleUser();
                 }}
               >
                 Login with Google
-              </Button>
+              </button>
             </Form>
           )}
         </Formik>
         <Link to="/register">
-          <Button mb={4} mt={16}>
-            Click Here to Register
-          </Button>
+          <button>Click Here to Register</button>
         </Link>
       </XWordContainer>
     </XWordContainer>

@@ -1,10 +1,8 @@
-import { Button, Heading } from "@chakra-ui/react";
 import "firebase/auth";
 import { Form, Formik, FormikErrors } from "formik";
 import React, { useContext, useEffect } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
-import { ColorModeSwitcher } from "../components/ColorModeSwitcher";
 import {
   RegisterInput,
   validateEmail,
@@ -30,11 +28,8 @@ const Register: React.FC = () => {
   }, [user, continueUrl, history]);
   return (
     <XWordContainer isLoading={false}>
-      <ColorModeSwitcher my={4} mr={4} ml="auto" />
-      <Heading mb={16} mt={8}>
-        {APP_NAME}
-      </Heading>
-      <XWordContainer maxW="400px" isLoading={false}>
+      <h1>{APP_NAME}</h1>
+      <XWordContainer isLoading={false}>
         <Formik
           initialValues={{ email: "", password: "", confirmPassword: "" }}
           onSubmit={async ({ email, password }) => {
@@ -79,17 +74,8 @@ const Register: React.FC = () => {
                 type="password"
                 required
               />
-              <Button
-                type="submit"
-                isLoading={isSubmitting}
-                width="100%"
-                mb={4}
-              >
-                Sign Up
-              </Button>
-              <Button
-                width="100%"
-                colorScheme="blue"
+              <button type="submit">Sign Up</button>
+              <button
                 onClick={async () => {
                   await createOrLoginGoogleUser();
                   const nextURL = continueUrl ? `/${continueUrl}` : "/";
@@ -97,14 +83,12 @@ const Register: React.FC = () => {
                 }}
               >
                 Sign Up with Google
-              </Button>
+              </button>
             </Form>
           )}
         </Formik>
         <Link to="/login">
-          <Button mb={4} mt={16}>
-            Click Here to Login
-          </Button>
+          <button>Click Here to Login</button>
         </Link>
       </XWordContainer>
     </XWordContainer>

@@ -1,4 +1,3 @@
-import { useTheme } from "@chakra-ui/react";
 import React from "react";
 import { CellState } from "../../models/PuzzleSession";
 import { getCellCoordinatesFromKey } from "../../utils/puzzleSessionUtils";
@@ -11,8 +10,6 @@ type XCellProps = {
 };
 
 export const XCell = ({ cellKey, cellSize, solution }: XCellProps) => {
-  const theme = useTheme();
-
   const { x, y } = getCellCoordinatesFromKey(cellKey);
 
   return (
@@ -22,9 +19,9 @@ export const XCell = ({ cellKey, cellSize, solution }: XCellProps) => {
         height={cellSize}
         x={cellSize * x}
         y={cellSize * y}
-        fill={solution ? theme.colors.white : theme.colors.black}
+        fill={solution ? "white" : "black"}
         strokeWidth={0.1}
-        stroke={theme.colors.gray[600]}
+        stroke={"grey"}
       />
     </g>
   );

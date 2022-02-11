@@ -3,7 +3,6 @@ import { SimpleKeyboard } from "react-simple-keyboard";
 import KeyboardLib from "react-simple-keyboard";
 
 import "react-simple-keyboard/build/css/index.css";
-import { Box } from "@chakra-ui/react";
 
 type KeyboardProps = {
   onChange: (input: string, event?: MouseEvent) => void;
@@ -18,14 +17,12 @@ export const Keyboard = ({ onChange, keyboardRef }: KeyboardProps) => {
       setLayoutName(layoutName === "default" ? "shift" : "default");
     }
   };
-
+  // sx={{
+  //   ".keyboard": { textColor: "black" },
+  //   ".rebus": { width: "40px !important" },
+  // }}
   return (
-    <Box
-      sx={{
-        ".keyboard": { textColor: "black" },
-        ".rebus": { width: "40px !important" },
-      }}
-    >
+    <div>
       <KeyboardLib
         keyboardRef={(r) => (keyboardRef.current = r)}
         layout={{
@@ -51,6 +48,6 @@ export const Keyboard = ({ onChange, keyboardRef }: KeyboardProps) => {
           },
         ]}
       />
-    </Box>
+    </div>
   );
 };

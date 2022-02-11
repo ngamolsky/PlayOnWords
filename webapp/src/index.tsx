@@ -1,18 +1,14 @@
-import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import "./config/firebase";
+import "./index.css";
 import * as React from "react";
 import ReactDOM from "react-dom";
 import { App } from "./App";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorker from "./serviceWorker";
-import theme from "./theme";
 
 ReactDOM.render(
   <React.StrictMode>
-    <ColorModeScript />
-    <ChakraProvider theme={theme}>
-      <App />
-    </ChakraProvider>
+    <App />
   </React.StrictMode>,
   document.getElementById("root")
 );

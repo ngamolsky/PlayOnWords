@@ -1,23 +1,25 @@
-import React from "react";
-import { Flex, FlexProps, Spinner } from "@chakra-ui/react";
+import React, { ReactNode } from "react";
+import Spinner from "./Spinner";
+import { XWordToolbar } from "./XWordToolbar";
 
-type XWordContainerProps = FlexProps & {
+type XWordContainerProps = {
   isLoading: boolean;
+  toolbarChildren?: ReactNode;
 };
 
-export const XWordContainer = (props: XWordContainerProps) => {
-  const { isLoading, children, ...rest } = props;
+export const XWordContainer: React.FC<XWordContainerProps> = (props) => {
+  const { isLoading, children, toolbarChildren } = props;
+  const content = isLoading ? (
+    <div className="grow flex justify-center items-center">
+      <Spinner />
+    </div>
+  ) : (
+    children
+  );
   return (
-    <Flex
-      direction="column"
-      alignItems="center"
-      justifyContent="flex-start"
-      h="100vh"
-      w="100%"
-      mx="auto"
-      {...rest}
-    >
-      {isLoading ? <Spinner size="xl" m="auto" /> : children}
-    </Flex>
+    <div className="min-h-screen flex flex-col">
+      <XWordToolbar>{toolbarChildren}</XWordToolbar>
+      {content}
+    </div>
   );
 };

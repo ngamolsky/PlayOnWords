@@ -1,27 +1,13 @@
-import {
-  Box,
-  theme,
-  AspectRatio,
-  Skeleton,
-  Heading,
-  useColorMode,
-  Image,
-  Text,
-  Popover,
-  PopoverTrigger,
-  PopoverArrow,
-  PopoverBody,
-  PopoverContent,
-  Button,
-} from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { Fragment, useState } from "react";
 import { toXWordDate } from "../utils/timeAndDateUtils";
 import puzzleSVG from "../images/XWordSquare.svg";
+import { Puzzle } from "../models/Puzzle";
+import { Menu, Transition } from "@headlessui/react";
+import { Link } from "react-router-dom";
 
 interface PuzzleCardProps {
-  puzzleDate: Date;
+  puzzle: Puzzle;
   onClick: (action: PuzzleCardAction) => void;
-  hasSession: boolean;
 }
 
 export enum PuzzleCardAction {
@@ -30,93 +16,26 @@ export enum PuzzleCardAction {
   END_GAME = "end_game",
 }
 
-export const PuzzleCard: React.FC<PuzzleCardProps> = ({
-  puzzleDate,
-  onClick,
-  hasSession,
-}) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { colorMode } = useColorMode();
-  const isDark = colorMode === "dark";
-
+export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
   return (
-    <Popover isOpen={isPopoverOpen} onClose={() => setIsPopoverOpen(false)}>
-      <PopoverTrigger>
-        <Box
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          bgColor={isDark ? theme.colors.gray[700] : theme.colors.gray[400]}
-          m="auto"
-          w="90%"
-          maxW="300px"
-          borderRadius="lg"
-          cursor="pointer"
-          boxShadow="lg"
-          borderWidth={hasSession ? 3 : 0}
-          borderColor={hasSession ? theme.colors.yellow[500] : undefined}
-          textAlign="start"
-        >
-          <AspectRatio ratio={1}>
-            <Image
-              draggable={false}
-              borderTopRadius="lg"
-              w="100%"
-              mx="auto"
-              src={puzzleSVG}
-              alt="Crossword Puzzle Image"
-              fallback={<Skeleton />}
-              overflow="hidden"
-            />
-          </AspectRatio>
-          <Box m="3">
-            <Heading size="md" fontSize="16px" isTruncated>
-              {toXWordDate(puzzleDate)}
-            </Heading>
-            <Text mt="2" fontSize="14px" isTruncated>
-              New York Times
-            </Text>
-          </Box>
-        </Box>
-      </PopoverTrigger>
-      <PopoverContent>
-        <PopoverArrow />
-        <PopoverBody>
-          {hasSession ? (
-            <>
-              <Button
-                variant="ghost"
-                w="100%"
-                onClick={() => {
-                  onClick(PuzzleCardAction.CONTINUE_GAME);
-                  setIsPopoverOpen(false);
-                }}
-              >
-                Continue Game
-              </Button>
-              <Button
-                variant="ghost"
-                w="100%"
-                onClick={() => {
-                  onClick(PuzzleCardAction.END_GAME);
-                  setIsPopoverOpen(false);
-                }}
-              >
-                End Game
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="ghost"
-              w="100%"
-              onClick={() => {
-                onClick(PuzzleCardAction.NEW_GAME);
-                setIsPopoverOpen(false);
-              }}
-            >
+    <Menu as="div" className="relative inline-block text-center">
+      <Menu.Button className="mx-auto p-4">
+        {toXWordDate(puzzle.puzzleTimestamp.toDate())}
+      </Menu.Button>
+
+      <Menu.Items
+        className="absolute p-2 px-8 mt-2 left-1/2 -translate-x-1/2
+                   bg-white divide-y divide-gray-100 rounded-md 
+                     shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10 hover:bg-zinc-200"
+      >
+        <Menu.Item>
+          {({ active }) => (
+            <Link className={`${active && "bg-blue-500 "}`} to={`/solve/{}`}>
               Start Game
-            </Button>
+            </Link>
           )}
-        </PopoverBody>
-      </PopoverContent>
-    </Popover>
+        </Menu.Item>
+      </Menu.Items>
+    </Menu>
   );
 };

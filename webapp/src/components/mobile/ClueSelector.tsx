@@ -6,5 +6,5 @@ type ClueSelectorProps = {
 };
 
 export const ClueSelector: React.FC<ClueSelectorProps> = ({ clue }) => {
-  return <p>{clue.hint}</p>;
+  return <p className="text-center py-2">{clue.hint}</p>;
 };

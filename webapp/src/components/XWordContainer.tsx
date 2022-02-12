@@ -4,11 +4,16 @@ import { XWordToolbar } from "./XWordToolbar";
 
 type XWordContainerProps = {
   isLoading: boolean;
+  showToolbar: boolean;
   toolbarChildren?: ReactNode;
 };
 
-export const XWordContainer: React.FC<XWordContainerProps> = (props) => {
-  const { isLoading, children, toolbarChildren } = props;
+export const XWordContainer: React.FC<XWordContainerProps> = ({
+  isLoading,
+  children,
+  toolbarChildren,
+  showToolbar,
+}) => {
   const content = isLoading ? (
     <div className="grow flex justify-center items-center">
       <Spinner />
@@ -18,7 +23,7 @@ export const XWordContainer: React.FC<XWordContainerProps> = (props) => {
   );
   return (
     <div className="min-h-screen flex flex-col">
-      <XWordToolbar>{toolbarChildren}</XWordToolbar>
+      {showToolbar && <XWordToolbar>{toolbarChildren}</XWordToolbar>}
       {content}
     </div>
   );

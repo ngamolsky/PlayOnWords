@@ -3,10 +3,10 @@ import { XWordContainer } from "../components/XWordContainer";
 import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../constants";
 import { useHistory } from "react-router-dom";
 import { useRecentPuzzles } from "../models/Puzzle";
-import { useLoggedInUser } from "../models/User";
+import { signOut, useLoggedInUser } from "../models/User";
 import Avatar from "../components/Avatar";
-import { toXWordDate } from "../utils/timeAndDateUtils";
-import { PuzzleCard } from "../components/PuzzleCard";
+import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
+import { startPuzzleSession } from "../models/PuzzleSession";
 
 const Home: React.FC = () => {
   const history = useHistory();
@@ -16,15 +16,32 @@ const Home: React.FC = () => {
 
   return (
     <XWordContainer
+      showToolbar
       isLoading={loading}
-      toolbarChildren={<Avatar user={user} />}
+      toolbarChildren={<Avatar user={user} onClick={signOut} />}
     >
       {puzzles &&
         puzzles.map((puzzle) => (
           <PuzzleCard
             key={puzzle.puzzleID}
             puzzle={puzzle}
-            onClick={(action) => console.log(action)}
+            onClick={async (action) => {
+              switch (action) {
+                case PuzzleCardAction.NEW_GAME:
+                  const { puzzleSessionID } = await startPuzzleSession(
+                    puzzle,
+                    user
+                  );
+                  history.push(`/solve/${puzzleSessionID}`);
+                  return;
+                case PuzzleCardAction.CONTINUE_GAME:
+                  console.log("CONTINUE GAME");
+                  return;
+                case PuzzleCardAction.END_GAME:
+                  console.log("END GAME");
+                  return;
+              }
+            }}
           />
         ))}
     </XWordContainer>

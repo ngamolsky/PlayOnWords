@@ -17,10 +17,7 @@ export const Keyboard = ({ onChange, keyboardRef }: KeyboardProps) => {
       setLayoutName(layoutName === "default" ? "shift" : "default");
     }
   };
-  // sx={{
-  //   ".keyboard": { textColor: "black" },
-  //   ".rebus": { width: "40px !important" },
-  // }}
+
   return (
     <div>
       <KeyboardLib
@@ -33,7 +30,6 @@ export const Keyboard = ({ onChange, keyboardRef }: KeyboardProps) => {
             "{space}",
           ],
         }}
-        theme={`hg-theme-default keyboard`}
         onChange={onChange}
         onKeyPress={onKeyPress}
         mergeDisplay={true}
@@ -43,7 +39,7 @@ export const Keyboard = ({ onChange, keyboardRef }: KeyboardProps) => {
         }}
         buttonTheme={[
           {
-            class: "rebus",
+            class: "w-10",
             buttons: "Rebus",
           },
         ]}

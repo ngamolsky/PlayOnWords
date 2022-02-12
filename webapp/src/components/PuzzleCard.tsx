@@ -3,7 +3,6 @@ import { toXWordDate } from "../utils/timeAndDateUtils";
 import puzzleSVG from "../images/XWordSquare.svg";
 import { Puzzle } from "../models/Puzzle";
 import { Menu, Transition } from "@headlessui/react";
-import { Link } from "react-router-dom";
 
 interface PuzzleCardProps {
   puzzle: Puzzle;
@@ -22,20 +21,34 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
       <Menu.Button className="mx-auto p-4">
         {toXWordDate(puzzle.puzzleTimestamp.toDate())}
       </Menu.Button>
-
-      <Menu.Items
-        className="absolute p-2 px-8 mt-2 left-1/2 -translate-x-1/2
-                   bg-white divide-y divide-gray-100 rounded-md 
-                     shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10 hover:bg-zinc-200"
+      <Transition
+        as={Fragment}
+        enter="transition ease-out duration-100"
+        enterFrom="transform opacity-0 scale-50"
+        enterTo="transform opacity-100 scale-100"
+        leave="transition ease-in duration-75"
+        leaveFrom="transform opacity-100 scale-100"
+        leaveTo="transform opacity-0 scale-50"
       >
-        <Menu.Item>
-          {({ active }) => (
-            <Link className={`${active && "bg-blue-500 "}`} to={`/solve/{}`}>
-              Start Game
-            </Link>
-          )}
-        </Menu.Item>
-      </Menu.Items>
+        <Menu.Items
+          className="absolute p-2 px-8 mt-2 left-1/2 -translate-x-1/2
+                   bg-white divide-y divide-gray-100 rounded-md 
+                     shadow-lg ring-1 ring-black ring-opacity-5 
+                     focus:outline-none z-10 hover:bg-zinc-200"
+        >
+          <Menu.Item>
+            {({ active }) => (
+              <button
+                onClick={() => {
+                  onClick(PuzzleCardAction.NEW_GAME);
+                }}
+              >
+                Start Game
+              </button>
+            )}
+          </Menu.Item>
+        </Menu.Items>
+      </Transition>
     </Menu>
   );
 };

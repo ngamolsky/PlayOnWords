@@ -15,6 +15,11 @@ import {
 import { db } from "../config/firebase";
 import { useState, useEffect } from "react";
 
+export enum OrientationType {
+  HORIZONTAL = "horizontal",
+  VERTICAL = "vertical",
+}
+
 export type PuzzleSession = {
   puzzleSessionID: string;
   puzzle: Puzzle;
@@ -31,6 +36,16 @@ export type BoardState = {
 export type CellState = {
   solutionState: CellSolutionState;
   currentLetter: string | null;
+};
+
+export enum CellSelectionState {
+  SELECTED_WORD = "selected_word",
+  SELECTED_CELL = "selected_cell",
+  UNSELECTED = "unselected",
+  UNSELECTABLE = "unselectable",
+}
+export type LocalCellState = {
+  cellSelectionState: CellSelectionState;
 };
 
 export enum CellSolutionState {

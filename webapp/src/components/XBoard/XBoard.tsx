@@ -1,20 +1,11 @@
 import React from "react";
 import { Puzzle } from "../../models/Puzzle";
-import {
-  BoardState,
-  CellSelectionState,
-  CellSolutionState,
-} from "../../models/PuzzleSession";
-import { SelectionState } from "../../pages/Solve";
-import {
-  getCellKeysForClueAndOrientation,
-  getClueFromCellKeyOrientationAndPuzzle,
-  getClueNumberForCellKeyAndPuzzle,
-} from "../../utils/puzzleSessionUtils";
+import { CombinedBoardState } from "../../models/PuzzleSession";
+import { getClueNumberForCellKeyAndPuzzle } from "../../utils/puzzleSessionUtils";
 import { XCell } from "./XCell";
 
 type XBoardProps = {
-  boardState: BoardState;
+  boardState: CombinedBoardState;
   puzzle: Puzzle;
   onCellClicked: (cellKey: string) => void;
 };

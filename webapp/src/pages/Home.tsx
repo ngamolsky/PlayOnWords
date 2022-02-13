@@ -6,16 +6,13 @@ import { useRecentPuzzles } from "../models/Puzzle";
 import { signOut, useLoggedInUser } from "../models/User";
 import Avatar from "../components/Avatar";
 import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
-import {
-  PuzzleSessionActionTypes,
-  usePuzzleSessionActions,
-} from "../models/PuzzleSession";
+import { SessionActionTypes, useSessionActions } from "../models/PuzzleSession";
 import { v4 } from "uuid";
 
 const Home: React.FC = () => {
   const history = useHistory();
   const [puzzles, loading] = useRecentPuzzles(NUM_PUZZLES_TO_SHOW_ON_HOME);
-  const dispatch = usePuzzleSessionActions();
+  const dispatch = useSessionActions();
 
   const user = useLoggedInUser();
 
@@ -36,7 +33,7 @@ const Home: React.FC = () => {
                   const sessionID = `puzzleSession.${v4()}`;
 
                   dispatch({
-                    type: PuzzleSessionActionTypes.START_SESSION,
+                    type: SessionActionTypes.START_SESSION,
                     puzzle,
                     user,
                     sessionID,

@@ -7,8 +7,8 @@ import {
   CellSelectionState,
   isUserInSession,
   OrientationType,
-  PuzzleSessionActionTypes,
-  usePuzzleSession,
+  SessionActionTypes,
+  useSessionState,
 } from "../models/PuzzleSession";
 import { UserContext } from "../contexts/UserContext";
 import { XBoard } from "../components/XBoard/XBoard";
@@ -22,6 +22,7 @@ import {
   getCellCoordinatesFromKey,
 } from "../utils/puzzleSessionUtils";
 import { signOut } from "../models/User";
+import { ACTION_KEYS } from "../utils/keyboardUtils";
 
 export type SelectionState = {
   orientation: OrientationType;
@@ -36,8 +37,14 @@ const Solve: React.FC = () => {
   }
 
   const [user] = useContext(UserContext);
-  const [session, sessionLoading, { selectedCellKey, orientation }, dispatch] =
-    usePuzzleSession(puzzleSessionID);
+
+  const [sessionState, dispatch] = useSessionState(puzzleSessionID);
+
+  const {
+    session,
+    isLoading,
+    localState: { selectedCellKey, orientation },
+  } = sessionState;
 
   // const sessionUsers = useUsersByID(session?.participantIDs);
 
@@ -50,7 +57,7 @@ const Solve: React.FC = () => {
       if (user && session) {
         if (!isUserInSession(session, user.userID)) {
           dispatch({
-            type: PuzzleSessionActionTypes.JOIN_SESSION_PARTICIPANTS,
+            type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS,
             userID: user.userID,
             sessionID: puzzleSessionID,
           });
@@ -64,7 +71,7 @@ const Solve: React.FC = () => {
   if (!session) {
     return (
       <XWordContainer
-        isLoading={sessionLoading}
+        isLoading={isLoading}
         showToolbar
         toolbarChildren={user && <Avatar user={user}></Avatar>}
       />
@@ -91,10 +98,11 @@ const Solve: React.FC = () => {
   const puzzleSize = Math.sqrt(Object.keys(session.puzzle.solutions).length);
   const { x, y } = getCellCoordinatesFromKey(selectedCellKey);
   const isLastKeySelected = x == puzzleSize - 1 && y == puzzleSize - 1;
+  const isFirstKeySelected = x == 0 && y == 0;
 
   return (
     <XWordContainer
-      isLoading={sessionLoading}
+      isLoading={false}
       showToolbar
       toolbarChildren={user && <Avatar user={user} onClick={signOut} />}
     >
@@ -110,11 +118,11 @@ const Solve: React.FC = () => {
               return;
             if (cellKey == selectedCellKey) {
               dispatch({
-                type: PuzzleSessionActionTypes.TOGGLE_ORIENTATION,
+                type: SessionActionTypes.TOGGLE_ORIENTATION,
               });
             } else {
               dispatch({
-                type: PuzzleSessionActionTypes.SET_CELL_SELECTED,
+                type: SessionActionTypes.SET_CELL_SELECTED,
                 cellKey: cellKey,
               });
             }
@@ -123,24 +131,52 @@ const Solve: React.FC = () => {
         <div className="grow" />
         <ClueSelector clue={currentSelectedClue} />
         <Keyboard
-          onChange={(letter: string): void => {
+          onKeyPress={(key) => {
+            switch (key) {
+              case ACTION_KEYS.BACKSPACE:
+                if (boardState[selectedCellKey].currentLetter) {
+                  dispatch({
+                    type: SessionActionTypes.SET_CELL_LETTER,
+                    cellKey: selectedCellKey,
+                    letter: "",
+                    sessionID: puzzleSessionID,
+                    boardState,
+                  });
+                } else {
+                  dispatch({
+                    type: SessionActionTypes.SELECT_PREVIOUS_CELL,
+                    puzzle: session.puzzle,
+                  });
+                  console.log(selectedCellKey);
+
+                  if (isFirstKeySelected) {
+                    dispatch({
+                      type: SessionActionTypes.TOGGLE_ORIENTATION,
+                    });
+                  }
+                }
+                return;
+              case ACTION_KEYS.REBUS:
+                console.log("REBUS");
+                return;
+            }
+          }}
+          onChange={(letter): void => {
             dispatch({
-              type: PuzzleSessionActionTypes.SET_CELL_LETTER,
+              type: SessionActionTypes.KEY_PRESSED,
               cellKey: selectedCellKey,
               letter,
+              boardState,
+              puzzle: session.puzzle,
               sessionID: puzzleSessionID,
             });
             if (keyboardRef.current) {
               keyboardRef.current.setInput("");
             }
-            dispatch({
-              type: PuzzleSessionActionTypes.SELECT_NEXT_CELL,
-              puzzle: session.puzzle,
-            });
 
             if (isLastKeySelected) {
               dispatch({
-                type: PuzzleSessionActionTypes.TOGGLE_ORIENTATION,
+                type: SessionActionTypes.TOGGLE_ORIENTATION,
               });
             }
           }}
@@ -150,5 +186,6 @@ const Solve: React.FC = () => {
     </XWordContainer>
   );
 };
+
 
 export default Solve;

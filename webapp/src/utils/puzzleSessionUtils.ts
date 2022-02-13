@@ -1,9 +1,9 @@
 import { Clue, Puzzle, Solutions } from "../models/Puzzle";
 import {
-  BoardState,
   CellSelectionState,
   CellSolutionState,
-  CellState,
+  CombinedBoardState,
+  CombinedCellState,
   OrientationType,
   SharedBoardState,
 } from "../models/PuzzleSession";
@@ -80,7 +80,7 @@ export const getPreviousCellKey = (
   orientation: OrientationType
 ): string => {
   const { x: oldX, y: oldY } = getCellCoordinatesFromKey(currentCellKey);
-  const size = Math.sqrt(Object.keys(puzzle).length);
+  const size = Math.sqrt(Object.keys(puzzle.solutions).length);
   let newX = oldX;
   let newY = oldY;
 
@@ -109,6 +109,8 @@ export const getPreviousCellKey = (
   }
 
   const newCellKey = [newX, newY].toString();
+  console.log("new key?", newCellKey);
+
   if (!puzzle.solutions[newCellKey]) {
     return getPreviousCellKey(newCellKey, puzzle, orientation);
   }
@@ -197,9 +199,9 @@ export const getSortedKeyArrayFromKeyObject = (keyObject: {
 };
 
 export const getResetBoardStateFromCurrentBoardState = (
-  boardState: BoardState
-): BoardState => {
-  let newBoardState: BoardState = {};
+  boardState: SharedBoardState
+): SharedBoardState => {
+  let newBoardState: SharedBoardState = {};
   newBoardState = Object.entries(boardState).reduce(
     (newBoardState, [cellKey, cellState]) => {
       if (cellState) {
@@ -222,13 +224,13 @@ export const getCombinedBoardState = (
   solutions: Solutions,
   selectedCellKey: string,
   activeCellKeys: string[]
-): BoardState => {
+): CombinedBoardState => {
   // This combines the local and shared state for each cellKey.
   // Probably could be done cleaner with a reduce method.
-  const boardState: BoardState = {};
+  const boardState: CombinedBoardState = {};
   Object.keys(sharedBoardState).forEach((cellKey) => {
     const sharedCellState = sharedBoardState[cellKey];
-    const cellState: CellState = {
+    const cellState: CombinedCellState = {
       ...sharedCellState,
       cellSelectionState:
         solutions[cellKey] == null

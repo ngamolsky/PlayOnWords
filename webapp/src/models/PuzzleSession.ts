@@ -3,6 +3,7 @@ import { Puzzle } from "./Puzzle";
 import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
 import {
   getNextCellKey,
+  getPreviousCellKey,
   getSharedBoardStateFromSolutions,
 } from "../utils/puzzleSessionUtils";
 import { v4 } from "uuid";
@@ -24,8 +25,8 @@ export enum OrientationType {
   VERTICAL = "vertical",
 }
 
-export type PuzzleSession = {
-  puzzleSessionID: string;
+export type Session = {
+  sessionID: string;
   puzzle: Puzzle;
   participantIDs: string[];
   ownerID: string;
@@ -33,23 +34,24 @@ export type PuzzleSession = {
   boardState: SharedBoardState;
 };
 
+export type SessionState = {
+  session?: Session;
+  localState: LocalSessionState;
+  isLoading: boolean;
+};
+
+export type LocalSessionState = {
+  orientation: OrientationType;
+  selectedCellKey: string;
+};
+
 export type SharedBoardState = {
   [key: string]: SharedCellState;
 };
 
-export type BoardState = {
-  [key: string]: CellState;
-};
-
-export type CellState = SharedCellState & LocalCellState;
-
 export type SharedCellState = {
   solutionState: CellSolutionState;
   currentLetter: string | null;
-};
-
-export type LocalCellState = {
-  cellSelectionState: CellSelectionState;
 };
 
 export enum CellSelectionState {
@@ -65,69 +67,108 @@ export enum CellSolutionState {
   NONE = "none",
 }
 
+export type CombinedCellState = SharedCellState & {
+  cellSelectionState: CellSelectionState;
+};
+
+export type CombinedBoardState = {
+  [key: string]: CombinedCellState;
+};
+
 // #region Hooks
 
-export enum PuzzleSessionActionTypes {
-  START_SESSION = "START_SESSION",
-  JOIN_SESSION_PARTICIPANTS = "JOIN_SESSION_PARTICIPANTS",
+export enum SessionActionTypes {
+  SET_IS_LOADING = "SET_IS_LOADING",
+  SET_SHARED_STATE = "SET_SHARED_STATE",
   TOGGLE_ORIENTATION = "TOGGLE_ORIENTATION",
-  SET_CELL_LETTER = "SET_CELL_LETTER",
   SET_CELL_SELECTED = "SET_CELL_SELECTED",
   SELECT_NEXT_CELL = "SELECT_NEXT_CELL",
+  SELECT_PREVIOUS_CELL = "SELECT_PREVIOUS_CELL",
+  START_SESSION = "START_SESSION",
+  JOIN_SESSION_PARTICIPANTS = "JOIN_SESSION_PARTICIPANTS",
+  SET_CELL_LETTER = "SET_CELL_LETTER",
+  KEY_PRESSED = "KEY_PRESSED",
 }
 
-type PuzzleSessionActions =
+type SessionActions =
   | {
-      type: PuzzleSessionActionTypes.START_SESSION;
+      type: SessionActionTypes.KEY_PRESSED;
+      boardState: SharedBoardState;
+      sessionID: string;
+      cellKey: string;
+      puzzle: Puzzle;
+      letter: string;
+    }
+  | { type: SessionActionTypes.SET_IS_LOADING; isLoading: boolean }
+  | { type: SessionActionTypes.SET_SHARED_STATE; session: Session }
+  | { type: SessionActionTypes.TOGGLE_ORIENTATION }
+  | { type: SessionActionTypes.SET_CELL_SELECTED; cellKey: string }
+  | { type: SessionActionTypes.SELECT_NEXT_CELL; puzzle: Puzzle }
+  | { type: SessionActionTypes.SELECT_PREVIOUS_CELL; puzzle: Puzzle }
+  | {
+      type: SessionActionTypes.START_SESSION;
       sessionID: string;
       puzzle: Puzzle;
       user: User;
     }
   | {
-      type: PuzzleSessionActionTypes.JOIN_SESSION_PARTICIPANTS;
-      userID: string;
+      type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS;
       sessionID: string;
+      userID: string;
     }
-  | { type: PuzzleSessionActionTypes.TOGGLE_ORIENTATION }
   | {
-      type: PuzzleSessionActionTypes.SET_CELL_LETTER;
+      type: SessionActionTypes.SET_CELL_LETTER;
+      boardState: SharedBoardState;
+      sessionID: string;
       cellKey: string;
       letter: string;
-      sessionID: string;
-    }
-  | { type: PuzzleSessionActionTypes.SET_CELL_SELECTED; cellKey: string }
-  | { type: PuzzleSessionActionTypes.SELECT_NEXT_CELL; puzzle: Puzzle };
+    };
 
-export const sessionReducer: Reducer<SelectionState, PuzzleSessionActions> = (
-  prevState: SelectionState,
-  action: PuzzleSessionActions
+export const sessionReducer: Reducer<SessionState, SessionActions> = (
+  prevState,
+  action
 ) => {
-  const { orientation: prevOrientation, selectedCellKey: prevSelectedCellKey } =
-    prevState;
+  const {
+    localState: {
+      orientation: prevOrientation,
+      selectedCellKey: prevSelectedCellKey,
+    },
+  } = prevState;
 
   switch (action.type) {
-    case PuzzleSessionActionTypes.TOGGLE_ORIENTATION:
+    case SessionActionTypes.SET_IS_LOADING:
+      const { isLoading } = action;
       return {
         ...prevState,
-        orientation:
-          prevOrientation == OrientationType.HORIZONTAL
-            ? OrientationType.VERTICAL
-            : OrientationType.HORIZONTAL,
+        isLoading,
       };
-    case PuzzleSessionActionTypes.SET_CELL_SELECTED:
+    case SessionActionTypes.SET_SHARED_STATE:
+      const { session } = action;
       return {
         ...prevState,
-        selectedCellKey: action.cellKey,
+        session,
       };
-    case PuzzleSessionActionTypes.SET_CELL_LETTER: {
-      const { letter, cellKey, sessionID } = action;
-      const property = `boardState.${cellKey}.currentLetter`;
-      updateDoc(doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID), {
-        [property]: letter,
-      });
-      return prevState;
-    }
-    case PuzzleSessionActionTypes.SELECT_NEXT_CELL: {
+    case SessionActionTypes.TOGGLE_ORIENTATION:
+      return {
+        ...prevState,
+        localState: {
+          ...prevState.localState,
+          orientation:
+            prevOrientation == OrientationType.HORIZONTAL
+              ? OrientationType.VERTICAL
+              : OrientationType.HORIZONTAL,
+        },
+      };
+    case SessionActionTypes.SET_CELL_SELECTED:
+      return {
+        ...prevState,
+        localState: {
+          ...prevState.localState,
+          selectedCellKey: action.cellKey,
+        },
+      };
+
+    case SessionActionTypes.SELECT_NEXT_CELL: {
       const { puzzle } = action;
       const nextCell = getNextCellKey(
         prevSelectedCellKey,
@@ -136,18 +177,102 @@ export const sessionReducer: Reducer<SelectionState, PuzzleSessionActions> = (
       );
       return {
         ...prevState,
-        selectedCellKey: nextCell,
+        localState: {
+          ...prevState.localState,
+          selectedCellKey: nextCell,
+        },
       };
     }
-    case PuzzleSessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
-      const { sessionID } = action;
-      updateDoc(doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID), {
+    case SessionActionTypes.SELECT_PREVIOUS_CELL: {
+      const { puzzle } = action;
+
+      const previousCell = getPreviousCellKey(
+        prevSelectedCellKey,
+        puzzle,
+        prevOrientation
+      );
+
+      return {
+        ...prevState,
+        localState: {
+          ...prevState.localState,
+          selectedCellKey: previousCell,
+        },
+      };
+    }
+    case SessionActionTypes.SET_CELL_LETTER: {
+      const { letter, cellKey, sessionID, boardState } = action;
+      const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
+      const newCell: SharedCellState = {
+        ...boardState[cellKey],
+        currentLetter: letter,
+      };
+
+      const newBoardState: SharedBoardState = {
+        ...boardState,
+        [cellKey]: newCell,
+      };
+
+      updateDoc(sessionRef, {
+        boardState: newBoardState,
+      });
+
+      return prevState;
+    }
+    case SessionActionTypes.KEY_PRESSED: {
+      const { letter, cellKey, sessionID, boardState, puzzle } = action;
+      const { session: prevSession } = prevState;
+      if (!prevSession) {
+        throw new Error("Trying to handle key press with no session");
+      }
+
+      const nextCellKey = getNextCellKey(
+        prevSelectedCellKey,
+        puzzle,
+        prevOrientation
+      );
+
+      const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
+      const newCell: SharedCellState = {
+        ...boardState[cellKey],
+        currentLetter: letter,
+      };
+
+      const newBoardState: SharedBoardState = {
+        ...boardState,
+        [cellKey]: newCell,
+      };
+
+      updateDoc(sessionRef, {
+        boardState: newBoardState,
+      });
+
+      console.log("Updated board state with", newBoardState[cellKey]);
+
+      return {
+        session: {
+          ...prevSession,
+          boardState: newBoardState,
+        },
+        localState: {
+          ...prevState.localState,
+          selectedCellKey: nextCellKey,
+        },
+        isLoading: false,
+      };
+    }
+    case SessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
+      const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, action.sessionID);
+
+      updateDoc(sessionRef, {
         participantIDs: arrayUnion(action.userID),
       });
       return prevState;
     }
-    case PuzzleSessionActionTypes.START_SESSION: {
+    case SessionActionTypes.START_SESSION: {
       const { puzzle, user, sessionID } = action;
+      const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
+
       const session = {
         sessionID,
         puzzle,
@@ -157,12 +282,11 @@ export const sessionReducer: Reducer<SelectionState, PuzzleSessionActions> = (
         boardState: getSharedBoardStateFromSolutions(puzzle.solutions),
       };
 
-      setDoc(doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID), session);
+      setDoc(sessionRef, session);
       console.log(`startPuzzleSession: Created session ${sessionID}`);
       return prevState;
     }
   }
-  return prevState;
 };
 
 const STARTING_LOCAL_STATE = {
@@ -170,33 +294,24 @@ const STARTING_LOCAL_STATE = {
   selectedCellKey: "0,0",
 };
 
-export const usePuzzleSessionActions = (): Dispatch<PuzzleSessionActions> => {
+export const useSessionActions = (): Dispatch<SessionActions> => {
   const [_, dispatch] = useReducer(sessionReducer, {
-    ...STARTING_LOCAL_STATE,
+    localState: STARTING_LOCAL_STATE,
+    isLoading: true,
   });
 
   return dispatch;
 };
 
-export const usePuzzleSession = (
+export const useSessionState = (
   puzzleSessionID: string
-): [
-  PuzzleSession | undefined,
-  boolean,
-  SelectionState,
-  Dispatch<PuzzleSessionActions>
-] => {
-  const [sessionState, setSessionState] = useState<{
-    session: PuzzleSession | undefined;
-    loading: boolean;
-  }>({
-    session: undefined,
-    loading: true,
+): [SessionState, Dispatch<SessionActions>] => {
+  const [sessionState, dispatch] = useReducer(sessionReducer, {
+    localState: STARTING_LOCAL_STATE,
+    isLoading: true,
   });
 
-  const [selectionState, dispatch] = useReducer(sessionReducer, {
-    ...STARTING_LOCAL_STATE,
-  });
+  console.log("local State: ", sessionState.localState);
 
   useEffect(() => {
     const unsub = onSnapshot(
@@ -204,35 +319,40 @@ export const usePuzzleSession = (
         sessionConverter
       ),
       (doc) => {
-        console.log(`usePuzzleSession: Snapshot`);
-        setSessionState({
-          session: doc.data(),
-          loading: false,
-        });
+        console.log(`useSessionState: Snapshot`);
+        const sessionData = doc.data();
+        if (sessionData) {
+          console.log("data from FS: ", sessionData);
+          console.log("local Data: ", sessionState);
+
+          dispatch({
+            type: SessionActionTypes.SET_SHARED_STATE,
+            session: sessionData,
+          });
+        } else {
+          console.log("No session data found");
+        }
       }
     );
 
     return unsub;
   }, []);
 
-  return [sessionState.session, sessionState.loading, selectionState, dispatch];
+  return [sessionState, dispatch];
 };
 
 // #endregion
 
-export const isUserInSession = (
-  session: PuzzleSession,
-  userID: string
-): boolean => {
+export const isUserInSession = (session: Session, userID: string): boolean => {
   const matchingUser = session.participantIDs.find(
     (currentUserID) => currentUserID === userID
   );
   return !!matchingUser;
 };
 
-const sessionConverter: FirestoreDataConverter<PuzzleSession> = {
-  fromFirestore: (snapshot) => snapshot.data() as PuzzleSession,
-  toFirestore: (session: PuzzleSession) => session,
+const sessionConverter: FirestoreDataConverter<Session> = {
+  fromFirestore: (snapshot) => snapshot.data() as Session,
+  toFirestore: (session: Session) => session,
 };
 
 

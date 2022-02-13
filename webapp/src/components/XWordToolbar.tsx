@@ -4,7 +4,7 @@ import React from "react";
 
 export const XWordToolbar: React.FC = ({ children }) => {
   return (
-    <header className="flex min-w-full shadow-sm shadow-black sticky top-0 z-10">
+    <header className="flex min-w-full shadow-sm shadow-black sticky top-0 z-10 bg-white">
       <p className="mx-4 my-4 flex-0">
         <Link to="/">{APP_NAME}</Link>
       </p>

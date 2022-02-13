@@ -2,13 +2,13 @@ import React from "react";
 import {
   CellSelectionState,
   CellSolutionState,
-  CellState,
+  CombinedCellState,
 } from "../../models/PuzzleSession";
 import { getCellCoordinatesFromKey } from "../../utils/puzzleSessionUtils";
 
 type XCellProps = {
   cellKey: string;
-  cellState: CellState;
+  cellState: CombinedCellState;
   clueNumber: number | null;
   cellSize: number;
   onCellClicked: (cellKey: string) => void;

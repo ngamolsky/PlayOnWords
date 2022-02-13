@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html, body, #root {
+    @apply h-full;
+  }
+  
+}
+
+
 @layer utilities {
   .rebus {
      width: 40px !important;

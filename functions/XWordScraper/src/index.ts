@@ -23,13 +23,12 @@ export const XWordScraper: HttpFunction = async (_, response) => {
       Date.parse(`${latestPuzzleMetadata.print_date}`)
     );
 
-    console.log(
-      `Loaded latest puzzle metadata: {
-        puzzleID: ${latestPuzzleID}
-        date: ${latestPuzzleDate.toUTCString()}
-        title: ${latestPuzzleTitle ? latestPuzzleTitle : "None"}
-      }`
-    );
+    console.log("Latest Puzzle Metadata: ");
+    console.log("NYT Puzzle ID: ", latestPuzzleID);
+    console.log("Date: ", latestPuzzleDate);
+    if (latestPuzzleTitle) {
+      console.log("Title: ", latestPuzzleTitle);
+    }
 
     console.log(`Checking for existing puzzle for nytID ${latestPuzzleID}`);
     const existingPuzzle = await getPuzzleByNYTPuzzleID(latestPuzzleID);

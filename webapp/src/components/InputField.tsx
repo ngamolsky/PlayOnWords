@@ -9,8 +9,6 @@ type InputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
 
 export const InputField: React.FC<InputFieldProps> = ({
   label,
-  size: _,
-  required,
   validate,
   ...props
 }) => {

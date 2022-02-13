@@ -1,4 +1,4 @@
-import React, { MutableRefObject, useContext, useEffect, useRef } from "react";
+import React, { MutableRefObject, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { SimpleKeyboard } from "react-simple-keyboard";
 
@@ -10,7 +10,6 @@ import {
   SessionActionTypes,
   useSessionState,
 } from "../models/PuzzleSession";
-import { UserContext } from "../contexts/UserContext";
 import { XBoard } from "../components/XBoard/XBoard";
 import { Keyboard } from "../components/mobile/Keyboard";
 import { ClueSelector } from "../components/mobile/ClueSelector";
@@ -21,7 +20,7 @@ import {
   getCombinedBoardState,
   getCellCoordinatesFromKey,
 } from "../utils/puzzleSessionUtils";
-import { signOut } from "../models/User";
+import { signOut, useLoggedInUser } from "../models/User";
 import { ACTION_KEYS } from "../utils/keyboardUtils";
 
 export type SelectionState = {
@@ -36,7 +35,7 @@ const Solve: React.FC = () => {
     throw new Error("Puzzle Session ID not found");
   }
 
-  const [user] = useContext(UserContext);
+  const user = useLoggedInUser();
 
   const [sessionState, dispatch] = useSessionState(puzzleSessionID);
 
@@ -96,6 +95,8 @@ const Solve: React.FC = () => {
   );
 
   const puzzleSize = Math.sqrt(Object.keys(session.puzzle.solutions).length);
+  console.log(session, "size");
+
   const { x, y } = getCellCoordinatesFromKey(selectedCellKey);
   const isLastKeySelected = x == puzzleSize - 1 && y == puzzleSize - 1;
   const isFirstKeySelected = x == 0 && y == 0;
@@ -111,6 +112,8 @@ const Solve: React.FC = () => {
           boardState={boardState}
           puzzle={session?.puzzle}
           onCellClicked={(cellKey) => {
+            console.log("Clicked: ", cellKey);
+
             if (
               boardState[cellKey].cellSelectionState ==
               CellSelectionState.UNSELECTABLE
@@ -129,7 +132,59 @@ const Solve: React.FC = () => {
           }}
         />
         <div className="grow" />
-        <ClueSelector clue={currentSelectedClue} />
+        <ClueSelector
+          clue={currentSelectedClue}
+          onNextClue={() => {
+            const clues = session.puzzle.clues;
+            const currentClueIndex = clues[orientation].findIndex(
+              (clue) => clue == currentSelectedClue
+            );
+
+            const isLastClue =
+              currentClueIndex == session.puzzle.clues[orientation].length - 1;
+
+            if (isLastClue) {
+              dispatch({
+                type: SessionActionTypes.TOGGLE_ORIENTATION,
+              });
+
+              dispatch({
+                type: SessionActionTypes.SET_CELL_SELECTED,
+                cellKey: "0,0",
+              });
+            } else {
+              dispatch({
+                type: SessionActionTypes.MOVE_TO_CLUE,
+                puzzle: session.puzzle,
+                nextClueIndex: currentClueIndex + 1,
+              });
+            }
+          }}
+          onPreviousClue={() => {
+            const clues = session.puzzle.clues;
+            const currentClueIndex = clues[orientation].findIndex(
+              (clue) => clue == currentSelectedClue
+            );
+
+            const isFirstClue = currentClueIndex == 0;
+            if (isFirstClue) {
+              dispatch({
+                type: SessionActionTypes.TOGGLE_ORIENTATION,
+              });
+
+              dispatch({
+                type: SessionActionTypes.SET_CELL_SELECTED,
+                cellKey: `${puzzleSize - 1},${puzzleSize - 1}`,
+              });
+            } else {
+              dispatch({
+                type: SessionActionTypes.MOVE_TO_CLUE,
+                puzzle: session.puzzle,
+                nextClueIndex: currentClueIndex - 1,
+              });
+            }
+          }}
+        />
         <Keyboard
           onKeyPress={(key) => {
             switch (key) {
@@ -147,7 +202,6 @@ const Solve: React.FC = () => {
                     type: SessionActionTypes.SELECT_PREVIOUS_CELL,
                     puzzle: session.puzzle,
                   });
-                  console.log(selectedCellKey);
 
                   if (isFirstKeySelected) {
                     dispatch({
@@ -163,13 +217,18 @@ const Solve: React.FC = () => {
           }}
           onChange={(letter): void => {
             dispatch({
-              type: SessionActionTypes.KEY_PRESSED,
+              type: SessionActionTypes.SET_CELL_LETTER,
               cellKey: selectedCellKey,
-              letter,
-              boardState,
-              puzzle: session.puzzle,
+              letter: letter,
               sessionID: puzzleSessionID,
+              boardState,
             });
+
+            dispatch({
+              type: SessionActionTypes.SELECT_NEXT_CELL,
+              puzzle: session.puzzle,
+            });
+
             if (keyboardRef.current) {
               keyboardRef.current.setInput("");
             }
@@ -186,6 +245,5 @@ const Solve: React.FC = () => {
     </XWordContainer>
   );
 };
-
 
 export default Solve;

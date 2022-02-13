@@ -1,8 +1,8 @@
-import React, { MutableRefObject, useState } from "react";
+import React, { MutableRefObject } from "react";
 import { SimpleKeyboard } from "react-simple-keyboard";
 import KeyboardLib from "react-simple-keyboard";
-
 import "react-simple-keyboard/build/css/index.css";
+
 import { ACTION_KEYS } from "../../utils/keyboardUtils";
 
 type KeyboardProps = {
@@ -22,10 +22,9 @@ export const Keyboard = ({
         keyboardRef={(r) => (keyboardRef.current = r)}
         layout={{
           default: [
-            "Q W E R T Y U I O P {bksp}",
+            "Q W E R T Y U I O P",
             "A S D F G H J K L",
-            "{rebus} Z X C V B N M",
-            "{space}",
+            "{rebus} Z X C V B N M {bksp}",
           ],
         }}
         onChange={onChange}

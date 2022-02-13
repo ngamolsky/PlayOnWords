@@ -2,11 +2,11 @@ import { User } from "./User";
 import { Puzzle } from "./Puzzle";
 import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
 import {
+  getCellKeysForClueAndOrientation,
   getNextCellKey,
   getPreviousCellKey,
   getSharedBoardStateFromSolutions,
 } from "../utils/puzzleSessionUtils";
-import { v4 } from "uuid";
 import {
   onSnapshot,
   doc,
@@ -17,8 +17,7 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { useState, useEffect, useReducer, Reducer, Dispatch } from "react";
-import { SelectionState } from "../pages/Solve";
+import { useEffect, useReducer, Reducer, Dispatch } from "react";
 
 export enum OrientationType {
   HORIZONTAL = "horizontal",
@@ -52,6 +51,7 @@ export type SharedBoardState = {
 export type SharedCellState = {
   solutionState: CellSolutionState;
   currentLetter: string | null;
+  lastEditedBy?: string;
 };
 
 export enum CellSelectionState {
@@ -87,17 +87,14 @@ export enum SessionActionTypes {
   START_SESSION = "START_SESSION",
   JOIN_SESSION_PARTICIPANTS = "JOIN_SESSION_PARTICIPANTS",
   SET_CELL_LETTER = "SET_CELL_LETTER",
-  KEY_PRESSED = "KEY_PRESSED",
+  MOVE_TO_CLUE = "MOVE_TO_CLUE",
 }
 
 type SessionActions =
   | {
-      type: SessionActionTypes.KEY_PRESSED;
-      boardState: SharedBoardState;
-      sessionID: string;
-      cellKey: string;
+      type: SessionActionTypes.MOVE_TO_CLUE;
       puzzle: Puzzle;
-      letter: string;
+      nextClueIndex: number;
     }
   | { type: SessionActionTypes.SET_IS_LOADING; isLoading: boolean }
   | { type: SessionActionTypes.SET_SHARED_STATE; session: Session }
@@ -219,48 +216,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       return prevState;
     }
-    case SessionActionTypes.KEY_PRESSED: {
-      const { letter, cellKey, sessionID, boardState, puzzle } = action;
-      const { session: prevSession } = prevState;
-      if (!prevSession) {
-        throw new Error("Trying to handle key press with no session");
-      }
-
-      const nextCellKey = getNextCellKey(
-        prevSelectedCellKey,
-        puzzle,
-        prevOrientation
-      );
-
-      const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
-      const newCell: SharedCellState = {
-        ...boardState[cellKey],
-        currentLetter: letter,
-      };
-
-      const newBoardState: SharedBoardState = {
-        ...boardState,
-        [cellKey]: newCell,
-      };
-
-      updateDoc(sessionRef, {
-        boardState: newBoardState,
-      });
-
-      console.log("Updated board state with", newBoardState[cellKey]);
-
-      return {
-        session: {
-          ...prevSession,
-          boardState: newBoardState,
-        },
-        localState: {
-          ...prevState.localState,
-          selectedCellKey: nextCellKey,
-        },
-        isLoading: false,
-      };
-    }
     case SessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
       const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, action.sessionID);
 
@@ -286,6 +241,27 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       console.log(`startPuzzleSession: Created session ${sessionID}`);
       return prevState;
     }
+    case SessionActionTypes.MOVE_TO_CLUE: {
+      const { puzzle, nextClueIndex } = action;
+
+      if (nextClueIndex >= puzzle.clues[prevOrientation].length) {
+        throw new Error("Clue index is out of bounds");
+      }
+
+      const nextClue = puzzle.clues[prevOrientation][nextClueIndex];
+      const newSelectedCell = getCellKeysForClueAndOrientation(
+        nextClue,
+        prevOrientation
+      )[0];
+
+      return {
+        ...prevState,
+        localState: {
+          ...prevState.localState,
+          selectedCellKey: newSelectedCell,
+        },
+      };
+    }
   }
 };
 
@@ -295,7 +271,7 @@ const STARTING_LOCAL_STATE = {
 };
 
 export const useSessionActions = (): Dispatch<SessionActions> => {
-  const [_, dispatch] = useReducer(sessionReducer, {
+  const [, dispatch] = useReducer(sessionReducer, {
     localState: STARTING_LOCAL_STATE,
     isLoading: true,
   });
@@ -311,8 +287,6 @@ export const useSessionState = (
     isLoading: true,
   });
 
-  console.log("local State: ", sessionState.localState);
-
   useEffect(() => {
     const unsub = onSnapshot(
       doc(db, PUZZLE_SESSIONS_COLLECTION, puzzleSessionID).withConverter(
@@ -322,9 +296,6 @@ export const useSessionState = (
         console.log(`useSessionState: Snapshot`);
         const sessionData = doc.data();
         if (sessionData) {
-          console.log("data from FS: ", sessionData);
-          console.log("local Data: ", sessionState);
-
           dispatch({
             type: SessionActionTypes.SET_SHARED_STATE,
             session: sessionData,

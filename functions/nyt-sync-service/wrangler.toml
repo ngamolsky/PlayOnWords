@@ -1,0 +1,15 @@
+name = "nyt-sync-service"
+type = "javascript"
+zone_id = ""
+account_id = "21b3fa9cad66fa719d5f92c25bbc3d5c"
+route = ""
+workers_dev = true
+compatibility_date = "2022-02-14"
+
+[build]
+command = "npm install && npm run build"
+[build.upload]
+format = "service-worker"
+
+# [secrets]
+# PRIVATE_KEY

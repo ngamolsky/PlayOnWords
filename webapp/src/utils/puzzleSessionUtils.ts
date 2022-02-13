@@ -109,7 +109,6 @@ export const getPreviousCellKey = (
   }
 
   const newCellKey = [newX, newY].toString();
-  console.log("new key?", newCellKey);
 
   if (!puzzle.solutions[newCellKey]) {
     return getPreviousCellKey(newCellKey, puzzle, orientation);
@@ -138,6 +137,37 @@ export const getClueFromCellKeyOrientationAndPuzzle = (
       ? horizontalClueIndex
       : verticalClueIndex;
   return clues[orientation][clueIndex];
+};
+
+export const getNextClue = (
+  { clues }: Puzzle,
+  currentClue: Clue,
+  orientation: OrientationType
+): Clue | null => {
+  const currentClueIndex = clues[orientation].findIndex(
+    (clue) => clue == currentClue
+  );
+
+  const isLastClue = currentClueIndex == clues[orientation].length;
+
+  if (isLastClue) return null;
+
+  return clues[orientation][currentClueIndex + 1];
+};
+
+export const getPreviousClue = (
+  { clues }: Puzzle,
+  currentClue: Clue,
+  orientation: OrientationType
+): Clue | null => {
+  const currentClueIndex = clues[orientation].findIndex(
+    (clue) => clue == currentClue
+  );
+
+  const isFirstClue = currentClueIndex == 0;
+  if (isFirstClue) return null;
+
+  return clues[orientation][currentClueIndex - 1];
 };
 
 export const getClueNumberForCellKeyAndPuzzle = (
@@ -186,17 +216,6 @@ export const getCellKeysForClueAndOrientation = (
   return cellKeys;
 };
 
-export const getSortedKeyArrayFromKeyObject = (keyObject: {
-  [cellKey: string]: any;
-}): string[] => {
-  return Object.keys(keyObject).sort((keyA, keyB) => {
-    const { x: aX, y: aY } = getCellCoordinatesFromKey(keyA);
-    const { x: bX, y: bY } = getCellCoordinatesFromKey(keyB);
-    if (bY === aY && aX === bX) return 0;
-    if (bY > aY || (bY === aY && bX > aX)) return -1;
-    return 1;
-  });
-};
 
 export const getResetBoardStateFromCurrentBoardState = (
   boardState: SharedBoardState

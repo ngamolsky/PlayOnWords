@@ -27,8 +27,13 @@ export const convertPuzzleDataToPuzzle = async ({
   date,
   nytID,
 }: NYTPuzzleData): Promise<Puzzle> => {
+
+  console.log("NYT Puzzle answers: ", answers);
+  console.log("NYT Puzzle clues: ", nytClues);
+
   const size = Math.sqrt(answers.length);
   console.log("Puzzle size is:", size);
+  
   const solutions: Solutions = answers.reduce<Solutions>((result, each, i) => {
     const x = i % size;
     const y = Math.floor(i / size);

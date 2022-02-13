@@ -1,27 +1,27 @@
-import React, {
-  MutableRefObject,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { MutableRefObject, useContext, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { SimpleKeyboard } from "react-simple-keyboard";
 
 import { XWordContainer } from "../components/XWordContainer";
 import {
+  CellSelectionState,
   isUserInSession,
-  joinPuzzleSessionParticipants,
   OrientationType,
+  PuzzleSessionActionTypes,
   usePuzzleSession,
 } from "../models/PuzzleSession";
 import { UserContext } from "../contexts/UserContext";
-import { useUsersByID } from "../models/User";
-import { UserGroup } from "../components/UserGroup";
 import { XBoard } from "../components/XBoard/XBoard";
 import { Keyboard } from "../components/mobile/Keyboard";
 import { ClueSelector } from "../components/mobile/ClueSelector";
 import Avatar from "../components/Avatar";
+import {
+  getClueFromCellKeyOrientationAndPuzzle,
+  getCellKeysForClueAndOrientation,
+  getCombinedBoardState,
+  getCellCoordinatesFromKey,
+} from "../utils/puzzleSessionUtils";
+import { signOut } from "../models/User";
 
 export type SelectionState = {
   orientation: OrientationType;
@@ -36,25 +36,24 @@ const Solve: React.FC = () => {
   }
 
   const [user] = useContext(UserContext);
-  const [session, sessionLoading] = usePuzzleSession(puzzleSessionID);
+  const [session, sessionLoading, { selectedCellKey, orientation }, dispatch] =
+    usePuzzleSession(puzzleSessionID);
+
+  // const sessionUsers = useUsersByID(session?.participantIDs);
+
   const keyboardRef: MutableRefObject<SimpleKeyboard | null> =
     useRef<SimpleKeyboard>(null);
-
-  const sessionUsers = useUsersByID(session?.participantIDs);
-  const [selectionState, setSelectionState] = useState<SelectionState>({
-    orientation: OrientationType.HORIZONTAL,
-    selectedCellKey: "1,2",
-  });
 
   // Join puzzle session if the user isn't already in it when joining
   useEffect(() => {
     const joinPuzzleSessionIfNeeded = async () => {
       if (user && session) {
         if (!isUserInSession(session, user.userID)) {
-          await joinPuzzleSessionParticipants(
-            session.puzzleSessionID,
-            user.userID
-          );
+          dispatch({
+            type: PuzzleSessionActionTypes.JOIN_SESSION_PARTICIPANTS,
+            userID: user.userID,
+            sessionID: puzzleSessionID,
+          });
         }
       }
     };
@@ -62,29 +61,92 @@ const Solve: React.FC = () => {
     joinPuzzleSessionIfNeeded();
   }, [user, session]);
 
+  if (!session) {
+    return (
+      <XWordContainer
+        isLoading={sessionLoading}
+        showToolbar
+        toolbarChildren={user && <Avatar user={user}></Avatar>}
+      />
+    );
+  }
+
+  const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
+    selectedCellKey,
+    orientation,
+    session.puzzle
+  );
+  const activeCellKeys = getCellKeysForClueAndOrientation(
+    currentSelectedClue,
+    orientation
+  );
+
+  const boardState = getCombinedBoardState(
+    session.boardState,
+    session.puzzle.solutions,
+    selectedCellKey,
+    activeCellKeys
+  );
+
+  const puzzleSize = Math.sqrt(Object.keys(session.puzzle.solutions).length);
+  const { x, y } = getCellCoordinatesFromKey(selectedCellKey);
+  const isLastKeySelected = x == puzzleSize - 1 && y == puzzleSize - 1;
+
   return (
     <XWordContainer
       isLoading={sessionLoading}
       showToolbar
-      toolbarChildren={user && <Avatar user={user}></Avatar>}
+      toolbarChildren={user && <Avatar user={user} onClick={signOut} />}
     >
-      {session && (
-        <>
-          <XBoard
-            boardState={session?.boardState}
-            puzzle={session?.puzzle}
-            selectionState={selectionState}
-          />
-          <div className="grow" />
-          <ClueSelector clue={session?.puzzle.clues.horizontal[0]} />
-          <Keyboard
-            onChange={(input: string): void => {
-              console.log(input, keyboardRef.current);
-            }}
-            keyboardRef={keyboardRef}
-          />
-        </>
-      )}
+      <>
+        <XBoard
+          boardState={boardState}
+          puzzle={session?.puzzle}
+          onCellClicked={(cellKey) => {
+            if (
+              boardState[cellKey].cellSelectionState ==
+              CellSelectionState.UNSELECTABLE
+            )
+              return;
+            if (cellKey == selectedCellKey) {
+              dispatch({
+                type: PuzzleSessionActionTypes.TOGGLE_ORIENTATION,
+              });
+            } else {
+              dispatch({
+                type: PuzzleSessionActionTypes.SET_CELL_SELECTED,
+                cellKey: cellKey,
+              });
+            }
+          }}
+        />
+        <div className="grow" />
+        <ClueSelector clue={currentSelectedClue} />
+        <Keyboard
+          onChange={(letter: string): void => {
+            dispatch({
+              type: PuzzleSessionActionTypes.SET_CELL_LETTER,
+              cellKey: selectedCellKey,
+              letter,
+              sessionID: puzzleSessionID,
+            });
+            if (keyboardRef.current) {
+              keyboardRef.current.setInput("");
+            }
+            dispatch({
+              type: PuzzleSessionActionTypes.SELECT_NEXT_CELL,
+              puzzle: session.puzzle,
+            });
+
+            if (isLastKeySelected) {
+              dispatch({
+                type: PuzzleSessionActionTypes.TOGGLE_ORIENTATION,
+              });
+            }
+          }}
+          keyboardRef={keyboardRef}
+        />
+      </>
     </XWordContainer>
   );
 };

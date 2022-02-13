@@ -15,49 +15,44 @@ import { XCell } from "./XCell";
 
 type XBoardProps = {
   boardState: BoardState;
-  selectionState: SelectionState;
   puzzle: Puzzle;
+  onCellClicked: (cellKey: string) => void;
 };
 
-export const XBoard = ({ boardState, puzzle, selectionState }: XBoardProps) => {
+const XBOARD_SIZE = 100;
+const XBOARD_BORDER_WIDTH = 1;
+const XBOARD_SIZE_WITH_BORDER = XBOARD_SIZE + XBOARD_BORDER_WIDTH;
+
+export const XBoard = ({ boardState, puzzle, onCellClicked }: XBoardProps) => {
   const boardStateKeys = Object.keys(boardState);
   const puzzleSize = Math.sqrt(boardStateKeys.length);
-  const { orientation, selectedCellKey } = selectionState;
 
   return (
-    <svg viewBox={`0 0 101 101`}>
-      <rect width="101" height="101" fill="black" />
-      <svg x={0.5} y={0.5} width="100" height="100">
+    <svg viewBox={`0 0 ${XBOARD_SIZE_WITH_BORDER} ${XBOARD_SIZE_WITH_BORDER}`}>
+      <rect
+        width={`${XBOARD_SIZE_WITH_BORDER}`}
+        height={`${XBOARD_SIZE_WITH_BORDER}`}
+        className="fill-black"
+      />
+      <svg
+        x={XBOARD_BORDER_WIDTH / 2}
+        y={XBOARD_BORDER_WIDTH / 2}
+        width={XBOARD_SIZE}
+        height={XBOARD_SIZE}
+      >
         {boardStateKeys.map((cellKey) => {
           const cellState = boardState[cellKey];
 
           const clueNumber = getClueNumberForCellKeyAndPuzzle(cellKey, puzzle);
-          const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
-            selectedCellKey,
-            orientation,
-            puzzle
-          );
-          const activeCellKeys = getCellKeysForClueAndOrientation(
-            currentSelectedClue,
-            selectionState.orientation
-          );
 
           return (
             <XCell
-              solution={puzzle.solutions[cellKey]}
+              onCellClicked={onCellClicked}
+              cellSize={XBOARD_SIZE / puzzleSize}
               key={cellKey}
               cellKey={cellKey}
-              cellSize={100 / puzzleSize}
               cellState={cellState}
               clueNumber={clueNumber}
-              localCellState={{
-                cellSelectionState:
-                  selectionState.selectedCellKey == cellKey
-                    ? CellSelectionState.SELECTED_CELL
-                    : activeCellKeys.includes(cellKey)
-                    ? CellSelectionState.SELECTED_WORD
-                    : CellSelectionState.UNSELECTED,
-              }}
             />
           );
         })}

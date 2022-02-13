@@ -10,14 +10,6 @@ type KeyboardProps = {
 };
 
 export const Keyboard = ({ onChange, keyboardRef }: KeyboardProps) => {
-  const [layoutName, setLayoutName] = useState("default");
-
-  const onKeyPress = (button: string) => {
-    if (button === "{shift}" || button === "{lock}") {
-      setLayoutName(layoutName === "default" ? "shift" : "default");
-    }
-  };
-
   return (
     <div>
       <KeyboardLib
@@ -31,7 +23,6 @@ export const Keyboard = ({ onChange, keyboardRef }: KeyboardProps) => {
           ],
         }}
         onChange={onChange}
-        onKeyPress={onKeyPress}
         mergeDisplay={true}
         display={{
           "{space}": "Space",

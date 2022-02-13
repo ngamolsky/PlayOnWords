@@ -3,30 +3,26 @@ import {
   CellSelectionState,
   CellSolutionState,
   CellState,
-  LocalCellState,
 } from "../../models/PuzzleSession";
 import { getCellCoordinatesFromKey } from "../../utils/puzzleSessionUtils";
 
 type XCellProps = {
   cellKey: string;
   cellState: CellState;
-  localCellState: LocalCellState;
-  cellSize: number;
-  solution: string | null;
   clueNumber: number | null;
+  cellSize: number;
+  onCellClicked: (cellKey: string) => void;
 };
 
 export const XCell = ({
   cellKey,
-  cellSize,
-  solution,
   cellState,
   clueNumber,
-  localCellState,
+  cellSize,
+  onCellClicked,
 }: XCellProps) => {
   const { x, y } = getCellCoordinatesFromKey(cellKey);
-  const { solutionState, currentLetter } = cellState;
-  const { cellSelectionState } = localCellState;
+  const { solutionState, currentLetter, cellSelectionState } = cellState;
 
   return (
     <g>
@@ -41,16 +37,16 @@ export const XCell = ({
           event.preventDefault();
         }}
         onPointerUp={() => {
-          console.log(cellKey);
+          onCellClicked(cellKey);
         }}
         className={
           cellSelectionState == CellSelectionState.SELECTED_CELL
             ? "fill-yellow-300"
             : cellSelectionState == CellSelectionState.SELECTED_WORD
             ? "fill-blue-300"
-            : solution
-            ? "fill-white"
-            : "fill-black"
+            : cellSelectionState == CellSelectionState.UNSELECTABLE
+            ? "fill-black"
+            : "fill-white"
         }
       />
       {solutionState === CellSolutionState.WRONG && (

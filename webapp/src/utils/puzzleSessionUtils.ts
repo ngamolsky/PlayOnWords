@@ -1,13 +1,16 @@
 import { Clue, Puzzle, Solutions } from "../models/Puzzle";
 import {
   BoardState,
+  CellSelectionState,
   CellSolutionState,
+  CellState,
   OrientationType,
+  SharedBoardState,
 } from "../models/PuzzleSession";
 
-export const getBoardStateFromSolutions = (
+export const getSharedBoardStateFromSolutions = (
   solutions: Solutions
-): BoardState => {
+): SharedBoardState => {
   const newBoardState = Object.fromEntries(
     Object.entries(solutions).map(([cellKey, solution]) => [
       cellKey,
@@ -36,11 +39,11 @@ export const getCellCoordinatesFromKey = (
 
 export const getNextCellKey = (
   currentCellKey: string,
-  boardState: BoardState,
+  puzzle: Puzzle,
   orientation: OrientationType
 ): string => {
   const { x: oldX, y: oldY } = getCellCoordinatesFromKey(currentCellKey);
-  const size = Math.sqrt(Object.keys(boardState).length);
+  const size = Math.sqrt(Object.keys(puzzle.solutions).length);
   let newX = oldX;
   let newY = oldY;
   if (orientation === OrientationType.HORIZONTAL) {
@@ -65,19 +68,19 @@ export const getNextCellKey = (
     }
   }
   const newCellKey = [newX, newY].toString();
-  if (!boardState[newCellKey]) {
-    return getNextCellKey(newCellKey, boardState, orientation);
+  if (!puzzle.solutions[newCellKey]) {
+    return getNextCellKey(newCellKey, puzzle, orientation);
   }
   return newCellKey;
 };
 
 export const getPreviousCellKey = (
   currentCellKey: string,
-  boardState: BoardState,
+  puzzle: Puzzle,
   orientation: OrientationType
 ): string => {
   const { x: oldX, y: oldY } = getCellCoordinatesFromKey(currentCellKey);
-  const size = Math.sqrt(Object.keys(boardState).length);
+  const size = Math.sqrt(Object.keys(puzzle).length);
   let newX = oldX;
   let newY = oldY;
 
@@ -106,8 +109,8 @@ export const getPreviousCellKey = (
   }
 
   const newCellKey = [newX, newY].toString();
-  if (!boardState[newCellKey]) {
-    return getPreviousCellKey(newCellKey, boardState, orientation);
+  if (!puzzle.solutions[newCellKey]) {
+    return getPreviousCellKey(newCellKey, puzzle, orientation);
   }
 
   return newCellKey;
@@ -212,4 +215,33 @@ export const getResetBoardStateFromCurrentBoardState = (
     newBoardState
   );
   return newBoardState;
+};
+
+export const getCombinedBoardState = (
+  sharedBoardState: SharedBoardState,
+  solutions: Solutions,
+  selectedCellKey: string,
+  activeCellKeys: string[]
+): BoardState => {
+  // This combines the local and shared state for each cellKey.
+  // Probably could be done cleaner with a reduce method.
+  const boardState: BoardState = {};
+  Object.keys(sharedBoardState).forEach((cellKey) => {
+    const sharedCellState = sharedBoardState[cellKey];
+    const cellState: CellState = {
+      ...sharedCellState,
+      cellSelectionState:
+        solutions[cellKey] == null
+          ? CellSelectionState.UNSELECTABLE
+          : selectedCellKey == cellKey
+          ? CellSelectionState.SELECTED_CELL
+          : activeCellKeys.includes(cellKey)
+          ? CellSelectionState.SELECTED_WORD
+          : CellSelectionState.UNSELECTED,
+    };
+
+    boardState[cellKey] = cellState;
+  });
+
+  return boardState;
 };

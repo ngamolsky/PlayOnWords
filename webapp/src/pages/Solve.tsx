@@ -95,7 +95,6 @@ const Solve: React.FC = () => {
   );
 
   const puzzleSize = Math.sqrt(Object.keys(session.puzzle.solutions).length);
-  console.log(session, "size");
 
   const { x, y } = getCellCoordinatesFromKey(selectedCellKey);
   const isLastKeySelected = x == puzzleSize - 1 && y == puzzleSize - 1;
@@ -112,8 +111,6 @@ const Solve: React.FC = () => {
           boardState={boardState}
           puzzle={session?.puzzle}
           onCellClicked={(cellKey) => {
-            console.log("Clicked: ", cellKey);
-
             if (
               boardState[cellKey].cellSelectionState ==
               CellSelectionState.UNSELECTABLE
@@ -134,6 +131,7 @@ const Solve: React.FC = () => {
         <div className="grow" />
         <ClueSelector
           clue={currentSelectedClue}
+          orientation={orientation}
           onNextClue={() => {
             const clues = session.puzzle.clues;
             const currentClueIndex = clues[orientation].findIndex(
@@ -183,6 +181,11 @@ const Solve: React.FC = () => {
                 nextClueIndex: currentClueIndex - 1,
               });
             }
+          }}
+          onCluePressed={() => {
+            dispatch({
+              type: SessionActionTypes.TOGGLE_ORIENTATION,
+            });
           }}
         />
         <Keyboard

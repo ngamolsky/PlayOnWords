@@ -6,8 +6,9 @@ import { useRecentPuzzles } from "../models/Puzzle";
 import { signOut, useLoggedInUser } from "../models/User";
 import Avatar from "../components/Avatar";
 import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
-import { SessionActionTypes, useSessionActions } from "../models/PuzzleSession";
+import { SessionActionTypes } from "../models/Session";
 import { v4 } from "uuid";
+import { useSessionActions } from "../hooks/useSessionState";
 
 const Home: React.FC = () => {
   const history = useHistory();
@@ -30,7 +31,7 @@ const Home: React.FC = () => {
             onClick={async (action) => {
               switch (action) {
                 case PuzzleCardAction.NEW_GAME:
-                  const sessionID = `puzzleSession.${v4()}`;
+                  const sessionID = `session.${v4()}`;
 
                   dispatch({
                     type: SessionActionTypes.START_SESSION,

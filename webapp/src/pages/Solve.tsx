@@ -5,11 +5,9 @@ import { SimpleKeyboard } from "react-simple-keyboard";
 import { XWordContainer } from "../components/XWordContainer";
 import {
   CellSelectionState,
-  isUserInSession,
   OrientationType,
   SessionActionTypes,
-  useSessionState,
-} from "../models/PuzzleSession";
+} from "../models/Session";
 import { XBoard } from "../components/XBoard/XBoard";
 import { Keyboard } from "../components/mobile/Keyboard";
 import { ClueSelector } from "../components/mobile/ClueSelector";
@@ -19,9 +17,11 @@ import {
   getCellKeysForClueAndOrientation,
   getCombinedBoardState,
   getCellCoordinatesFromKey,
-} from "../utils/puzzleSessionUtils";
+  isUserInSession,
+} from "../utils/sessionUtils";
 import { signOut, useLoggedInUser } from "../models/User";
 import { ACTION_KEYS } from "../utils/keyboardUtils";
+import { useSessionState } from "../hooks/useSessionState";
 
 export type SelectionState = {
   orientation: OrientationType;
@@ -41,7 +41,6 @@ const Solve: React.FC = () => {
 
   const {
     session,
-    isLoading,
     localState: { selectedCellKey, orientation },
   } = sessionState;
 
@@ -70,7 +69,7 @@ const Solve: React.FC = () => {
   if (!session) {
     return (
       <XWordContainer
-        isLoading={isLoading}
+        isLoading={false}
         showToolbar
         toolbarChildren={user && <Avatar user={user}></Avatar>}
       />

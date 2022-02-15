@@ -1,7 +1,7 @@
 import React from "react";
 import { Puzzle } from "../../models/Puzzle";
-import { CombinedBoardState } from "../../models/PuzzleSession";
-import { getClueNumberForCellKeyAndPuzzle } from "../../utils/puzzleSessionUtils";
+import { CombinedBoardState } from "../../models/Session";
+import { getClueNumberForCellKeyAndPuzzle } from "../../utils/sessionUtils";
 import { XCell } from "./XCell";
 
 type XBoardProps = {

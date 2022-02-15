@@ -5,12 +5,13 @@ import {
   CombinedBoardState,
   CombinedCellState,
   OrientationType,
-  SharedBoardState,
-} from "../models/PuzzleSession";
+  BoardState,
+  Session,
+} from "../models/Session";
 
-export const getSharedBoardStateFromSolutions = (
+export const getBoardStateFromSolutions = (
   solutions: Solutions
-): SharedBoardState => {
+): BoardState => {
   const newBoardState = Object.fromEntries(
     Object.entries(solutions).map(([cellKey, solution]) => [
       cellKey,
@@ -216,11 +217,10 @@ export const getCellKeysForClueAndOrientation = (
   return cellKeys;
 };
 
-
 export const getResetBoardStateFromCurrentBoardState = (
-  boardState: SharedBoardState
-): SharedBoardState => {
-  let newBoardState: SharedBoardState = {};
+  boardState: BoardState
+): BoardState => {
+  let newBoardState: BoardState = {};
   newBoardState = Object.entries(boardState).reduce(
     (newBoardState, [cellKey, cellState]) => {
       if (cellState) {
@@ -239,7 +239,7 @@ export const getResetBoardStateFromCurrentBoardState = (
 };
 
 export const getCombinedBoardState = (
-  sharedBoardState: SharedBoardState,
+  BoardState: BoardState,
   solutions: Solutions,
   selectedCellKey: string,
   activeCellKeys: string[]
@@ -247,8 +247,8 @@ export const getCombinedBoardState = (
   // This combines the local and shared state for each cellKey.
   // Probably could be done cleaner with a reduce method.
   const boardState: CombinedBoardState = {};
-  Object.keys(sharedBoardState).forEach((cellKey) => {
-    const sharedCellState = sharedBoardState[cellKey];
+  Object.keys(BoardState).forEach((cellKey) => {
+    const sharedCellState = BoardState[cellKey];
     const cellState: CombinedCellState = {
       ...sharedCellState,
       cellSelectionState:
@@ -265,4 +265,11 @@ export const getCombinedBoardState = (
   });
 
   return boardState;
+};
+
+export const isUserInSession = (session: Session, userID: string): boolean => {
+  const matchingUser = session.participantIDs.find(
+    (currentUserID) => currentUserID === userID
+  );
+  return !!matchingUser;
 };

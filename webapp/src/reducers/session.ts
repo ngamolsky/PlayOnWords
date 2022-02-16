@@ -11,13 +11,11 @@ import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
 import { Puzzle } from "../models/Puzzle";
 import {
   SessionState,
-  SharedActionTypes,
-  SelectionActionTypes,
-  ClueActionTypes,
   OrientationType,
   CellState,
   BoardState,
-  SessionActions,
+  Session,
+  CellSelectionState,
 } from "../models/Session";
 import { User } from "../models/User";
 import {
@@ -25,7 +23,63 @@ import {
   getPreviousCellKey,
   getBoardStateFromSolutions,
   getCellKeysForClueAndOrientation,
+  getCombinedBoardState,
 } from "../utils/sessionUtils";
+
+// #region Actions
+
+export enum SessionActionTypes {
+  START_SESSION = "START_SESSION",
+  JOIN_SESSION_PARTICIPANTS = "JOIN_SESSION_PARTICIPANTS",
+  SET_CELL_LETTER = "SET_CELL_LETTER",
+  HANDLE_BACKSPACE = "HANDLE_BACKSPACE",
+  HANDLE_CELL_CLICKED = "HANDLE_CELL_CLICKED",
+  SET_SHARED_STATE = "SET_SHARED_STATE",
+  TOGGLE_ORIENTATION = "TOGGLE_ORIENTATION",
+  SET_CELL_SELECTED = "SET_CELL_SELECTED",
+  SELECT_NEXT_CELL = "SELECT_NEXT_CELL",
+  SELECT_PREVIOUS_CELL = "SELECT_PREVIOUS_CELL",
+  MOVE_TO_CLUE = "MOVE_TO_CLUE",
+  NEXT_CLUE = "NEXT_CLUE",
+  PREVIOUS_CLUE = "PREVIOUS_CLUE",
+}
+
+export type SessionActions =
+  | {
+      type: SessionActionTypes.SET_SHARED_STATE;
+      session: Session;
+    }
+  | {
+      type: SessionActionTypes.START_SESSION;
+      sessionID: string;
+      user: User;
+    }
+  | {
+      type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS;
+      userID: string;
+    }
+  | {
+      type: SessionActionTypes.SET_CELL_LETTER;
+      cellKey: string;
+      letter: string;
+    }
+  | {
+      type: SessionActionTypes.HANDLE_BACKSPACE;
+    }
+  | {
+      type: SessionActionTypes.HANDLE_CELL_CLICKED;
+      cellKey: string;
+    }
+  | { type: SessionActionTypes.TOGGLE_ORIENTATION }
+  | { type: SessionActionTypes.SET_CELL_SELECTED; cellKey: string }
+  | { type: SessionActionTypes.SELECT_NEXT_CELL }
+  | { type: SessionActionTypes.SELECT_PREVIOUS_CELL }
+  | {
+      type: SessionActionTypes.MOVE_TO_CLUE;
+      nextClueIndex: number;
+    };
+
+// #endregion
 
 // #region Private Functions
 
@@ -121,76 +175,105 @@ const _selectCell = (
 // #endregion
 
 export const sessionReducer: Reducer<SessionState, SessionActions> = (
-  prevState,
+  state,
   action
 ) => {
   const {
-    localState: {
-      orientation: prevOrientation,
-      selectedCellKey: prevSelectedCellKey,
-    },
-  } = prevState;
+    localState: { orientation, selectedCellKey },
+    session,
+  } = state;
+
+  if (!session) {
+    console.log("No session found");
+    return state;
+  }
+
+  const { boardState, puzzle, sessionID } = session;
+
+  const combinedBoardState = getCombinedBoardState(state);
 
   switch (action.type) {
-    case SharedActionTypes.SET_SHARED_STATE: {
-      const { session } = action;
+    case SessionActionTypes.SET_SHARED_STATE: {
+      const { session: nextSession } = action;
       return {
-        ...prevState,
-        session,
+        ...state,
+        session: nextSession,
       };
     }
-    case SharedActionTypes.SET_CELL_LETTER: {
-      const { sessionID, boardState, cellKey, letter } = action;
+    case SessionActionTypes.SET_CELL_LETTER: {
+      const { cellKey, letter } = action;
       _updateCellLetter(sessionID, boardState, cellKey, letter);
-      return prevState;
+      return state;
     }
-    case SharedActionTypes.JOIN_SESSION_PARTICIPANTS: {
-      _joinSessionParticpants(action.sessionID, action.userID);
-      return prevState;
-    }
-    case SharedActionTypes.START_SESSION: {
-      const { sessionID, puzzle, user } = action;
-      _startSession(sessionID, puzzle, user);
-      return prevState;
-    }
-    case SelectionActionTypes.TOGGLE_ORIENTATION: {
-      return _toggleOrientation(prevState);
-    }
-    case SelectionActionTypes.SET_CELL_SELECTED: {
-      return _selectCell(prevState, action.cellKey);
-    }
-    case SelectionActionTypes.SELECT_NEXT_CELL: {
-      const { puzzle } = action;
-      const nextCellKey = getNextCellKey(
-        prevSelectedCellKey,
-        puzzle,
-        prevOrientation
-      );
-      return _selectCell(prevState, nextCellKey);
-    }
-    case SelectionActionTypes.SELECT_PREVIOUS_CELL: {
-      const { puzzle } = action;
+    case SessionActionTypes.HANDLE_BACKSPACE: {
       const previousCellKey = getPreviousCellKey(
-        prevSelectedCellKey,
+        selectedCellKey,
         puzzle,
-        prevOrientation
+        orientation
       );
-      return _selectCell(prevState, previousCellKey);
-    }
-    case ClueActionTypes.MOVE_TO_CLUE: {
-      const { puzzle, nextClueIndex } = action;
 
-      if (nextClueIndex >= puzzle.clues[prevOrientation].length) {
+      if (boardState[selectedCellKey].currentLetter) {
+        _updateCellLetter(session.sessionID, boardState, selectedCellKey, "");
+      } else if (boardState[previousCellKey].currentLetter) {
+        _updateCellLetter(sessionID, boardState, previousCellKey, "");
+      }
+
+      return _selectCell(state, previousCellKey);
+    }
+    case SessionActionTypes.HANDLE_CELL_CLICKED: {
+      const { cellKey } = action;
+      if (
+        combinedBoardState[selectedCellKey].cellSelectionState ==
+        CellSelectionState.UNSELECTABLE
+      )
+        return state;
+
+      if (cellKey == selectedCellKey) {
+        return _toggleOrientation(state);
+      } else {
+        return _selectCell(state, cellKey);
+      }
+    }
+    case SessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
+      _joinSessionParticpants(sessionID, action.userID);
+      return state;
+    }
+    case SessionActionTypes.START_SESSION: {
+      const { sessionID, user } = action;
+      _startSession(sessionID, puzzle, user);
+      return state;
+    }
+    case SessionActionTypes.TOGGLE_ORIENTATION: {
+      return _toggleOrientation(state);
+    }
+    case SessionActionTypes.SET_CELL_SELECTED: {
+      return _selectCell(state, action.cellKey);
+    }
+    case SessionActionTypes.SELECT_NEXT_CELL: {
+      const nextCellKey = getNextCellKey(selectedCellKey, puzzle, orientation);
+      return _selectCell(state, nextCellKey);
+    }
+    case SessionActionTypes.SELECT_PREVIOUS_CELL: {
+      const previousCellKey = getPreviousCellKey(
+        selectedCellKey,
+        puzzle,
+        orientation
+      );
+      return _selectCell(state, previousCellKey);
+    }
+    case SessionActionTypes.MOVE_TO_CLUE: {
+      const { nextClueIndex } = action;
+      if (nextClueIndex >= puzzle.clues[orientation].length) {
         throw new Error("Clue index is out of bounds");
       }
 
-      const nextClue = puzzle.clues[prevOrientation][nextClueIndex];
+      const nextClue = puzzle.clues[orientation][nextClueIndex];
       const newSelectedCellKey = getCellKeysForClueAndOrientation(
         nextClue,
-        prevOrientation
+        orientation
       )[0];
 
-      return _selectCell(prevState, newSelectedCellKey);
+      return _selectCell(state, newSelectedCellKey);
     }
   }
 };

@@ -3,25 +3,20 @@ import { useParams } from "react-router-dom";
 import { SimpleKeyboard } from "react-simple-keyboard";
 
 import { XWordContainer } from "../components/XWordContainer";
-import {
-  CellSelectionState,
-  OrientationType,
-  SessionActionTypes,
-} from "../models/Session";
+import { OrientationType } from "../models/Session";
 import { XBoard } from "../components/XBoard/XBoard";
 import { Keyboard } from "../components/mobile/Keyboard";
 import { ClueSelector } from "../components/mobile/ClueSelector";
 import Avatar from "../components/Avatar";
 import {
   getClueFromCellKeyOrientationAndPuzzle,
-  getCellKeysForClueAndOrientation,
   getCombinedBoardState,
-  getCellCoordinatesFromKey,
   isUserInSession,
 } from "../utils/sessionUtils";
 import { signOut, useLoggedInUser } from "../models/User";
 import { ACTION_KEYS } from "../utils/keyboardUtils";
 import { useSessionState } from "../hooks/useSessionState";
+import { SessionActionTypes } from "../reducers/session";
 
 export type SelectionState = {
   orientation: OrientationType;
@@ -29,15 +24,15 @@ export type SelectionState = {
 };
 
 const Solve: React.FC = () => {
-  const { puzzleSessionID } = useParams<{ puzzleSessionID?: string }>();
+  const { sessionID } = useParams<{ sessionID?: string }>();
 
-  if (!puzzleSessionID) {
+  if (!sessionID) {
     throw new Error("Puzzle Session ID not found");
   }
 
   const user = useLoggedInUser();
 
-  const [sessionState, dispatch] = useSessionState(puzzleSessionID);
+  const [sessionState, dispatch] = useSessionState(sessionID);
 
   const {
     session,
@@ -57,7 +52,7 @@ const Solve: React.FC = () => {
           dispatch({
             type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS,
             userID: user.userID,
-            sessionID: puzzleSessionID,
+            sessionID,
           });
         }
       }
@@ -69,7 +64,7 @@ const Solve: React.FC = () => {
   if (!session) {
     return (
       <XWordContainer
-        isLoading={false}
+        isLoading={true}
         showToolbar
         toolbarChildren={user && <Avatar user={user}></Avatar>}
       />
@@ -81,23 +76,10 @@ const Solve: React.FC = () => {
     orientation,
     session.puzzle
   );
-  const activeCellKeys = getCellKeysForClueAndOrientation(
-    currentSelectedClue,
-    orientation
-  );
 
-  const boardState = getCombinedBoardState(
-    session.boardState,
-    session.puzzle.solutions,
-    selectedCellKey,
-    activeCellKeys
-  );
+  const boardState = getCombinedBoardState(sessionState);
 
   const puzzleSize = Math.sqrt(Object.keys(session.puzzle.solutions).length);
-
-  const { x, y } = getCellCoordinatesFromKey(selectedCellKey);
-  const isLastKeySelected = x == puzzleSize - 1 && y == puzzleSize - 1;
-  const isFirstKeySelected = x == 0 && y == 0;
 
   return (
     <XWordContainer
@@ -108,23 +90,9 @@ const Solve: React.FC = () => {
       <>
         <XBoard
           boardState={boardState}
-          puzzle={session?.puzzle}
+          puzzle={session.puzzle}
           onCellClicked={(cellKey) => {
-            if (
-              boardState[cellKey].cellSelectionState ==
-              CellSelectionState.UNSELECTABLE
-            )
-              return;
-            if (cellKey == selectedCellKey) {
-              dispatch({
-                type: SessionActionTypes.TOGGLE_ORIENTATION,
-              });
-            } else {
-              dispatch({
-                type: SessionActionTypes.SET_CELL_SELECTED,
-                cellKey: cellKey,
-              });
-            }
+            dispatch({ type: SessionActionTypes.HANDLE_CELL_CLICKED, cellKey });
           }}
         />
         <div className="grow" />
@@ -191,26 +159,11 @@ const Solve: React.FC = () => {
           onKeyPress={(key) => {
             switch (key) {
               case ACTION_KEYS.BACKSPACE:
-                if (boardState[selectedCellKey].currentLetter) {
-                  dispatch({
-                    type: SessionActionTypes.SET_CELL_LETTER,
-                    cellKey: selectedCellKey,
-                    letter: "",
-                    sessionID: puzzleSessionID,
-                    boardState,
-                  });
-                } else {
-                  dispatch({
-                    type: SessionActionTypes.SELECT_PREVIOUS_CELL,
-                    puzzle: session.puzzle,
-                  });
+                dispatch({
+                  type: SessionActionTypes.HANDLE_BACKSPACE,
+                  puzzle: session.puzzle,
+                });
 
-                  if (isFirstKeySelected) {
-                    dispatch({
-                      type: SessionActionTypes.TOGGLE_ORIENTATION,
-                    });
-                  }
-                }
                 return;
               case ACTION_KEYS.REBUS:
                 console.log("REBUS");
@@ -222,7 +175,6 @@ const Solve: React.FC = () => {
               type: SessionActionTypes.SET_CELL_LETTER,
               cellKey: selectedCellKey,
               letter: letter,
-              sessionID: puzzleSessionID,
               boardState,
             });
 
@@ -233,12 +185,6 @@ const Solve: React.FC = () => {
 
             if (keyboardRef.current) {
               keyboardRef.current.setInput("");
-            }
-
-            if (isLastKeySelected) {
-              dispatch({
-                type: SessionActionTypes.TOGGLE_ORIENTATION,
-              });
             }
           }}
           keyboardRef={keyboardRef}

@@ -7,6 +7,7 @@ import {
   OrientationType,
   BoardState,
   Session,
+  SessionState,
 } from "../models/Session";
 
 export const getBoardStateFromSolutions = (
@@ -239,16 +240,39 @@ export const getResetBoardStateFromCurrentBoardState = (
 };
 
 export const getCombinedBoardState = (
-  BoardState: BoardState,
-  solutions: Solutions,
-  selectedCellKey: string,
-  activeCellKeys: string[]
+  sessionState: SessionState
 ): CombinedBoardState => {
   // This combines the local and shared state for each cellKey.
   // Probably could be done cleaner with a reduce method.
-  const boardState: CombinedBoardState = {};
-  Object.keys(BoardState).forEach((cellKey) => {
-    const sharedCellState = BoardState[cellKey];
+
+  const {
+    session,
+    localState: { orientation, selectedCellKey },
+  } = sessionState;
+
+  if (!session) {
+    throw new Error("No session not found");
+  }
+
+  const {
+    boardState,
+    puzzle: { solutions },
+  } = session;
+
+  const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
+    selectedCellKey,
+    orientation,
+    session.puzzle
+  );
+
+  const activeCellKeys = getCellKeysForClueAndOrientation(
+    currentSelectedClue,
+    orientation
+  );
+
+  const combinedBoardState: CombinedBoardState = {};
+  Object.keys(combinedBoardState).forEach((cellKey) => {
+    const sharedCellState = boardState[cellKey];
     const cellState: CombinedCellState = {
       ...sharedCellState,
       cellSelectionState:
@@ -261,10 +285,10 @@ export const getCombinedBoardState = (
           : CellSelectionState.UNSELECTED,
     };
 
-    boardState[cellKey] = cellState;
+    combinedBoardState[cellKey] = cellState;
   });
 
-  return boardState;
+  return combinedBoardState;
 };
 
 export const isUserInSession = (session: Session, userID: string): boolean => {

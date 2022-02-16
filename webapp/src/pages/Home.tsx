@@ -6,9 +6,9 @@ import { useRecentPuzzles } from "../models/Puzzle";
 import { signOut, useLoggedInUser } from "../models/User";
 import Avatar from "../components/Avatar";
 import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
-import { SessionActionTypes } from "../models/Session";
 import { v4 } from "uuid";
 import { useSessionActions } from "../hooks/useSessionState";
+import { SessionActionTypes } from "../reducers/session";
 
 const Home: React.FC = () => {
   const history = useHistory();

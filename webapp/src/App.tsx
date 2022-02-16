@@ -20,7 +20,7 @@ export const App = () => {
           <Route path="/register">
             <Register />
           </Route>
-          <ProtectedRoute path="/solve/:puzzleSessionID">
+          <ProtectedRoute path="/solve/:sessionID">
             <Solve />
           </ProtectedRoute>
           <ProtectedRoute path="/">

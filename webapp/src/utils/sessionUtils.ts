@@ -271,7 +271,7 @@ export const getCombinedBoardState = (
   );
 
   const combinedBoardState: CombinedBoardState = {};
-  Object.keys(combinedBoardState).forEach((cellKey) => {
+  Object.keys(boardState).forEach((cellKey) => {
     const sharedCellState = boardState[cellKey];
     const cellState: CombinedCellState = {
       ...sharedCellState,

@@ -52,6 +52,7 @@ export type SessionActions =
   | {
       type: SessionActionTypes.START_SESSION;
       sessionID: string;
+      puzzle: Puzzle;
       user: User;
     }
   | {
@@ -115,7 +116,11 @@ const _updateCellLetter = (
   _updateBoardState(sessionID, newBoardState);
 };
 
-const _startSession = (sessionID: string, puzzle: Puzzle, user: User): void => {
+export const _startSession = (
+  sessionID: string,
+  puzzle: Puzzle,
+  user: User
+): void => {
   const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
 
   const session = {
@@ -126,6 +131,8 @@ const _startSession = (sessionID: string, puzzle: Puzzle, user: User): void => {
     startTime: Timestamp.now(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),
   };
+
+  console.log("Starting Session:", sessionID);
 
   setDoc(sessionRef, session);
 };
@@ -172,6 +179,14 @@ const _selectCell = (
 
 // #endregion
 
+const _requireSession = (session: Session | undefined): Session => {
+  if (!session) {
+    throw new Error("Session required for this action!");
+  }
+
+  return session;
+};
+
 // #endregion
 
 export const sessionReducer: Reducer<SessionState, SessionActions> = (
@@ -183,15 +198,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     session,
   } = state;
 
-  if (!session) {
-    console.log("No session found");
-    return state;
-  }
-
-  const { boardState, puzzle, sessionID } = session;
-
-  const combinedBoardState = getCombinedBoardState(state);
-
   switch (action.type) {
     case SessionActionTypes.SET_SHARED_STATE: {
       const { session: nextSession } = action;
@@ -201,11 +207,15 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       };
     }
     case SessionActionTypes.SET_CELL_LETTER: {
+      const { boardState, sessionID } = _requireSession(session);
       const { cellKey, letter } = action;
+
       _updateCellLetter(sessionID, boardState, cellKey, letter);
       return state;
     }
     case SessionActionTypes.HANDLE_BACKSPACE: {
+      const { boardState, puzzle, sessionID } = _requireSession(session);
+
       const previousCellKey = getPreviousCellKey(
         selectedCellKey,
         puzzle,
@@ -213,7 +223,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       );
 
       if (boardState[selectedCellKey].currentLetter) {
-        _updateCellLetter(session.sessionID, boardState, selectedCellKey, "");
+        _updateCellLetter(sessionID, boardState, selectedCellKey, "");
       } else if (boardState[previousCellKey].currentLetter) {
         _updateCellLetter(sessionID, boardState, previousCellKey, "");
       }
@@ -221,7 +231,10 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       return _selectCell(state, previousCellKey);
     }
     case SessionActionTypes.HANDLE_CELL_CLICKED: {
+      _requireSession(session);
       const { cellKey } = action;
+      const combinedBoardState = getCombinedBoardState(state);
+
       if (
         combinedBoardState[selectedCellKey].cellSelectionState ==
         CellSelectionState.UNSELECTABLE
@@ -235,11 +248,13 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       }
     }
     case SessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
+      const { sessionID } = _requireSession(session);
       _joinSessionParticpants(sessionID, action.userID);
       return state;
     }
     case SessionActionTypes.START_SESSION: {
-      const { sessionID, user } = action;
+      const { sessionID, puzzle, user } = action;
+
       _startSession(sessionID, puzzle, user);
       return state;
     }
@@ -250,10 +265,13 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       return _selectCell(state, action.cellKey);
     }
     case SessionActionTypes.SELECT_NEXT_CELL: {
+      const { puzzle } = _requireSession(session);
       const nextCellKey = getNextCellKey(selectedCellKey, puzzle, orientation);
       return _selectCell(state, nextCellKey);
     }
     case SessionActionTypes.SELECT_PREVIOUS_CELL: {
+      const { puzzle } = _requireSession(session);
+
       const previousCellKey = getPreviousCellKey(
         selectedCellKey,
         puzzle,
@@ -263,6 +281,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.MOVE_TO_CLUE: {
       const { nextClueIndex } = action;
+      const { puzzle } = _requireSession(session);
+
       if (nextClueIndex >= puzzle.clues[orientation].length) {
         throw new Error("Clue index is out of bounds");
       }

@@ -52,7 +52,6 @@ const Solve: React.FC = () => {
           dispatch({
             type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS,
             userID: user.userID,
-            sessionID,
           });
         }
       }
@@ -120,7 +119,6 @@ const Solve: React.FC = () => {
             } else {
               dispatch({
                 type: SessionActionTypes.MOVE_TO_CLUE,
-                puzzle: session.puzzle,
                 nextClueIndex: currentClueIndex + 1,
               });
             }
@@ -144,7 +142,6 @@ const Solve: React.FC = () => {
             } else {
               dispatch({
                 type: SessionActionTypes.MOVE_TO_CLUE,
-                puzzle: session.puzzle,
                 nextClueIndex: currentClueIndex - 1,
               });
             }
@@ -161,7 +158,6 @@ const Solve: React.FC = () => {
               case ACTION_KEYS.BACKSPACE:
                 dispatch({
                   type: SessionActionTypes.HANDLE_BACKSPACE,
-                  puzzle: session.puzzle,
                 });
 
                 return;
@@ -175,12 +171,10 @@ const Solve: React.FC = () => {
               type: SessionActionTypes.SET_CELL_LETTER,
               cellKey: selectedCellKey,
               letter: letter,
-              boardState,
             });
 
             dispatch({
               type: SessionActionTypes.SELECT_NEXT_CELL,
-              puzzle: session.puzzle,
             });
 
             if (keyboardRef.current) {

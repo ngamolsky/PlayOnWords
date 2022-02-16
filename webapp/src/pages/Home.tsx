@@ -35,7 +35,6 @@ const Home: React.FC = () => {
 
                   dispatch({
                     type: SessionActionTypes.START_SESSION,
-                    puzzle,
                     user,
                     sessionID,
                   });

@@ -6,13 +6,12 @@ import {
   STARTING_ORIENTATION,
   STARTING_SELECTED_CELL,
 } from "../constants";
+import { SessionState, Session } from "../models/Session";
 import {
-  SessionState,
   SessionActions,
   SessionActionTypes,
-  Session,
-} from "../models/Session";
-import { sessionReducer } from "../reducers/session";
+  sessionReducer,
+} from "../reducers/session";
 
 export const useSessionState = (
   puzzleSessionID: string

@@ -22,6 +22,8 @@ export const XWordScraper: HttpFunction = async (_, response) => {
     const latestPuzzleDate = new Date(
       Date.parse(`${latestPuzzleMetadata.print_date}`)
     );
+    const latestPuzzleWidth = latestPuzzleMetadata.width;
+    const latestPuzzleHeight = latestPuzzleMetadata.height;
 
     console.log("Latest Puzzle Metadata: ");
     console.log("NYT Puzzle ID: ", latestPuzzleID);
@@ -29,6 +31,10 @@ export const XWordScraper: HttpFunction = async (_, response) => {
     if (latestPuzzleTitle) {
       console.log("Title: ", latestPuzzleTitle);
     }
+    console.log("Height: ", latestPuzzleHeight);
+    console.log("Width: ", latestPuzzleWidth);
+
+    
 
     console.log(`Checking for existing puzzle for nytID ${latestPuzzleID}`);
     const existingPuzzle = await getPuzzleByNYTPuzzleID(latestPuzzleID);

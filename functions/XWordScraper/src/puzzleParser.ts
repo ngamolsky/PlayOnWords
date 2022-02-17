@@ -18,6 +18,8 @@ type NYTPuzzleData = {
   title: string;
   date: Date;
   nytID: string;
+  height: number;
+  width: number;
 };
 
 export const convertPuzzleDataToPuzzle = async ({
@@ -26,17 +28,15 @@ export const convertPuzzleDataToPuzzle = async ({
   title,
   date,
   nytID,
+  height,
+  width,
 }: NYTPuzzleData): Promise<Puzzle> => {
-
   console.log("NYT Puzzle answers: ", answers);
   console.log("NYT Puzzle clues: ", nytClues);
 
-  const size = Math.sqrt(answers.length);
-  console.log("Puzzle size is:", size);
-  
   const solutions: Solutions = answers.reduce<Solutions>((result, each, i) => {
-    const x = i % size;
-    const y = Math.floor(i / size);
+    const x = i % width;
+    const y = Math.floor(i / height);
     const cellKey = [x, y].toString();
     result[cellKey] = each;
 
@@ -47,17 +47,19 @@ export const convertPuzzleDataToPuzzle = async ({
     horizontal: nytClues.A.map((clue) => ({
       number: clue.clueNum,
       hint: clue.value,
-      x: clue.clueStart % size,
-      y: Math.floor(clue.clueStart / size),
+      x: clue.clueStart % width,
+      y: Math.floor(clue.clueStart / height),
       length: clue.clueEnd - clue.clueStart + 1,
     })),
     vertical: nytClues.D.map((clue) => ({
       number: clue.clueNum,
       hint: clue.value,
-      x: clue.clueStart % size,
-      y: Math.floor(clue.clueStart / size),
+      x: clue.clueStart % width,
+      y: Math.floor(clue.clueStart / height),
       length:
-        Math.floor(clue.clueEnd / size) - Math.floor(clue.clueStart / size) + 1,
+        Math.floor(clue.clueEnd / height) -
+        Math.floor(clue.clueStart / height) +
+        1,
     })),
   };
 

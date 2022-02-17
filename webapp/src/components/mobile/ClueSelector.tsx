@@ -21,27 +21,27 @@ export const ClueSelector: React.FC<ClueSelectorProps> = ({
 }) => {
   return (
     <div className="flex flex-row">
-      <button
+      <div
         onClick={onPreviousClue}
-        className="bg-slate-300 hover:bg-slate-400 p-2 py-4"
+        className="bg-slate-300 active:bg-slate-400 p-2 py-4"
       >
         <ChevronLeft />
-      </button>
-      <button
-        className="text-left grow bg-slate-300 hover:bg-slate-400 p-2"
+      </div>
+      <div
+        className="text-left grow bg-slate-300 active:bg-slate-400 p-2 flex select-none"
         onClick={onCluePressed}
       >
-        <p className="text-sm">
+        <p className="text-sm self-center">
           {clue.number}
           {orientation == OrientationType.HORIZONTAL ? "A" : "D"}: {clue.hint}
         </p>
-      </button>
-      <button
+      </div>
+      <div
         onClick={onNextClue}
         className="bg-slate-300 active:bg-slate-400 p-2 py-4"
       >
         <ChevronRight />
-      </button>
+      </div>
     </div>
   );
 };

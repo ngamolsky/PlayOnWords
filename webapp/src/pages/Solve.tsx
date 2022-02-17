@@ -94,7 +94,6 @@ const Solve: React.FC = () => {
             dispatch({ type: SessionActionTypes.HANDLE_CELL_CLICKED, cellKey });
           }}
         />
-        <div className="grow" />
         <ClueSelector
           clue={currentSelectedClue}
           orientation={orientation}

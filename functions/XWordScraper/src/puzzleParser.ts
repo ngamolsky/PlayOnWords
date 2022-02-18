@@ -37,6 +37,7 @@ export const convertPuzzleDataToPuzzle = async ({
   const solutions: Solutions = answers.reduce<Solutions>((result, each, i) => {
     const x = i % width;
     const y = Math.floor(i / height);
+
     const cellKey = [x, y].toString();
     result[cellKey] = each;
 

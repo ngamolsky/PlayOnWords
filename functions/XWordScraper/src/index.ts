@@ -1,6 +1,11 @@
 import { HttpFunction } from "@google-cloud/functions-framework/build/src/functions";
 import axios from "axios";
-import { addPuzzle, getPuzzleByNYTPuzzleID, Puzzle } from "./models/Puzzle";
+import {
+  addPuzzle,
+  deletePuzzle,
+  getPuzzleByNYTPuzzleID,
+  Puzzle,
+} from "./models/Puzzle";
 import { convertPuzzleDataToPuzzle } from "./puzzleParser";
 
 const LATEST_PUZZLE_URL =
@@ -12,23 +17,33 @@ export const XWordScraper: HttpFunction = async (_, response) => {
   try {
     console.log("Starting XWordScraper function");
 
-    console.log("Loading latest puzzle metadata");
-    const latestPuzzleMetadata = (await axios.get(LATEST_PUZZLE_URL)).data
-      .results[0];
+    let puzzleID: string;
+    if (process.env.OVERWRITE_PUZZLE_ID) {
+      puzzleID = process.env.OVERWRITE_PUZZLE_ID;
+    } else {
+      console.log("Loading latest puzzle metadata");
+      const latestPuzzleMetadata = (await axios.get(LATEST_PUZZLE_URL)).data
+        .results[0];
 
-    console.log(latestPuzzleMetadata);
-    const latestPuzzleID = latestPuzzleMetadata.puzzle_id;
+      console.log(latestPuzzleMetadata);
+      puzzleID = latestPuzzleMetadata.puzzle_id;
+    }
 
-    console.log(`Checking for existing puzzle for nytID ${latestPuzzleID}`);
-    const existingPuzzle = await getPuzzleByNYTPuzzleID(latestPuzzleID);
-    if (existingPuzzle) {
+    const existingPuzzle = await getPuzzleByNYTPuzzleID(puzzleID);
+
+    const replacePuzzleIfExists =
+      process.env.REPLACE_EXISTING_PUZZLE === "true";
+
+    if (replacePuzzleIfExists && existingPuzzle) {
+      console.log("Deleting existing puzzle", existingPuzzle.puzzleID);
+      await deletePuzzle(existingPuzzle.puzzleID);
+    } else if (existingPuzzle) {
       throw new Error(
         `Found existing puzzle with id ${existingPuzzle.puzzleID}`
       );
     }
 
-    const puzzle: Puzzle = await loadPuzzleFromNYTPuzzle(latestPuzzleID);
-
+    const puzzle: Puzzle = await loadPuzzleFromNYTPuzzle(puzzleID);
     await addPuzzle(puzzle);
 
     response.send(puzzle.puzzleID);
@@ -70,6 +85,8 @@ export async function loadPuzzleFromNYTPuzzle(latestPuzzleID: any) {
     title: latestPuzzleTitle,
     date: latestPuzzleDate,
     nytID: latestPuzzleID,
+    width: latestPuzzleWidth,
+    height: latestPuzzleHeight,
   });
   return puzzle;
 }

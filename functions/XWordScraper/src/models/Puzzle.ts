@@ -39,6 +39,33 @@ export const addPuzzle = async (puzzle: Puzzle): Promise<boolean> => {
   return true;
 };
 
+export const deletePuzzle = async (puzzleID: string): Promise<boolean> => {
+  await db
+    .collection(PUZZLES_COLLECTION)
+    .withConverter(puzzleConverter)
+    .doc(puzzleID)
+    .delete();
+
+  console.log(`Deleted puzzle from db with id: ${puzzleID}`);
+  return true;
+};
+
+export const getPuzzleByDate = async (date: Date): Promise<Puzzle | null> => {
+  let puzzle = null;
+  console.log(Timestamp.fromDate(date), date);
+
+  const results = (
+    await db
+      .collection("puzzles")
+      .withConverter(puzzleConverter)
+      .where("puzzleTimestamp", "==", Timestamp.fromDate(date))
+      .get()
+  ).docs;
+
+  puzzle = results[0].data();
+  return puzzle;
+};
+
 export const getPuzzleByNYTPuzzleID = async (
   nytID: string
 ): Promise<Puzzle | null> => {
@@ -52,6 +79,13 @@ export const getPuzzleByNYTPuzzleID = async (
   ).docs;
 
   if (results.length > 1) {
+    console.log(
+      "FOUND PUZZLES: ",
+      results.map(async (each) => {
+        await deletePuzzle(each.data().puzzleID);
+      })
+    );
+
     throw new Error(
       `Found more than one result for nytID ${nytID}. Num results: ${results.length}`
     );

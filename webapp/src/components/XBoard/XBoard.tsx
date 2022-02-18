@@ -1,7 +1,10 @@
 import React from "react";
 import { Puzzle } from "../../models/Puzzle";
 import { CombinedBoardState } from "../../models/Session";
-import { getClueNumberForCellKeyAndPuzzle } from "../../utils/sessionUtils";
+import {
+  getCellCoordinatesFromKey,
+  getClueNumberForCellKeyAndPuzzle,
+} from "../../utils/sessionUtils";
 import { XCell } from "./XCell";
 
 type XBoardProps = {
@@ -16,7 +19,13 @@ const XBOARD_SIZE_WITH_BORDER = XBOARD_SIZE + XBOARD_BORDER_WIDTH;
 
 export const XBoard = ({ boardState, puzzle, onCellClicked }: XBoardProps) => {
   const boardStateKeys = Object.keys(boardState);
-  const puzzleSize = Math.sqrt(boardStateKeys.length);
+  const width = Math.max(
+    ...boardStateKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).x)
+  );
+  const height = Math.max(
+    ...boardStateKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).y)
+  );
+  console.log(width, height);
 
   return (
     <svg viewBox={`0 0 ${XBOARD_SIZE_WITH_BORDER} ${XBOARD_SIZE_WITH_BORDER}`}>
@@ -39,7 +48,7 @@ export const XBoard = ({ boardState, puzzle, onCellClicked }: XBoardProps) => {
           return (
             <XCell
               onCellClicked={onCellClicked}
-              cellSize={XBOARD_SIZE / puzzleSize}
+              cellSize={XBOARD_SIZE / 15}
               key={cellKey}
               cellKey={cellKey}
               cellState={cellState}

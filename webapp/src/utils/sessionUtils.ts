@@ -45,24 +45,32 @@ export const getNextCellKey = (
   orientation: OrientationType
 ): string => {
   const { x: oldX, y: oldY } = getCellCoordinatesFromKey(currentCellKey);
-  const size = Math.sqrt(Object.keys(puzzle.solutions).length);
+  const cellKeys = Object.keys(puzzle.solutions);
+  const width =
+    Math.max(
+      ...cellKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).x)
+    ) + 1;
+  const height =
+    Math.max(
+      ...cellKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).y)
+    ) + 1;
   let newX = oldX;
   let newY = oldY;
   if (orientation === OrientationType.HORIZONTAL) {
-    if ((oldX + 1) % size === 0) {
+    if ((oldX + 1) % width === 0) {
       newX = 0;
       newY++;
-      if (newY % size === 0) {
+      if (newY % width === 0) {
         newY = 0;
       }
     } else {
       newX++;
     }
   } else if (orientation === OrientationType.VERTICAL) {
-    if ((oldY + 1) % size === 0) {
+    if ((oldY + 1) % height === 0) {
       newX++;
       newY = 0;
-      if (newX % size === 0) {
+      if (newX % height === 0) {
         newX = 0;
       }
     } else {
@@ -82,31 +90,39 @@ export const getPreviousCellKey = (
   orientation: OrientationType
 ): string => {
   const { x: oldX, y: oldY } = getCellCoordinatesFromKey(currentCellKey);
-  const size = Math.sqrt(Object.keys(puzzle.solutions).length);
+  const cellKeys = Object.keys(puzzle.solutions);
+  const width =
+    Math.max(
+      ...cellKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).x)
+    ) + 1;
+  const height =
+    Math.max(
+      ...cellKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).y)
+    ) + 1;
   let newX = oldX;
   let newY = oldY;
 
   if (orientation === OrientationType.HORIZONTAL) {
     if (oldX === 0) {
-      newX = size - 1;
+      newX = width - 1;
       newY--;
     } else {
       newX--;
     }
 
     if (newY < 0) {
-      newY = size - 1;
+      newY = width - 1;
     }
   } else if (orientation === OrientationType.VERTICAL) {
     if (oldY === 0) {
-      newY = size - 1;
+      newY = height - 1;
       newX--;
     } else {
       newY--;
     }
 
     if (newX < 0) {
-      newX = size - 1;
+      newX = height - 1;
     }
   }
 

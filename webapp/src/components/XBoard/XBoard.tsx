@@ -13,32 +13,41 @@ type XBoardProps = {
   onCellClicked: (cellKey: string) => void;
 };
 
-const XBOARD_SIZE = 100;
+const XBOARD_WIDTH = 100;
 const XBOARD_BORDER_WIDTH = 1;
-const XBOARD_SIZE_WITH_BORDER = XBOARD_SIZE + XBOARD_BORDER_WIDTH;
 
 export const XBoard = ({ boardState, puzzle, onCellClicked }: XBoardProps) => {
   const boardStateKeys = Object.keys(boardState);
-  const width = Math.max(
-    ...boardStateKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).x)
-  );
-  const height = Math.max(
-    ...boardStateKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).y)
-  );
+  const width =
+    Math.max(
+      ...boardStateKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).x)
+    ) + 1;
+  const height =
+    Math.max(
+      ...boardStateKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).y)
+    ) + 1;
+
+  const xBoardHeight = (15 * XBOARD_WIDTH) / 16;
+  console.log(xBoardHeight);
+
   console.log(width, height);
 
   return (
-    <svg viewBox={`0 0 ${XBOARD_SIZE_WITH_BORDER} ${XBOARD_SIZE_WITH_BORDER}`}>
+    <svg
+      viewBox={`0 0 ${XBOARD_WIDTH + XBOARD_BORDER_WIDTH} ${
+        xBoardHeight + XBOARD_BORDER_WIDTH
+      }`}
+    >
       <rect
-        width={`${XBOARD_SIZE_WITH_BORDER}`}
-        height={`${XBOARD_SIZE_WITH_BORDER}`}
+        width={XBOARD_WIDTH + XBOARD_BORDER_WIDTH}
+        height={xBoardHeight + XBOARD_BORDER_WIDTH}
         className="fill-black"
       />
       <svg
         x={XBOARD_BORDER_WIDTH / 2}
         y={XBOARD_BORDER_WIDTH / 2}
-        width={XBOARD_SIZE}
-        height={XBOARD_SIZE}
+        width={XBOARD_WIDTH}
+        height={xBoardHeight}
       >
         {boardStateKeys.map((cellKey) => {
           const cellState = boardState[cellKey];
@@ -48,7 +57,7 @@ export const XBoard = ({ boardState, puzzle, onCellClicked }: XBoardProps) => {
           return (
             <XCell
               onCellClicked={onCellClicked}
-              cellSize={XBOARD_SIZE / 15}
+              cellSize={XBOARD_WIDTH / width}
               key={cellKey}
               cellKey={cellKey}
               cellState={cellState}

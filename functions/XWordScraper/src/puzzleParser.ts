@@ -37,8 +37,7 @@ export const convertPuzzleDataToPuzzle = async ({
   const solutions: Solutions = answers.reduce<Solutions>((result, each, i) => {
     const x = i % width;
     const y = Math.floor(i / width);
-    console.log("y", y);
-    
+
     const cellKey = [x, y].toString();
     result[cellKey] = each;
 
@@ -50,17 +49,17 @@ export const convertPuzzleDataToPuzzle = async ({
       number: clue.clueNum,
       hint: clue.value,
       x: clue.clueStart % width,
-      y: Math.floor(clue.clueStart / height),
+      y: Math.floor(clue.clueStart / width),
       length: clue.clueEnd - clue.clueStart + 1,
     })),
     vertical: nytClues.D.map((clue) => ({
       number: clue.clueNum,
       hint: clue.value,
       x: clue.clueStart % width,
-      y: Math.floor(clue.clueStart / height),
+      y: Math.floor(clue.clueStart / width),
       length:
-        Math.floor(clue.clueEnd / height) -
-        Math.floor(clue.clueStart / height) +
+        Math.floor(clue.clueEnd / width) -
+        Math.floor(clue.clueStart / width) +
         1,
     })),
   };

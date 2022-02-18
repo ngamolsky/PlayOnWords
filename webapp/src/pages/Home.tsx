@@ -8,7 +8,7 @@ import Avatar from "../components/Avatar";
 import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
 import { v4 } from "uuid";
 import { useSessionActions } from "../hooks/useSessionState";
-import { SessionActionTypes, _startSession } from "../reducers/session";
+import { SessionActionTypes } from "../reducers/session";
 
 const Home: React.FC = () => {
   const history = useHistory();
@@ -33,7 +33,12 @@ const Home: React.FC = () => {
                 case PuzzleCardAction.NEW_GAME:
                   const sessionID = `session.${v4()}`;
 
-                  _startSession(sessionID, puzzle, user);
+                  dispatch({
+                    type: SessionActionTypes.START_SESSION,
+                    puzzle: puzzle,
+                    sessionID,
+                    user,
+                  });
                   history.push(`/solve/${sessionID}`);
                   return;
                 case PuzzleCardAction.CONTINUE_GAME:

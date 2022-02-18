@@ -34,7 +34,7 @@ export type Clue = {
   length: number;
 };
 
-export type Solutions = Record<string, string | null>;
+export type Solutions = Record<string, string | null | string[]>;
 
 export const useRecentPuzzles = (
   numPuzzles: number

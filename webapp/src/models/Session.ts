@@ -26,6 +26,7 @@ export enum CellSolutionState {
   REVEALED = "revealed",
   WRONG = "wrong",
   NONE = "none",
+  PENCIL = "pencil",
 }
 
 export type SessionState = {
@@ -41,6 +42,7 @@ export enum OrientationType {
 export type LocalSessionState = {
   orientation: OrientationType;
   selectedCellKey: string;
+  isPencilModeOn: boolean;
 };
 
 export enum CellSelectionState {

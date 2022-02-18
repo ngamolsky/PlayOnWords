@@ -19,6 +19,7 @@ import {
   BoardState,
   Session,
   CellSelectionState,
+  CellSolutionState,
 } from "../models/Session";
 import { User } from "../models/User";
 import {
@@ -44,6 +45,7 @@ export enum SessionActionTypes {
   MOVE_TO_CLUE = "MOVE_TO_CLUE",
   NEXT_CLUE = "NEXT_CLUE",
   PREVIOUS_CLUE = "PREVIOUS_CLUE",
+  PENCIL_CLICKED = "PENCIL_CLICKED",
 }
 
 export type SessionActions =
@@ -64,9 +66,12 @@ export type SessionActions =
   | {
       type: SessionActionTypes.LETTER_PRESSED;
       letter: string;
+      userID: string;
+      solutionState: CellSolutionState;
     }
   | {
       type: SessionActionTypes.BACKSPACE;
+      userID: string;
     }
   | {
       type: SessionActionTypes.CELL_CLICKED;
@@ -78,7 +83,8 @@ export type SessionActions =
       nextClueIndex: number;
     }
   | { type: SessionActionTypes.NEXT_CLUE }
-  | { type: SessionActionTypes.PREVIOUS_CLUE };
+  | { type: SessionActionTypes.PREVIOUS_CLUE }
+  | { type: SessionActionTypes.PENCIL_CLICKED };
 
 // #endregion
 
@@ -99,13 +105,16 @@ const _updateBoardState = (sessionID: string, boardState: BoardState): void => {
 
 const _updateCellLetter = (
   sessionID: string,
+  userID: string,
   boardState: BoardState,
   cellKey: string,
+  solutionState: CellSolutionState,
   letter: string
 ): void => {
   const newCell: CellState = {
-    ...boardState[cellKey],
+    solutionState,
     currentLetter: letter,
+    lastEditedBy: userID,
   };
 
   const newBoardState: BoardState = {
@@ -193,7 +202,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
   action
 ) => {
   const {
-    localState: { orientation, selectedCellKey },
+    localState: { orientation, selectedCellKey, isPencilModeOn },
     session,
   } = state;
 
@@ -218,15 +227,23 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.LETTER_PRESSED: {
       const { boardState, sessionID, puzzle } = _requireSession(session);
-      const { letter } = action;
+      const { letter, userID, solutionState } = action;
 
-      _updateCellLetter(sessionID, boardState, selectedCellKey, letter);
+      _updateCellLetter(
+        sessionID,
+        userID,
+        boardState,
+        selectedCellKey,
+        solutionState,
+        letter
+      );
 
       const nextCellKey = getNextCellKey(selectedCellKey, puzzle, orientation);
       return _selectCell(state, nextCellKey);
     }
     case SessionActionTypes.BACKSPACE: {
       const { boardState, puzzle, sessionID } = _requireSession(session);
+      const { userID } = action;
 
       const previousCellKey = getPreviousCellKey(
         selectedCellKey,
@@ -235,9 +252,23 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       );
 
       if (boardState[selectedCellKey].currentLetter) {
-        _updateCellLetter(sessionID, boardState, selectedCellKey, "");
+        _updateCellLetter(
+          sessionID,
+          userID,
+          boardState,
+          selectedCellKey,
+          CellSolutionState.NONE,
+          ""
+        );
       } else if (boardState[previousCellKey].currentLetter) {
-        _updateCellLetter(sessionID, boardState, previousCellKey, "");
+        _updateCellLetter(
+          sessionID,
+          userID,
+          boardState,
+          previousCellKey,
+          CellSolutionState.NONE,
+          ""
+        );
       }
 
       return _selectCell(state, previousCellKey);
@@ -361,5 +392,13 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       return _selectCell(state, newSelectedCellKey);
     }
+    case SessionActionTypes.PENCIL_CLICKED:
+      return {
+        ...state,
+        localState: {
+          ...state.localState,
+          isPencilModeOn: !isPencilModeOn,
+        },
+      };
   }
 };

@@ -58,6 +58,7 @@ export const XCell = ({
         />
       )}
       <text
+        className="select-none"
         x={cellSize * x + 0.3}
         y={cellSize * y + cellSize / 3.8}
         fontSize={cellSize / 3.5}
@@ -75,9 +76,11 @@ export const XCell = ({
         textAnchor="middle"
         pointerEvents="none"
         letterSpacing="0"
-        className={`${
+        className={`select-none ${
           solutionState == CellSolutionState.REVEALED
             ? "fill-blue-600"
+            : solutionState == CellSolutionState.PENCIL
+            ? "fill-slate-600"
             : "fill-black"
         } `}
       >

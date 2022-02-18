@@ -19,6 +19,9 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
   return (
     <Menu as="div" className="relative inline-block text-center">
       <Menu.Button className="mx-auto p-4">
+        <div>
+          <img src={puzzleSVG} />
+        </div>
         {toXWordDate(puzzle.puzzleTimestamp.toDate())}
       </Menu.Button>
       <Transition
@@ -37,15 +40,13 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
                      focus:outline-none z-10 hover:bg-zinc-200"
         >
           <Menu.Item>
-            {({ active }) => (
-              <button
-                onClick={() => {
-                  onClick(PuzzleCardAction.NEW_GAME);
-                }}
-              >
-                Start Game
-              </button>
-            )}
+            <button
+              onClick={() => {
+                onClick(PuzzleCardAction.NEW_GAME);
+              }}
+            >
+              Start Game
+            </button>
           </Menu.Item>
         </Menu.Items>
       </Transition>

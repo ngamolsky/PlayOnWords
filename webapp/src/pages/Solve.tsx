@@ -3,20 +3,22 @@ import { useParams } from "react-router-dom";
 import { SimpleKeyboard } from "react-simple-keyboard";
 
 import { XWordContainer } from "../components/XWordContainer";
-import { OrientationType } from "../models/Session";
+import { CellSolutionState, OrientationType } from "../models/Session";
 import { XBoard } from "../components/XBoard/XBoard";
 import { Keyboard } from "../components/mobile/Keyboard";
 import { ClueSelector } from "../components/mobile/ClueSelector";
-import Avatar from "../components/Avatar";
 import {
   getClueFromCellKeyOrientationAndPuzzle,
   getCombinedBoardState,
   isUserInSession,
 } from "../utils/sessionUtils";
-import { signOut, useLoggedInUser } from "../models/User";
+import { useLoggedInUser } from "../models/User";
 import { ACTION_KEYS } from "../utils/keyboardUtils";
 import { useSessionState } from "../hooks/useSessionState";
 import { SessionActionTypes } from "../reducers/session";
+import Pencil from "../components/icons/Pencil";
+import Help from "../components/icons/Help";
+import VerticalDots from "../components/icons/VerticalDots";
 
 export type SelectionState = {
   orientation: OrientationType;
@@ -36,7 +38,7 @@ const Solve: React.FC = () => {
 
   const {
     session,
-    localState: { selectedCellKey, orientation },
+    localState: { selectedCellKey, orientation, isPencilModeOn },
   } = sessionState;
 
   // const sessionUsers = useUsersByID(session?.participantIDs);
@@ -61,13 +63,7 @@ const Solve: React.FC = () => {
   }, [user, session]);
 
   if (!session) {
-    return (
-      <XWordContainer
-        isLoading={true}
-        showToolbar
-        toolbarChildren={user && <Avatar user={user}></Avatar>}
-      />
-    );
+    return <XWordContainer isLoading={true} showToolbar />;
   }
 
   const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
@@ -82,7 +78,28 @@ const Solve: React.FC = () => {
     <XWordContainer
       isLoading={false}
       showToolbar
-      toolbarChildren={user && <Avatar user={user} onClick={signOut} />}
+      toolbarChildren={
+        <div className="space-x-2 flex-row flex h-8">
+          <button
+            className={`aspect-square rounded-md ${
+              isPencilModeOn ? "bg-slate-300" : "bg-white"
+            } p-1`}
+            onClick={() => {
+              dispatch({
+                type: SessionActionTypes.PENCIL_CLICKED,
+              });
+            }}
+          >
+            <Pencil />
+          </button>
+          <div className="aspect-square rounded-md bg-slate-300 p-1">
+            <Help />
+          </div>
+          <div className="aspect-square rounded-md bg-slate-300 p-1">
+            <VerticalDots />
+          </div>
+        </div>
+      }
     >
       <>
         <XBoard
@@ -92,7 +109,6 @@ const Solve: React.FC = () => {
             dispatch({ type: SessionActionTypes.CELL_CLICKED, cellKey });
           }}
         />
-        <div className="grow" />
         <ClueSelector
           clue={currentSelectedClue}
           orientation={orientation}
@@ -118,6 +134,7 @@ const Solve: React.FC = () => {
               case ACTION_KEYS.BACKSPACE:
                 dispatch({
                   type: SessionActionTypes.BACKSPACE,
+                  userID: user.userID,
                 });
 
                 return;
@@ -127,7 +144,15 @@ const Solve: React.FC = () => {
             }
           }}
           onChange={(letter): void => {
-            dispatch({ type: SessionActionTypes.LETTER_PRESSED, letter });
+            const cellState = boardState[selectedCellKey];
+            dispatch({
+              type: SessionActionTypes.LETTER_PRESSED,
+              userID: user.userID,
+              letter,
+              solutionState: isPencilModeOn
+                ? CellSolutionState.PENCIL
+                : cellState.solutionState,
+            });
             if (keyboardRef.current) {
               keyboardRef.current.setInput("");
             }

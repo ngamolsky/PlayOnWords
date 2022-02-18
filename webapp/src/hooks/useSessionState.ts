@@ -20,6 +20,7 @@ export const useSessionState = (
     localState: {
       orientation: STARTING_ORIENTATION,
       selectedCellKey: STARTING_SELECTED_CELL,
+      isPencilModeOn: false,
     },
   });
 
@@ -52,6 +53,7 @@ export const useSessionActions = (): Dispatch<SessionActions> => {
     localState: {
       orientation: STARTING_ORIENTATION,
       selectedCellKey: STARTING_SELECTED_CELL,
+      isPencilModeOn: false,
     },
   });
 

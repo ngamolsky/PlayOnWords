@@ -10,7 +10,7 @@ const LATEST_PUZZLE_DATA_BASE_URL =
 
 export const XWordScraper: HttpFunction = async (_, response) => {
   try {
-    console.log("Starting XWordeScraper function");
+    console.log("Starting XWordScraper function");
 
     console.log("Loading latest puzzle metadata");
     const latestPuzzleMetadata = (await axios.get(LATEST_PUZZLE_URL)).data
@@ -18,56 +18,58 @@ export const XWordScraper: HttpFunction = async (_, response) => {
 
     console.log(latestPuzzleMetadata);
     const latestPuzzleID = latestPuzzleMetadata.puzzle_id;
-    const latestPuzzleTitle = latestPuzzleMetadata.title;
-    const latestPuzzleDate = new Date(
-      Date.parse(`${latestPuzzleMetadata.print_date}`)
-    );
-    const latestPuzzleWidth = latestPuzzleMetadata.width;
-    const latestPuzzleHeight = latestPuzzleMetadata.height;
-
-    console.log("Latest Puzzle Metadata: ");
-    console.log("NYT Puzzle ID: ", latestPuzzleID);
-    console.log("Date: ", latestPuzzleDate);
-    if (latestPuzzleTitle) {
-      console.log("Title: ", latestPuzzleTitle);
-    }
-    console.log("Height: ", latestPuzzleHeight);
-    console.log("Width: ", latestPuzzleWidth);
-
-    
 
     console.log(`Checking for existing puzzle for nytID ${latestPuzzleID}`);
     const existingPuzzle = await getPuzzleByNYTPuzzleID(latestPuzzleID);
-    if (!existingPuzzle) {
-      const latestPuzzleData = (
-        await axios.get(
-          `${LATEST_PUZZLE_DATA_BASE_URL}/${latestPuzzleID}.json`,
-          {
-            headers: {
-              Cookie: process.env.NYT_COOKIE,
-            },
-          }
-        )
-      ).data.results[0].puzzle_data;
-
-      console.log(`Loaded latest puzzle data for puzzle ID: ${latestPuzzleID}`);
-
-      const puzzle: Puzzle = await convertPuzzleDataToPuzzle({
-        ...latestPuzzleData,
-        title: latestPuzzleTitle,
-        date: latestPuzzleDate,
-        nytID: latestPuzzleID,
-      });
-
-      await addPuzzle(puzzle);
-      response.send(puzzle.puzzleID);
-    } else {
+    if (existingPuzzle) {
       throw new Error(
         `Found existing puzzle with id ${existingPuzzle.puzzleID}`
       );
     }
+
+    const puzzle: Puzzle = await loadPuzzleFromNYTPuzzle(latestPuzzleID);
+
+    await addPuzzle(puzzle);
+
+    response.send(puzzle.puzzleID);
   } catch (err) {
     console.error(err);
     response.send(`${err}`);
   }
 };
+
+export async function loadPuzzleFromNYTPuzzle(latestPuzzleID: any) {
+  const puzzleResults = (
+    await axios.get(`${LATEST_PUZZLE_DATA_BASE_URL}/${latestPuzzleID}.json`, {
+      headers: {
+        Cookie: process.env.NYT_COOKIE,
+      },
+    })
+  ).data.results[0];
+
+  const puzzleMetadata = puzzleResults.puzzle_meta;
+  const puzzleData = puzzleResults.puzzle_data;
+  const latestPuzzleTitle = puzzleMetadata.title;
+  const latestPuzzleDate = new Date(Date.parse(puzzleMetadata.printDate));
+  const latestPuzzleWidth = puzzleMetadata.width;
+  const latestPuzzleHeight = puzzleMetadata.height;
+
+  console.log("Latest Puzzle Metadata: ", puzzleMetadata);
+  console.log("NYT Puzzle ID: ", latestPuzzleID);
+  console.log("Date: ", latestPuzzleDate);
+  if (latestPuzzleTitle) {
+    console.log("Title: ", latestPuzzleTitle);
+  }
+  console.log("Height: ", latestPuzzleHeight);
+  console.log("Width: ", latestPuzzleWidth);
+
+  console.log(`Loaded latest puzzle data for puzzle ID: ${latestPuzzleID}`);
+
+  const puzzle: Puzzle = await convertPuzzleDataToPuzzle({
+    ...puzzleData,
+    title: latestPuzzleTitle,
+    date: latestPuzzleDate,
+    nytID: latestPuzzleID,
+  });
+  return puzzle;
+}

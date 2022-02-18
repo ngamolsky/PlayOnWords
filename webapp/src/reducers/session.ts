@@ -248,10 +248,11 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       const combinedBoardState = getCombinedBoardState(state);
 
       if (
-        combinedBoardState[selectedCellKey].cellSelectionState ==
+        combinedBoardState[cellKey].cellSelectionState ==
         CellSelectionState.UNSELECTABLE
-      )
+      ) {
         return state;
+      }
 
       if (cellKey == selectedCellKey) {
         return _toggleOrientation(state);

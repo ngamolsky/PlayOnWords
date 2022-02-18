@@ -20,7 +20,7 @@ export const ClueSelector: React.FC<ClueSelectorProps> = ({
   onCluePressed,
 }) => {
   return (
-    <div className="flex flex-row grow">
+    <div className="flex flex-row grow max-h-20">
       <div
         onClick={onPreviousClue}
         className="bg-slate-300 active:bg-slate-400 p-2 py-4 flex"

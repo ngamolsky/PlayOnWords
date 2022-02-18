@@ -313,3 +313,22 @@ export const isUserInSession = (session: Session, userID: string): boolean => {
   );
   return !!matchingUser;
 };
+
+
+export const getSizeFromCellKeys = (
+  cellKeys: string[]
+): { width: number; height: number } => {
+  const width =
+    Math.max(
+      ...cellKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).x)
+    ) + 1;
+  const height =
+    Math.max(
+      ...cellKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).y)
+    ) + 1;
+
+  return {
+    width,
+    height,
+  };
+};

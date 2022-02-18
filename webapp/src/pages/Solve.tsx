@@ -78,8 +78,6 @@ const Solve: React.FC = () => {
 
   const boardState = getCombinedBoardState(sessionState);
 
-  const puzzleSize = Math.sqrt(Object.keys(session.puzzle.solutions).length);
-
   return (
     <XWordContainer
       isLoading={false}
@@ -91,59 +89,22 @@ const Solve: React.FC = () => {
           boardState={boardState}
           puzzle={session.puzzle}
           onCellClicked={(cellKey) => {
-            dispatch({ type: SessionActionTypes.HANDLE_CELL_CLICKED, cellKey });
+            dispatch({ type: SessionActionTypes.CELL_CLICKED, cellKey });
           }}
         />
+        <div className="grow" />
         <ClueSelector
           clue={currentSelectedClue}
           orientation={orientation}
           onNextClue={() => {
-            const clues = session.puzzle.clues;
-            const currentClueIndex = clues[orientation].findIndex(
-              (clue) => clue == currentSelectedClue
-            );
-
-            const isLastClue =
-              currentClueIndex == session.puzzle.clues[orientation].length - 1;
-
-            if (isLastClue) {
-              dispatch({
-                type: SessionActionTypes.TOGGLE_ORIENTATION,
-              });
-
-              dispatch({
-                type: SessionActionTypes.SET_CELL_SELECTED,
-                cellKey: "0,0",
-              });
-            } else {
-              dispatch({
-                type: SessionActionTypes.MOVE_TO_CLUE,
-                nextClueIndex: currentClueIndex + 1,
-              });
-            }
+            dispatch({
+              type: SessionActionTypes.NEXT_CLUE,
+            });
           }}
           onPreviousClue={() => {
-            const clues = session.puzzle.clues;
-            const currentClueIndex = clues[orientation].findIndex(
-              (clue) => clue == currentSelectedClue
-            );
-
-            const isFirstClue = currentClueIndex == 0;
-            if (isFirstClue) {
-              dispatch({
-                type: SessionActionTypes.TOGGLE_ORIENTATION,
-              });
-
-              dispatch({
-                type: SessionActionTypes.SET_CELL_SELECTED,
-                cellKey: `${puzzleSize - 1},${puzzleSize - 1}`,
-              });
-            } else {
-              dispatch({
-                type: SessionActionTypes.MOVE_TO_CLUE,
-                nextClueIndex: currentClueIndex - 1,
-              });
-            }
+            dispatch({
+              type: SessionActionTypes.PREVIOUS_CLUE,
+            });
           }}
           onCluePressed={() => {
             dispatch({
@@ -156,7 +117,7 @@ const Solve: React.FC = () => {
             switch (key) {
               case ACTION_KEYS.BACKSPACE:
                 dispatch({
-                  type: SessionActionTypes.HANDLE_BACKSPACE,
+                  type: SessionActionTypes.BACKSPACE,
                 });
 
                 return;
@@ -166,16 +127,7 @@ const Solve: React.FC = () => {
             }
           }}
           onChange={(letter): void => {
-            dispatch({
-              type: SessionActionTypes.SET_CELL_LETTER,
-              cellKey: selectedCellKey,
-              letter: letter,
-            });
-
-            dispatch({
-              type: SessionActionTypes.SELECT_NEXT_CELL,
-            });
-
+            dispatch({ type: SessionActionTypes.LETTER_PRESSED, letter });
             if (keyboardRef.current) {
               keyboardRef.current.setInput("");
             }

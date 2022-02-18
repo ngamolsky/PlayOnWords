@@ -2,8 +2,8 @@ import React from "react";
 import { Puzzle } from "../../models/Puzzle";
 import { CombinedBoardState } from "../../models/Session";
 import {
-  getCellCoordinatesFromKey,
   getClueNumberForCellKeyAndPuzzle,
+  getSizeFromCellKeys,
 } from "../../utils/sessionUtils";
 import { XCell } from "./XCell";
 
@@ -18,19 +18,8 @@ const XBOARD_BORDER_WIDTH = 1;
 
 export const XBoard = ({ boardState, puzzle, onCellClicked }: XBoardProps) => {
   const boardStateKeys = Object.keys(boardState);
-  const width =
-    Math.max(
-      ...boardStateKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).x)
-    ) + 1;
-  const height =
-    Math.max(
-      ...boardStateKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).y)
-    ) + 1;
-
-  const xBoardHeight = (15 * XBOARD_WIDTH) / 16;
-  console.log(xBoardHeight);
-
-  console.log(width, height);
+  const { width, height } = getSizeFromCellKeys(boardStateKeys);
+  const xBoardHeight = (height * XBOARD_WIDTH) / width;
 
   return (
     <svg

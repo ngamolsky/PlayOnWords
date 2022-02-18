@@ -7,7 +7,10 @@ import {
 } from "firebase/firestore";
 import { Reducer } from "react";
 import { db } from "../config/firebase";
-import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
+import {
+  PUZZLE_SESSIONS_COLLECTION,
+  STARTING_SELECTED_CELL,
+} from "../constants";
 import { Puzzle } from "../models/Puzzle";
 import {
   SessionState,
@@ -24,21 +27,20 @@ import {
   getBoardStateFromSolutions,
   getCellKeysForClueAndOrientation,
   getCombinedBoardState,
+  getClueFromCellKeyOrientationAndPuzzle,
+  getSizeFromCellKeys,
 } from "../utils/sessionUtils";
 
 // #region Actions
 
 export enum SessionActionTypes {
+  SET_SHARED_STATE = "SET_SHARED_STATE",
   START_SESSION = "START_SESSION",
   JOIN_SESSION_PARTICIPANTS = "JOIN_SESSION_PARTICIPANTS",
-  SET_CELL_LETTER = "SET_CELL_LETTER",
-  HANDLE_BACKSPACE = "HANDLE_BACKSPACE",
-  HANDLE_CELL_CLICKED = "HANDLE_CELL_CLICKED",
-  SET_SHARED_STATE = "SET_SHARED_STATE",
+  LETTER_PRESSED = "LETTER_PRESSED",
+  BACKSPACE = "BACKSPACE",
+  CELL_CLICKED = "CELL_CLICKED",
   TOGGLE_ORIENTATION = "TOGGLE_ORIENTATION",
-  SET_CELL_SELECTED = "SET_CELL_SELECTED",
-  SELECT_NEXT_CELL = "SELECT_NEXT_CELL",
-  SELECT_PREVIOUS_CELL = "SELECT_PREVIOUS_CELL",
   MOVE_TO_CLUE = "MOVE_TO_CLUE",
   NEXT_CLUE = "NEXT_CLUE",
   PREVIOUS_CLUE = "PREVIOUS_CLUE",
@@ -60,25 +62,23 @@ export type SessionActions =
       userID: string;
     }
   | {
-      type: SessionActionTypes.SET_CELL_LETTER;
-      cellKey: string;
+      type: SessionActionTypes.LETTER_PRESSED;
       letter: string;
     }
   | {
-      type: SessionActionTypes.HANDLE_BACKSPACE;
+      type: SessionActionTypes.BACKSPACE;
     }
   | {
-      type: SessionActionTypes.HANDLE_CELL_CLICKED;
+      type: SessionActionTypes.CELL_CLICKED;
       cellKey: string;
     }
   | { type: SessionActionTypes.TOGGLE_ORIENTATION }
-  | { type: SessionActionTypes.SET_CELL_SELECTED; cellKey: string }
-  | { type: SessionActionTypes.SELECT_NEXT_CELL }
-  | { type: SessionActionTypes.SELECT_PREVIOUS_CELL }
   | {
       type: SessionActionTypes.MOVE_TO_CLUE;
       nextClueIndex: number;
-    };
+    }
+  | { type: SessionActionTypes.NEXT_CLUE }
+  | { type: SessionActionTypes.PREVIOUS_CLUE };
 
 // #endregion
 
@@ -133,7 +133,6 @@ export const _startSession = (
   };
 
   console.log("Starting Session:", sessionID);
-
   setDoc(sessionRef, session);
 };
 
@@ -206,14 +205,27 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         session: nextSession,
       };
     }
-    case SessionActionTypes.SET_CELL_LETTER: {
-      const { boardState, sessionID } = _requireSession(session);
-      const { cellKey, letter } = action;
+    case SessionActionTypes.START_SESSION: {
+      const { sessionID, puzzle, user } = action;
 
-      _updateCellLetter(sessionID, boardState, cellKey, letter);
+      _startSession(sessionID, puzzle, user);
       return state;
     }
-    case SessionActionTypes.HANDLE_BACKSPACE: {
+    case SessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
+      const { sessionID } = _requireSession(session);
+      _joinSessionParticpants(sessionID, action.userID);
+      return state;
+    }
+    case SessionActionTypes.LETTER_PRESSED: {
+      const { boardState, sessionID, puzzle } = _requireSession(session);
+      const { letter } = action;
+
+      _updateCellLetter(sessionID, boardState, selectedCellKey, letter);
+
+      const nextCellKey = getNextCellKey(selectedCellKey, puzzle, orientation);
+      return _selectCell(state, nextCellKey);
+    }
+    case SessionActionTypes.BACKSPACE: {
       const { boardState, puzzle, sessionID } = _requireSession(session);
 
       const previousCellKey = getPreviousCellKey(
@@ -230,7 +242,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       return _selectCell(state, previousCellKey);
     }
-    case SessionActionTypes.HANDLE_CELL_CLICKED: {
+    case SessionActionTypes.CELL_CLICKED: {
       _requireSession(session);
       const { cellKey } = action;
       const combinedBoardState = getCombinedBoardState(state);
@@ -247,37 +259,90 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         return _selectCell(state, cellKey);
       }
     }
-    case SessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
-      const { sessionID } = _requireSession(session);
-      _joinSessionParticpants(sessionID, action.userID);
-      return state;
-    }
-    case SessionActionTypes.START_SESSION: {
-      const { sessionID, puzzle, user } = action;
 
-      _startSession(sessionID, puzzle, user);
-      return state;
-    }
     case SessionActionTypes.TOGGLE_ORIENTATION: {
       return _toggleOrientation(state);
     }
-    case SessionActionTypes.SET_CELL_SELECTED: {
-      return _selectCell(state, action.cellKey);
-    }
-    case SessionActionTypes.SELECT_NEXT_CELL: {
-      const { puzzle } = _requireSession(session);
-      const nextCellKey = getNextCellKey(selectedCellKey, puzzle, orientation);
-      return _selectCell(state, nextCellKey);
-    }
-    case SessionActionTypes.SELECT_PREVIOUS_CELL: {
+    case SessionActionTypes.MOVE_TO_CLUE: {
+      const { nextClueIndex } = action;
       const { puzzle } = _requireSession(session);
 
-      const previousCellKey = getPreviousCellKey(
-        selectedCellKey,
-        puzzle,
+      if (nextClueIndex >= puzzle.clues[orientation].length) {
+        throw new Error("Clue index is out of bounds");
+      }
+
+      const nextClue = puzzle.clues[orientation][nextClueIndex];
+      const newSelectedCellKey = getCellKeysForClueAndOrientation(
+        nextClue,
         orientation
+      )[0];
+
+      return _selectCell(state, newSelectedCellKey);
+    }
+    case SessionActionTypes.NEXT_CLUE: {
+      const { puzzle } = _requireSession(session);
+
+      const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
+        selectedCellKey,
+        orientation,
+        puzzle
       );
-      return _selectCell(state, previousCellKey);
+
+      const currentClueIndex = puzzle.clues[orientation].findIndex(
+        (clue) => clue == currentSelectedClue
+      );
+
+      const isLastClue =
+        currentClueIndex == puzzle.clues[orientation].length - 1;
+      let newState: SessionState = state;
+      if (isLastClue) {
+        newState = _toggleOrientation(newState);
+        newState = _selectCell(newState, STARTING_SELECTED_CELL);
+      } else {
+        const nextClue = puzzle.clues[orientation][currentClueIndex + 1];
+        const newSelectedCellKey = getCellKeysForClueAndOrientation(
+          nextClue,
+          orientation
+        )[0];
+
+        newState = _selectCell(newState, newSelectedCellKey);
+      }
+
+      return newState;
+    }
+    case SessionActionTypes.PREVIOUS_CLUE: {
+      const { puzzle } = _requireSession(session);
+
+      const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
+        selectedCellKey,
+        orientation,
+        puzzle
+      );
+
+      const currentClueIndex = puzzle.clues[orientation].findIndex(
+        (clue) => clue == currentSelectedClue
+      );
+
+      const isFirstClue = currentClueIndex == 0;
+      let newState: SessionState = state;
+      if (isFirstClue) {
+        const { width, height } = getSizeFromCellKeys(
+          Object.keys(puzzle.solutions)
+        );
+        const lastCellKey = `${width - 1},${height - 1}`;
+        newState = _toggleOrientation(newState);
+        newState = _selectCell(newState, lastCellKey);
+      } else {
+        const nextClue = puzzle.clues[orientation][currentClueIndex - 1];
+        const newSelectedCellKey = getCellKeysForClueAndOrientation(
+          nextClue,
+          orientation
+        )[0];
+
+        newState = _selectCell(newState, newSelectedCellKey);
+      }
+
+      return newState;
     }
     case SessionActionTypes.MOVE_TO_CLUE: {
       const { nextClueIndex } = action;

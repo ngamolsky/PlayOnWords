@@ -80,7 +80,7 @@ export const XCell = ({
           solutionState == CellSolutionState.REVEALED
             ? "fill-blue-600"
             : solutionState == CellSolutionState.PENCIL
-            ? "fill-slate-600"
+            ? "fill-slate-400"
             : "fill-black"
         } `}
       >

@@ -80,8 +80,8 @@ const Solve: React.FC = () => {
       showToolbar
       toolbarChildren={
         <div className="space-x-2 flex-row flex h-8">
-          <button
-            className={`aspect-square rounded-md ${
+          <div
+            className={`h-8 w-8 rounded-md ${
               isPencilModeOn ? "bg-slate-300" : "bg-white"
             } p-1`}
             onClick={() => {
@@ -91,11 +91,11 @@ const Solve: React.FC = () => {
             }}
           >
             <Pencil />
-          </button>
-          <div className="aspect-square rounded-md bg-slate-300 p-1">
+          </div>
+          <div className="h-8 w-8 rounded-md bg-slate-300 p-1">
             <Help />
           </div>
-          <div className="aspect-square rounded-md bg-slate-300 p-1">
+          <div className="h-8 w-8 rounded-md bg-slate-300 p-1">
             <VerticalDots />
           </div>
         </div>

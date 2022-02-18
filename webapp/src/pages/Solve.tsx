@@ -83,7 +83,7 @@ const Solve: React.FC = () => {
           <div
             className={`h-8 w-8 rounded-md ${
               isPencilModeOn ? "bg-slate-300" : "bg-white"
-            } p-1`}
+            } p-1 outline-none`}
             onClick={() => {
               dispatch({
                 type: SessionActionTypes.PENCIL_CLICKED,

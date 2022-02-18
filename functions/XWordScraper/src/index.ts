@@ -17,9 +17,9 @@ export const XWordScraper: HttpFunction = async (_, response) => {
   try {
     console.log("Starting XWordScraper function");
 
-    let puzzleID: string;
+    let puzzleID: number;
     if (process.env.OVERWRITE_PUZZLE_ID) {
-      puzzleID = process.env.OVERWRITE_PUZZLE_ID;
+      puzzleID = parseInt(process.env.OVERWRITE_PUZZLE_ID);
     } else {
       console.log("Loading latest puzzle metadata");
       const latestPuzzleMetadata = (await axios.get(LATEST_PUZZLE_URL)).data
@@ -33,6 +33,12 @@ export const XWordScraper: HttpFunction = async (_, response) => {
 
     const replacePuzzleIfExists =
       process.env.REPLACE_EXISTING_PUZZLE === "true";
+
+    console.log("Replace existing puzzle: ", replacePuzzleIfExists);
+    console.log(
+      "Overwrite latest puzzle ID: ",
+      process.env.OVERWRITE_PUZZLE_ID
+    );
 
     if (replacePuzzleIfExists && existingPuzzle) {
       console.log("Deleting existing puzzle", existingPuzzle.puzzleID);

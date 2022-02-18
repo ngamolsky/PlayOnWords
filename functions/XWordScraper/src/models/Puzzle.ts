@@ -52,8 +52,6 @@ export const deletePuzzle = async (puzzleID: string): Promise<boolean> => {
 
 export const getPuzzleByDate = async (date: Date): Promise<Puzzle | null> => {
   let puzzle = null;
-  console.log(Timestamp.fromDate(date), date);
-
   const results = (
     await db
       .collection("puzzles")
@@ -67,7 +65,7 @@ export const getPuzzleByDate = async (date: Date): Promise<Puzzle | null> => {
 };
 
 export const getPuzzleByNYTPuzzleID = async (
-  nytID: string
+  nytID: number
 ): Promise<Puzzle | null> => {
   let puzzle = null;
   const results = (

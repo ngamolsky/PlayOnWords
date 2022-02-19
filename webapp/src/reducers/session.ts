@@ -289,8 +289,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       );
 
       if (boardState[selectedCellKey].currentLetter) {
-        console.log("updating cellkey to none", selectedCellKey);
-
         _updateCellLetter(
           sessionID,
           userID,

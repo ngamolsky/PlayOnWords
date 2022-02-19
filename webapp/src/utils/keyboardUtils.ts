@@ -1,4 +1,4 @@
 export enum ACTION_KEYS {
-  BACKSPACE = "{bksp}",
+  BACKSPACE = "{backspace}",
   REBUS = "{rebus}",
 }

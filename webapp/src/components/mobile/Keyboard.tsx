@@ -2,34 +2,52 @@ import React, { MutableRefObject } from "react";
 import { SimpleKeyboard } from "react-simple-keyboard";
 import KeyboardLib from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
-
 import { ACTION_KEYS } from "../../utils/keyboardUtils";
 
 type KeyboardProps = {
-  onKeyPress: (key: ACTION_KEYS) => void;
+  onKeyPress: (key: string) => void;
   keyboardRef: MutableRefObject<SimpleKeyboard | null>;
   rebus: boolean;
 };
 
 export const Keyboard = ({ onKeyPress, keyboardRef, rebus }: KeyboardProps) => {
+  const rows = [
+    "q w e r t y u i o p",
+    "a s d f g h j k l",
+    "{rebus} z x c v b n m {backspace}",
+  ];
+
+  const characters = rows
+    .join(" ")
+    .split(" ")
+    .filter((each) => each.length == 1)
+    .reduce(
+      (result, value) => ({ ...result, [value]: value.toUpperCase() }),
+      {}
+    );
+
   return (
     <div>
       <KeyboardLib
         keyboardRef={(r) => (keyboardRef.current = r)}
         layout={{
-          default: [
-            "Q W E R T Y U I O P",
-            "A S D F G H J K L",
-            "{rebus} Z X C V B N M {bksp}",
-          ],
+          default: rows,
         }}
         physicalKeyboardHighlight
-        onKeyPress={onKeyPress}
-        mergeDisplay={true}
+        physicalKeyboardHighlightPress
+        disableButtonHold
+        onKeyPress={(letter: string) => {
+          if (letter.length == 1) {
+            onKeyPress(letter.toUpperCase());
+          } else {
+            onKeyPress(letter);
+          }
+        }}
         display={{
+          ...characters,
           "{space}": "Space",
           "{rebus}": "Rebus",
-          "{bksp}": "⌫",
+          "{backspace}": "⌫",
         }}
         buttonTheme={[
           {

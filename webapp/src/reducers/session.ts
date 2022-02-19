@@ -314,18 +314,22 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       _requireSession(session);
       const { cellKey } = action;
       const combinedBoardState = getCombinedBoardState(state);
+      let newState = state;
+      if (rebus) {
+        newState = _toggleRebus(newState);
+      }
 
       if (
         combinedBoardState[cellKey].cellSelectionState ==
         CellSelectionState.UNSELECTABLE
       ) {
-        return state;
+        return newState;
       }
 
       if (cellKey == selectedCellKey) {
-        return _toggleOrientation(state);
+        return _toggleOrientation(newState);
       } else {
-        return _selectCell(state, cellKey);
+        return _selectCell(newState, cellKey);
       }
     }
     case SessionActionTypes.TOGGLE_ORIENTATION: {

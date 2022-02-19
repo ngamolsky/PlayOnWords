@@ -130,8 +130,6 @@ const Solve: React.FC = () => {
           onKeyPress={(key) => {
             switch (key) {
               case ACTION_KEYS.BACKSPACE:
-                console.log("BBACLKSPACE");
-
                 dispatch({
                   type: SessionActionTypes.BACKSPACE,
                   userID: user.userID,

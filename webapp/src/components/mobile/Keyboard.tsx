@@ -37,10 +37,10 @@ export const Keyboard = ({ onKeyPress, keyboardRef, rebus }: KeyboardProps) => {
         physicalKeyboardHighlightPress
         disableButtonHold
         onKeyPress={(letter: string) => {
-          if (letter.length == 1) {
-            onKeyPress(letter.toUpperCase());
-          } else {
+          if (Object.values<string>(ACTION_KEYS).includes(letter)) {
             onKeyPress(letter);
+          } else {
+            onKeyPress(letter.toUpperCase());
           }
         }}
         display={{

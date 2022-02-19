@@ -19,6 +19,7 @@ import { SessionActionTypes } from "../reducers/session";
 import Pencil from "../components/icons/Pencil";
 import Help from "../components/icons/Help";
 import VerticalDots from "../components/icons/VerticalDots";
+import Timer from "../components/Timer";
 
 export type SelectionState = {
   orientation: OrientationType;
@@ -78,6 +79,9 @@ const Solve: React.FC = () => {
       showToolbar
       toolbarChildren={
         <div className="space-x-2 flex-row flex h-8">
+          <div className="my-auto">
+            <Timer sessionStartDate={session.startTime.toDate()} />
+          </div>
           <div
             className={`h-8 w-8 rounded-md ${
               pencilMode ? "bg-slate-300" : "bg-white"
@@ -142,14 +146,13 @@ const Solve: React.FC = () => {
                 });
                 return;
               default: {
-                const cellState = boardState[selectedCellKey];
                 dispatch({
                   type: SessionActionTypes.LETTER_PRESSED,
                   userID: user.userID,
                   letter: key,
                   solutionState: pencilMode
                     ? CellSolutionState.PENCIL
-                    : cellState.solutionState,
+                    : CellSolutionState.NONE,
                 });
               }
             }

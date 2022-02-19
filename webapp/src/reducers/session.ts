@@ -42,10 +42,10 @@ export enum SessionActionTypes {
   BACKSPACE = "BACKSPACE",
   CELL_CLICKED = "CELL_CLICKED",
   TOGGLE_ORIENTATION = "TOGGLE_ORIENTATION",
-  MOVE_TO_CLUE = "MOVE_TO_CLUE",
   NEXT_CLUE = "NEXT_CLUE",
   PREVIOUS_CLUE = "PREVIOUS_CLUE",
   PENCIL_CLICKED = "PENCIL_CLICKED",
+  REBUS_CLICKED = "REBUS_CLICKED",
   CHECK_PUZZLE = "PENCIL_CLICKED",
   CHECK_WORD = "CHECK_WORD",
   CHECK_SQUARE = "CHECK_SQUARE",
@@ -84,13 +84,10 @@ export type SessionActions =
       cellKey: string;
     }
   | { type: SessionActionTypes.TOGGLE_ORIENTATION }
-  | {
-      type: SessionActionTypes.MOVE_TO_CLUE;
-      nextClueIndex: number;
-    }
   | { type: SessionActionTypes.NEXT_CLUE }
   | { type: SessionActionTypes.PREVIOUS_CLUE }
-  | { type: SessionActionTypes.PENCIL_CLICKED };
+  | { type: SessionActionTypes.PENCIL_CLICKED }
+  | { type: SessionActionTypes.REBUS_CLICKED };
 
 // #endregion
 
@@ -178,6 +175,16 @@ const _toggleOrientation = (currentState: SessionState): SessionState => {
   };
 };
 
+const _toggleRebus = (currentState: SessionState): SessionState => {
+  return {
+    ...currentState,
+    localState: {
+      ...currentState.localState,
+      rebus: !currentState.localState.rebus,
+    },
+  };
+};
+
 const _selectCell = (
   currentState: SessionState,
   cellKey: string
@@ -208,7 +215,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
   action
 ) => {
   const {
-    localState: { orientation, selectedCellKey, isPencilModeOn },
+    localState: { orientation, selectedCellKey, pencilMode, rebus },
     session,
   } = state;
 
@@ -234,22 +241,46 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     case SessionActionTypes.LETTER_PRESSED: {
       const { boardState, sessionID, puzzle } = _requireSession(session);
       const { letter, userID, solutionState } = action;
+      const cellState = boardState[selectedCellKey];
+      if (rebus) {
+        _updateCellLetter(
+          sessionID,
+          userID,
+          boardState,
+          selectedCellKey,
+          solutionState,
+          cellState.currentLetter
+            ? cellState.currentLetter.concat(letter)
+            : letter
+        );
+      } else {
+        _updateCellLetter(
+          sessionID,
+          userID,
+          boardState,
+          selectedCellKey,
+          solutionState,
+          letter
+        );
+        const nextCellKey = getNextCellKey(
+          selectedCellKey,
+          puzzle,
+          orientation
+        );
+        return _selectCell(state, nextCellKey);
+      }
 
-      _updateCellLetter(
-        sessionID,
-        userID,
-        boardState,
-        selectedCellKey,
-        solutionState,
-        letter
-      );
-
-      const nextCellKey = getNextCellKey(selectedCellKey, puzzle, orientation);
-      return _selectCell(state, nextCellKey);
+      return state;
     }
     case SessionActionTypes.BACKSPACE: {
       const { boardState, puzzle, sessionID } = _requireSession(session);
       const { userID } = action;
+
+      let newState = state;
+
+      if (rebus) {
+        newState = _toggleRebus(newState);
+      }
 
       const previousCellKey = getPreviousCellKey(
         selectedCellKey,
@@ -258,6 +289,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       );
 
       if (boardState[selectedCellKey].currentLetter) {
+        console.log("updating cellkey to none", selectedCellKey);
+
         _updateCellLetter(
           sessionID,
           userID,
@@ -277,7 +310,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         );
       }
 
-      return _selectCell(state, previousCellKey);
+      return _selectCell(newState, previousCellKey);
     }
     case SessionActionTypes.CELL_CLICKED: {
       _requireSession(session);
@@ -297,25 +330,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         return _selectCell(state, cellKey);
       }
     }
-
     case SessionActionTypes.TOGGLE_ORIENTATION: {
       return _toggleOrientation(state);
-    }
-    case SessionActionTypes.MOVE_TO_CLUE: {
-      const { nextClueIndex } = action;
-      const { puzzle } = _requireSession(session);
-
-      if (nextClueIndex >= puzzle.clues[orientation].length) {
-        throw new Error("Clue index is out of bounds");
-      }
-
-      const nextClue = puzzle.clues[orientation][nextClueIndex];
-      const newSelectedCellKey = getCellKeysForClueAndOrientation(
-        nextClue,
-        orientation
-      )[0];
-
-      return _selectCell(state, newSelectedCellKey);
     }
     case SessionActionTypes.NEXT_CLUE: {
       const { puzzle } = _requireSession(session);
@@ -382,29 +398,16 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       return newState;
     }
-    case SessionActionTypes.MOVE_TO_CLUE: {
-      const { nextClueIndex } = action;
-      const { puzzle } = _requireSession(session);
-
-      if (nextClueIndex >= puzzle.clues[orientation].length) {
-        throw new Error("Clue index is out of bounds");
-      }
-
-      const nextClue = puzzle.clues[orientation][nextClueIndex];
-      const newSelectedCellKey = getCellKeysForClueAndOrientation(
-        nextClue,
-        orientation
-      )[0];
-
-      return _selectCell(state, newSelectedCellKey);
-    }
-    case SessionActionTypes.PENCIL_CLICKED:
+    case SessionActionTypes.PENCIL_CLICKED: {
       return {
         ...state,
         localState: {
           ...state.localState,
-          isPencilModeOn: !isPencilModeOn,
+          pencilMode: !pencilMode,
         },
       };
+    }
+    case SessionActionTypes.REBUS_CLICKED:
+      return _toggleRebus(state);
   }
 };

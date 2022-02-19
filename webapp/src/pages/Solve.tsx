@@ -38,10 +38,8 @@ const Solve: React.FC = () => {
 
   const {
     session,
-    localState: { selectedCellKey, orientation, isPencilModeOn },
+    localState: { selectedCellKey, orientation, pencilMode, rebus },
   } = sessionState;
-
-  // const sessionUsers = useUsersByID(session?.participantIDs);
 
   const keyboardRef: MutableRefObject<SimpleKeyboard | null> =
     useRef<SimpleKeyboard>(null);
@@ -82,7 +80,7 @@ const Solve: React.FC = () => {
         <div className="space-x-2 flex-row flex h-8">
           <div
             className={`h-8 w-8 rounded-md ${
-              isPencilModeOn ? "bg-slate-300" : "bg-white"
+              pencilMode ? "bg-slate-300" : "bg-white"
             } p-1 outline-none`}
             onClick={() => {
               dispatch({
@@ -92,10 +90,10 @@ const Solve: React.FC = () => {
           >
             <Pencil />
           </div>
-          <div className="h-8 w-8 rounded-md bg-slate-300 p-1">
+          <div className="h-8 w-8 rounded-md p-1">
             <Help />
           </div>
-          <div className="h-8 w-8 rounded-md bg-slate-300 p-1">
+          <div className="h-8 w-8 rounded-md p-1">
             <VerticalDots />
           </div>
         </div>
@@ -130,6 +128,8 @@ const Solve: React.FC = () => {
         />
         <Keyboard
           onKeyPress={(key) => {
+            console.log(key);
+
             switch (key) {
               case ACTION_KEYS.BACKSPACE:
                 dispatch({
@@ -139,24 +139,24 @@ const Solve: React.FC = () => {
 
                 return;
               case ACTION_KEYS.REBUS:
-                console.log("REBUS");
+                dispatch({
+                  type: SessionActionTypes.REBUS_CLICKED,
+                });
                 return;
+              default: {
+                const cellState = boardState[selectedCellKey];
+                dispatch({
+                  type: SessionActionTypes.LETTER_PRESSED,
+                  userID: user.userID,
+                  letter: key,
+                  solutionState: pencilMode
+                    ? CellSolutionState.PENCIL
+                    : cellState.solutionState,
+                });
+              }
             }
           }}
-          onChange={(letter): void => {
-            const cellState = boardState[selectedCellKey];
-            dispatch({
-              type: SessionActionTypes.LETTER_PRESSED,
-              userID: user.userID,
-              letter,
-              solutionState: isPencilModeOn
-                ? CellSolutionState.PENCIL
-                : cellState.solutionState,
-            });
-            if (keyboardRef.current) {
-              keyboardRef.current.setInput("");
-            }
-          }}
+          rebus={rebus}
           keyboardRef={keyboardRef}
         />
       </>

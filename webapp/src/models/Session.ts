@@ -42,7 +42,8 @@ export enum OrientationType {
 export type LocalSessionState = {
   orientation: OrientationType;
   selectedCellKey: string;
-  isPencilModeOn: boolean;
+  pencilMode: boolean;
+  rebus: boolean;
 };
 
 export enum CellSelectionState {

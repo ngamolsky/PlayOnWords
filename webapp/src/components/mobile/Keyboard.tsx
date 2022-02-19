@@ -6,16 +6,12 @@ import "react-simple-keyboard/build/css/index.css";
 import { ACTION_KEYS } from "../../utils/keyboardUtils";
 
 type KeyboardProps = {
-  onChange: (input: string, event?: MouseEvent) => void;
   onKeyPress: (key: ACTION_KEYS) => void;
   keyboardRef: MutableRefObject<SimpleKeyboard | null>;
+  rebus: boolean;
 };
 
-export const Keyboard = ({
-  onChange,
-  onKeyPress,
-  keyboardRef,
-}: KeyboardProps) => {
+export const Keyboard = ({ onKeyPress, keyboardRef, rebus }: KeyboardProps) => {
   return (
     <div>
       <KeyboardLib
@@ -27,7 +23,7 @@ export const Keyboard = ({
             "{rebus} Z X C V B N M {bksp}",
           ],
         }}
-        onChange={onChange}
+        physicalKeyboardHighlight
         onKeyPress={onKeyPress}
         mergeDisplay={true}
         display={{
@@ -36,13 +32,8 @@ export const Keyboard = ({
           "{bksp}": "⌫",
         }}
         buttonTheme={[
-          // {
-          //   class: "hover:-translate-y-full z-10",
-          //   buttons:
-          //     "Q W E R T Y U I O P A S D F G H J K L {rebus} Z X C V B N M {bksp}",
-          // },
           {
-            class: "w-10",
+            class: rebus ? "bg-blue-300 w-10" : "w-10",
             buttons: "{rebus}",
           },
         ]}

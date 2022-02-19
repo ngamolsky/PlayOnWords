@@ -68,24 +68,26 @@ export const XCell = ({
       >
         {clueNumber}
       </text>
-      <text
-        x={cellSize * x + cellSize / 2}
-        y={cellSize * y + cellSize - 0.7}
-        fontSize={cellSize - cellSize * 0.2}
-        fontFamily="arial,sans-serif"
-        textAnchor="middle"
-        pointerEvents="none"
-        letterSpacing="0"
-        className={`select-none ${
-          solutionState == CellSolutionState.REVEALED
-            ? "fill-blue-600"
-            : solutionState == CellSolutionState.PENCIL
-            ? "fill-slate-400"
-            : "fill-black"
-        } `}
-      >
-        {currentLetter}
-      </text>
+      {currentLetter && (
+        <text
+          x={cellSize * x + cellSize / 2}
+          y={cellSize * y + cellSize - 0.7}
+          fontSize={cellSize - cellSize * (0.2 * currentLetter.length)}
+          fontFamily="arial,sans-serif"
+          textAnchor="middle"
+          pointerEvents="none"
+          letterSpacing="0"
+          className={`select-none ${
+            solutionState == CellSolutionState.REVEALED
+              ? "fill-blue-600"
+              : solutionState == CellSolutionState.PENCIL
+              ? "fill-slate-400"
+              : "fill-black"
+          } `}
+        >
+          {currentLetter}
+        </text>
+      )}
     </g>
   );
 };

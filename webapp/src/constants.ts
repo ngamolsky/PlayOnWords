@@ -1,4 +1,4 @@
-import { OrientationType } from "./models/Session";
+import { OrientationType } from "./reducers/session";
 
 export const APP_NAME = "XWord";
 

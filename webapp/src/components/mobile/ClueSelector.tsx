@@ -1,6 +1,6 @@
 import React from "react";
 import { Clue } from "../../models/Puzzle";
-import { OrientationType } from "../../models/Session";
+import { OrientationType } from "../../reducers/session";
 import ChevronLeft from "../icons/ChevronLeft";
 import ChevronRight from "../icons/ChevronRight";
 

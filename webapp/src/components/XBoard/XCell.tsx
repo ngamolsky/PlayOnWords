@@ -51,7 +51,7 @@ export const XCell = ({
       />
       {solutionState === CellSolutionState.WRONG && (
         <path
-          d={`m ${x} ${y} l ${cellSize} ${cellSize}`}
+          d={`m ${cellSize * x} ${cellSize * y} l ${cellSize} ${cellSize}`}
           strokeWidth={0.4}
           strokeLinecap="butt"
           className="stroke-red-500 stroke-[.4]"

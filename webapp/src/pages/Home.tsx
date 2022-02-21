@@ -7,13 +7,11 @@ import { signOut, useLoggedInUser } from "../models/User";
 import Avatar from "../components/Avatar";
 import { PuzzleCard, PuzzleCardAction } from "../components/PuzzleCard";
 import { v4 } from "uuid";
-import { useSessionActions } from "../hooks/useSessionState";
-import { SessionActionTypes } from "../reducers/session";
+import { startSession } from "../reducers/session";
 
 const Home: React.FC = () => {
   const history = useHistory();
   const [puzzles, loading] = useRecentPuzzles(NUM_PUZZLES_TO_SHOW_ON_HOME);
-  const dispatch = useSessionActions();
 
   const user = useLoggedInUser();
 
@@ -33,12 +31,7 @@ const Home: React.FC = () => {
                 case PuzzleCardAction.NEW_GAME:
                   const sessionID = `session.${v4()}`;
 
-                  dispatch({
-                    type: SessionActionTypes.START_SESSION,
-                    puzzle: puzzle,
-                    sessionID,
-                    user,
-                  });
+                  await startSession(sessionID, puzzle, user);
                   history.push(`/solve/${sessionID}`);
                   return;
                 case PuzzleCardAction.CONTINUE_GAME:

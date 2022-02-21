@@ -4,23 +4,28 @@ import {
   CellSolutionState,
   CombinedBoardState,
   CombinedCellState,
-  OrientationType,
   BoardState,
   Session,
-  SessionState,
+  CellState,
 } from "../models/Session";
+import { OrientationType, SessionState } from "../reducers/session";
 
 export const getBoardStateFromSolutions = (
-  solutions: Solutions
+  solutions: Solutions,
+  userID?: string
 ): BoardState => {
   const newBoardState = Object.fromEntries(
-    Object.entries(solutions).map(([cellKey, solution]) => [
-      cellKey,
-      {
+    Object.entries(solutions).map(([cellKey, solution]) => {
+      const cellState: CellState = {
         currentLetter: solution ? "" : null,
         solutionState: CellSolutionState.NONE,
-      },
-    ])
+      };
+
+      if (userID) {
+        cellState.lastEditedBy = userID;
+      }
+      return [cellKey, cellState];
+    })
   );
 
   return newBoardState;
@@ -232,27 +237,6 @@ export const getCellKeysForClueAndOrientation = (
   }
 
   return cellKeys;
-};
-
-export const getResetBoardStateFromCurrentBoardState = (
-  boardState: BoardState
-): BoardState => {
-  let newBoardState: BoardState = {};
-  newBoardState = Object.entries(boardState).reduce(
-    (newBoardState, [cellKey, cellState]) => {
-      if (cellState) {
-        newBoardState[cellKey] = {
-          ...cellState,
-          currentLetter: "",
-          solutionState: CellSolutionState.NONE,
-        };
-      }
-
-      return newBoardState;
-    },
-    newBoardState
-  );
-  return newBoardState;
 };
 
 export const getCombinedBoardState = (

@@ -1,7 +1,6 @@
 import { Puzzle } from "./Puzzle";
 import { Timestamp } from "firebase/firestore";
 
-// #region Model Types
 
 export type Session = {
   sessionID: string;
@@ -29,23 +28,6 @@ export enum CellSolutionState {
   PENCIL = "pencil",
 }
 
-export type SessionState = {
-  session?: Session;
-  localState: LocalSessionState;
-};
-
-export enum OrientationType {
-  HORIZONTAL = "horizontal",
-  VERTICAL = "vertical",
-}
-
-export type LocalSessionState = {
-  orientation: OrientationType;
-  selectedCellKey: string;
-  pencilMode: boolean;
-  rebus: boolean;
-};
-
 export enum CellSelectionState {
   SELECTED_WORD = "selected_word",
   SELECTED_CELL = "selected_cell",
@@ -60,5 +42,3 @@ export type CombinedCellState = CellState & {
 export type CombinedBoardState = {
   [key: string]: CombinedCellState;
 };
-
-// #endregion

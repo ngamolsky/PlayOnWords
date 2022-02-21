@@ -13,8 +13,6 @@ import {
 } from "../constants";
 import { Puzzle } from "../models/Puzzle";
 import {
-  SessionState,
-  OrientationType,
   CellState,
   BoardState,
   Session,
@@ -32,11 +30,30 @@ import {
   getSizeFromCellKeys,
 } from "../utils/sessionUtils";
 
+// #region State
+export type SessionState = {
+  session?: Session;
+  localState: LocalSessionState;
+};
+
+export enum OrientationType {
+  HORIZONTAL = "horizontal",
+  VERTICAL = "vertical",
+}
+
+export type LocalSessionState = {
+  orientation: OrientationType;
+  selectedCellKey: string;
+  pencilMode: boolean;
+  rebus: boolean;
+};
+
+// #endregion
+
 // #region Actions
 
 export enum SessionActionTypes {
   SET_SHARED_STATE = "SET_SHARED_STATE",
-  START_SESSION = "START_SESSION",
   JOIN_SESSION_PARTICIPANTS = "JOIN_SESSION_PARTICIPANTS",
   LETTER_PRESSED = "LETTER_PRESSED",
   BACKSPACE = "BACKSPACE",
@@ -46,24 +63,19 @@ export enum SessionActionTypes {
   PREVIOUS_CLUE = "PREVIOUS_CLUE",
   PENCIL_CLICKED = "PENCIL_CLICKED",
   REBUS_CLICKED = "REBUS_CLICKED",
-  CHECK_PUZZLE = "PENCIL_CLICKED",
+  CHECK_PUZZLE = "CHECK_PUZZLE",
   CHECK_WORD = "CHECK_WORD",
   CHECK_SQUARE = "CHECK_SQUARE",
   REVEAL_PUZZLE = "REVEAL_PUZZLE",
   REVEAL_WORD = "REVEAL_WORD",
   REVEAL_SQUARE = "REVEAL_SQUARE",
+  RESET_PUZZLE = "RESET_PUZZLE",
 }
 
 export type SessionActions =
   | {
       type: SessionActionTypes.SET_SHARED_STATE;
       session: Session;
-    }
-  | {
-      type: SessionActionTypes.START_SESSION;
-      sessionID: string;
-      puzzle: Puzzle;
-      user: User;
     }
   | {
       type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS;
@@ -87,7 +99,14 @@ export type SessionActions =
   | { type: SessionActionTypes.NEXT_CLUE }
   | { type: SessionActionTypes.PREVIOUS_CLUE }
   | { type: SessionActionTypes.PENCIL_CLICKED }
-  | { type: SessionActionTypes.REBUS_CLICKED };
+  | { type: SessionActionTypes.REBUS_CLICKED }
+  | { type: SessionActionTypes.CHECK_SQUARE; userID: string }
+  | { type: SessionActionTypes.CHECK_WORD; userID: string }
+  | { type: SessionActionTypes.CHECK_PUZZLE; userID: string }
+  | { type: SessionActionTypes.REVEAL_SQUARE; userID: string }
+  | { type: SessionActionTypes.REVEAL_WORD; userID: string }
+  | { type: SessionActionTypes.REVEAL_PUZZLE; userID: string }
+  | { type: SessionActionTypes.RESET_PUZZLE; userID: string };
 
 // #endregion
 
@@ -95,7 +114,7 @@ export type SessionActions =
 
 // Shared functions only affect shared state, because they don't set the state locally
 // (that happens in the snapshot handler using the special SET_SHARED_STATE action).
-// They shouldn't return anything, so it's clear that the modified state can't be used immedietely.
+// They shouldn't return anything, so it's clear that the modified state can't be used immediately.
 
 // #region Shared Functions
 
@@ -106,7 +125,7 @@ const _updateBoardState = (sessionID: string, boardState: BoardState): void => {
   });
 };
 
-const _updateCellLetter = (
+const _updateCellState = (
   sessionID: string,
   userID: string,
   boardState: BoardState,
@@ -126,26 +145,6 @@ const _updateCellLetter = (
   };
 
   _updateBoardState(sessionID, newBoardState);
-};
-
-export const _startSession = (
-  sessionID: string,
-  puzzle: Puzzle,
-  user: User
-): void => {
-  const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
-
-  const session = {
-    sessionID,
-    puzzle,
-    participantIDs: [user.userID],
-    ownerID: user.userID,
-    startTime: Timestamp.now(),
-    boardState: getBoardStateFromSolutions(puzzle.solutions),
-  };
-
-  console.log("Starting Session:", sessionID);
-  setDoc(sessionRef, session);
 };
 
 const _joinSessionParticpants = (sessionID: string, userID: string): void => {
@@ -200,12 +199,54 @@ const _selectCell = (
 
 // #endregion
 
+// #region Utilities
+
 const _requireSession = (session: Session | undefined): Session => {
   if (!session) {
     throw new Error("Session required for this action!");
   }
 
   return session;
+};
+
+const _checkCell = (
+  cellSolution: string | string[],
+  currentCellValue: string
+): CellSolutionState => {
+  let isCorrect = false;
+  if (Array.isArray(cellSolution)) {
+    isCorrect = cellSolution.includes(currentCellValue);
+  } else if (typeof cellSolution == "string") {
+    isCorrect = cellSolution == currentCellValue;
+  }
+
+  return isCorrect ? CellSolutionState.REVEALED : CellSolutionState.WRONG;
+};
+
+// #endregion
+
+// #endregion
+
+// #region Public
+
+export const startSession = async (
+  sessionID: string,
+  puzzle: Puzzle,
+  user: User
+): Promise<void> => {
+  const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
+
+  const session = {
+    sessionID,
+    puzzle,
+    participantIDs: [user.userID],
+    ownerID: user.userID,
+    startTime: Timestamp.now(),
+    boardState: getBoardStateFromSolutions(puzzle.solutions),
+  };
+
+  console.log("Starting Session:", sessionID);
+  await setDoc(sessionRef, session);
 };
 
 // #endregion
@@ -227,12 +268,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         session: nextSession,
       };
     }
-    case SessionActionTypes.START_SESSION: {
-      const { sessionID, puzzle, user } = action;
-
-      _startSession(sessionID, puzzle, user);
-      return state;
-    }
     case SessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
       const { sessionID } = _requireSession(session);
       _joinSessionParticpants(sessionID, action.userID);
@@ -243,7 +278,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       const { letter, userID, solutionState } = action;
       const cellState = boardState[selectedCellKey];
       if (rebus) {
-        _updateCellLetter(
+        _updateCellState(
           sessionID,
           userID,
           boardState,
@@ -254,7 +289,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
             : letter
         );
       } else {
-        _updateCellLetter(
+        _updateCellState(
           sessionID,
           userID,
           boardState,
@@ -289,7 +324,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       );
 
       if (boardState[selectedCellKey].currentLetter) {
-        _updateCellLetter(
+        _updateCellState(
           sessionID,
           userID,
           boardState,
@@ -298,7 +333,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           ""
         );
       } else if (boardState[previousCellKey].currentLetter) {
-        _updateCellLetter(
+        _updateCellState(
           sessionID,
           userID,
           boardState,
@@ -409,7 +444,183 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         },
       };
     }
-    case SessionActionTypes.REBUS_CLICKED:
+    case SessionActionTypes.REBUS_CLICKED: {
       return _toggleRebus(state);
+    }
+    case SessionActionTypes.CHECK_SQUARE: {
+      const { sessionID, boardState, puzzle } = _requireSession(session);
+      const { userID } = action;
+      const currentCellValue = boardState[selectedCellKey].currentLetter;
+      const cellSolution = puzzle.solutions[selectedCellKey];
+
+      console.log(currentCellValue, cellSolution);
+
+      if (!currentCellValue || !cellSolution) return state;
+
+      const solutionState = _checkCell(cellSolution, currentCellValue);
+
+      _updateCellState(
+        sessionID,
+        userID,
+        boardState,
+        selectedCellKey,
+        solutionState,
+        currentCellValue
+      );
+
+      return state;
+    }
+    case SessionActionTypes.CHECK_WORD: {
+      const { sessionID, boardState, puzzle } = _requireSession(session);
+      const { userID } = action;
+      const currentCellValue = boardState[selectedCellKey].currentLetter;
+      const cellSolution = puzzle.solutions[selectedCellKey];
+
+      if (!currentCellValue || !cellSolution) return state;
+
+      const currentClue = getClueFromCellKeyOrientationAndPuzzle(
+        selectedCellKey,
+        orientation,
+        puzzle
+      );
+      const activeCellKeys = getCellKeysForClueAndOrientation(
+        currentClue,
+        orientation
+      );
+
+      const newBoardState = boardState;
+      activeCellKeys.forEach((cellKey) => {
+        const cellSolution = puzzle.solutions[cellKey];
+        const cellLetter = boardState[cellKey].currentLetter;
+
+        if (!cellSolution || !cellLetter) return;
+
+        const solutionState = _checkCell(cellSolution, cellLetter);
+
+        newBoardState[cellKey] = {
+          ...newBoardState[cellKey],
+          solutionState,
+          lastEditedBy: userID,
+        };
+      });
+
+      _updateBoardState(sessionID, newBoardState);
+      return state;
+    }
+    case SessionActionTypes.CHECK_PUZZLE: {
+      const { sessionID, boardState, puzzle } = _requireSession(session);
+      const { userID } = action;
+      const currentCellValue = boardState[selectedCellKey].currentLetter;
+      const cellSolution = puzzle.solutions[selectedCellKey];
+
+      if (!currentCellValue || !cellSolution) return state;
+
+      const newBoardState = boardState;
+      Object.keys(boardState).forEach((cellKey) => {
+        const cellSolution = puzzle.solutions[cellKey];
+        const cellLetter = boardState[cellKey].currentLetter;
+
+        if (!cellSolution || !cellLetter) return;
+
+        const solutionState = _checkCell(cellSolution, cellLetter);
+
+        newBoardState[cellKey] = {
+          ...newBoardState[cellKey],
+          solutionState,
+          lastEditedBy: userID,
+        };
+      });
+
+      _updateBoardState(sessionID, newBoardState);
+      return state;
+    }
+    case SessionActionTypes.REVEAL_SQUARE: {
+      const { sessionID, boardState, puzzle } = _requireSession(session);
+      const { userID } = action;
+      const cellSolution = puzzle.solutions[selectedCellKey];
+
+      if (!cellSolution) return state;
+
+      _updateCellState(
+        sessionID,
+        userID,
+        boardState,
+        selectedCellKey,
+        CellSolutionState.REVEALED,
+        cellSolution[0]
+      );
+
+      return state;
+    }
+    case SessionActionTypes.REVEAL_WORD: {
+      const { sessionID, boardState, puzzle } = _requireSession(session);
+      const { userID } = action;
+      const cellSolution = puzzle.solutions[selectedCellKey];
+
+      if (!cellSolution) return state;
+
+      const currentClue = getClueFromCellKeyOrientationAndPuzzle(
+        selectedCellKey,
+        orientation,
+        puzzle
+      );
+      const activeCellKeys = getCellKeysForClueAndOrientation(
+        currentClue,
+        orientation
+      );
+
+      const newBoardState = boardState;
+      activeCellKeys.forEach((cellKey) => {
+        const cellSolution = puzzle.solutions[cellKey];
+
+        if (!cellSolution) return;
+
+        newBoardState[cellKey] = {
+          ...newBoardState[cellKey],
+          currentLetter: cellSolution[0],
+          solutionState: CellSolutionState.REVEALED,
+          lastEditedBy: userID,
+        };
+      });
+
+      _updateBoardState(sessionID, newBoardState);
+      return state;
+    }
+    case SessionActionTypes.REVEAL_PUZZLE: {
+      const { sessionID, boardState, puzzle } = _requireSession(session);
+      const { userID } = action;
+      const currentCellValue = boardState[selectedCellKey].currentLetter;
+      const cellSolution = puzzle.solutions[selectedCellKey];
+
+      if (!currentCellValue || !cellSolution) return state;
+
+      const newBoardState = boardState;
+      Object.keys(boardState).forEach((cellKey) => {
+        const cellSolution = puzzle.solutions[cellKey];
+
+        if (!cellSolution) return;
+
+        newBoardState[cellKey] = {
+          ...newBoardState[cellKey],
+          currentLetter: cellSolution[0],
+          solutionState: CellSolutionState.REVEALED,
+          lastEditedBy: userID,
+        };
+      });
+
+      _updateBoardState(sessionID, newBoardState);
+      return state;
+    }
+    case SessionActionTypes.RESET_PUZZLE: {
+      const { sessionID, puzzle } = _requireSession(session);
+      const { userID } = action;
+      const newBoardState = getBoardStateFromSolutions(
+        puzzle.solutions,
+        userID
+      );
+
+      _updateBoardState(sessionID, newBoardState);
+      return state;
+    }
   }
 };

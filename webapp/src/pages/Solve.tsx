@@ -1,9 +1,9 @@
 import React, { MutableRefObject, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { SimpleKeyboard } from "react-simple-keyboard";
 
 import { XWordContainer } from "../components/XWordContainer";
-import { CellSolutionState, OrientationType } from "../models/Session";
+import { CellSolutionState } from "../models/Session";
 import { XBoard } from "../components/XBoard/XBoard";
 import { Keyboard } from "../components/mobile/Keyboard";
 import { ClueSelector } from "../components/mobile/ClueSelector";
@@ -12,7 +12,7 @@ import {
   getCombinedBoardState,
   isUserInSession,
 } from "../utils/sessionUtils";
-import { useLoggedInUser } from "../models/User";
+import { signOut, useLoggedInUser } from "../models/User";
 import { ACTION_KEYS } from "../utils/keyboardUtils";
 import { useSessionState } from "../hooks/useSessionState";
 import { SessionActionTypes } from "../reducers/session";
@@ -20,6 +20,7 @@ import Pencil from "../components/icons/Pencil";
 import Help from "../components/icons/Help";
 import VerticalDots from "../components/icons/VerticalDots";
 import Timer from "../components/Timer";
+import DropdownMenu from "../components/DropdownMenu";
 
 export type SelectionState = {
   orientation: OrientationType;
@@ -34,6 +35,7 @@ const Solve: React.FC = () => {
   }
 
   const user = useLoggedInUser();
+  const location = useLocation();
 
   const [sessionState, dispatch] = useSessionState(sessionID);
 
@@ -94,12 +96,116 @@ const Solve: React.FC = () => {
           >
             <Pencil />
           </div>
-          <div className="h-8 w-8 rounded-md p-1">
-            <Help />
-          </div>
-          <div className="h-8 w-8 rounded-md p-1">
-            <VerticalDots />
-          </div>
+          <DropdownMenu
+            buttonContent={
+              <div className="h-8 w-8 rounded-md p-1 active:bg-slate-300 outline-none">
+                <Help />
+              </div>
+            }
+            items={[
+              {
+                node: <p>Autocheck</p>,
+                onClick: () => {
+                  console.log("CHECK_SQUARE clicked");
+                  dispatch({
+                    type: SessionActionTypes.CHECK_SQUARE,
+                    userID: user.userID,
+                  });
+                },
+              },
+              {
+                node: <p>Check Square</p>,
+                onClick: () => {
+                  console.log("CHECK_SQUARE clicked");
+                  dispatch({
+                    type: SessionActionTypes.CHECK_SQUARE,
+                    userID: user.userID,
+                  });
+                },
+              },
+              {
+                node: <p>Check Word</p>,
+                onClick: () => {
+                  dispatch({
+                    type: SessionActionTypes.CHECK_WORD,
+                    userID: user.userID,
+                  });
+                },
+              },
+              {
+                node: <p>Check Puzzle</p>,
+                onClick: () => {
+                  dispatch({
+                    type: SessionActionTypes.CHECK_PUZZLE,
+                    userID: user.userID,
+                  });
+                },
+              },
+              {
+                node: <p>Reveal Square</p>,
+                onClick: () => {
+                  dispatch({
+                    type: SessionActionTypes.REVEAL_SQUARE,
+                    userID: user.userID,
+                  });
+                },
+              },
+              {
+                node: <p>Reveal Word</p>,
+                onClick: () => {
+                  dispatch({
+                    type: SessionActionTypes.REVEAL_WORD,
+                    userID: user.userID,
+                  });
+                },
+              },
+              {
+                node: <p>Reveal Puzzle</p>,
+                onClick: () => {
+                  dispatch({
+                    type: SessionActionTypes.REVEAL_PUZZLE,
+                    userID: user.userID,
+                  });
+                },
+              },
+              {
+                node: <p>Reset Puzzle</p>,
+                onClick: () => {
+                  dispatch({
+                    type: SessionActionTypes.RESET_PUZZLE,
+                    userID: user.userID,
+                  });
+                },
+              },
+            ]}
+            anchor="right"
+          />
+          <DropdownMenu
+            buttonContent={
+              <div className="h-8 w-8 rounded-md p-1 active:bg-slate-300  outline-none">
+                <VerticalDots />
+              </div>
+            }
+            items={[
+              {
+                node: <p>Sign Out</p>,
+                onClick: signOut,
+              },
+              {
+                node: <p>Log Particpants</p>,
+                onClick: () => {
+                  console.log(session.participantIDs);
+                },
+              },
+              {
+                node: <p>Get Share Link</p>,
+                onClick: () => {
+                  console.log(location.pathname);
+                },
+              },
+            ]}
+            anchor="right"
+          />
         </div>
       }
     >

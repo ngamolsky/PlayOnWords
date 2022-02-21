@@ -22,16 +22,12 @@ const Timer = ({ sessionStartDate }: { sessionStartDate: Date }) => {
     setSecondsDiff(calcDiffInSeconds(currentDate, sessionStartDate));
   }, [currentDate, sessionStartDate]);
 
-  console.log(secondsDiff);
 
   const durationDate = new Date(secondsDiff * 1000);
 
   const hh = durationDate.getUTCHours();
   const mm = durationDate.getUTCMinutes();
   const ss = durationDate.getSeconds();
-  // If you were building a timestamp instead of a duration, you would uncomment the following line to get 12-hour (not 24) time
-  // if (hh > 12) {hh = hh % 12;}
-  // These lines ensure you have two-digits
 
   let hourString = hh.toString();
   if (hh < 10) {

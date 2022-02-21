@@ -6,11 +6,12 @@ import {
   STARTING_ORIENTATION,
   STARTING_SELECTED_CELL,
 } from "../constants";
-import { SessionState, Session } from "../models/Session";
+import { Session } from "../models/Session";
 import {
   SessionActions,
   SessionActionTypes,
   sessionReducer,
+  SessionState,
 } from "../reducers/session";
 
 export const useSessionState = (

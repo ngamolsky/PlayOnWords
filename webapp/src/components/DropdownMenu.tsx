@@ -7,16 +7,17 @@ type DropdownMenuProps = {
     onClick: () => void;
   }[];
   buttonContent: React.ReactNode;
-  anchor?: "left" | "right" | "center";
+  selectedItemIndex?: number;
 };
 
 const DropdownMenu: React.FC<DropdownMenuProps> = ({
   buttonContent,
   items,
+  selectedItemIndex,
 }) => {
   return (
     <Menu as="div">
-      <Menu.Button>{buttonContent}</Menu.Button>
+      <Menu.Button as="div">{buttonContent}</Menu.Button>
       <Transition
         as={Fragment}
         enter="transition ease-out duration-100"
@@ -27,21 +28,24 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
         leaveTo="transform opacity-0 scale-50"
       >
         <Menu.Items
-          className={`absolute
+          className={`absolute right-0
           bg-white divide-y divide-gray-100 rounded-md 
-            shadow-lg ring-1 ring-black ring-opacity-5 
-            focus:outline-none`}
+            shadow-lg ring-1 ring-black ring-opacity-5`}
         >
           {items.map((item, index) => (
             <Menu.Item key={index}>
-              {({ active }) => (
-                <div
-                  className={`${active && "bg-blue-400"} py-1 px-2`}
-                  onClick={item.onClick}
-                >
-                  {item.node}
-                </div>
-              )}
+              {({ active }) => {
+                return (
+                  <div
+                    className={`${
+                      (active || index == selectedItemIndex) && "bg-blue-400"
+                    } py-1 px-2 ${index == 0 && "rounded-t-md"}`}
+                    onClick={item.onClick}
+                  >
+                    {item.node}
+                  </div>
+                );
+              }}
             </Menu.Item>
           ))}
         </Menu.Items>

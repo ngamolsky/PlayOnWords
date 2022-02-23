@@ -23,6 +23,7 @@ export const useSessionState = (
       selectedCellKey: STARTING_SELECTED_CELL,
       pencilMode: false,
       rebus: false,
+      autocheck: false,
     },
   });
 
@@ -57,6 +58,7 @@ export const useSessionActions = (): Dispatch<SessionActions> => {
       selectedCellKey: STARTING_SELECTED_CELL,
       pencilMode: false,
       rebus: false,
+      autocheck: false,
     },
   });
 

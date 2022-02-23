@@ -41,7 +41,7 @@ const Solve: React.FC = () => {
 
   const {
     session,
-    localState: { selectedCellKey, orientation, pencilMode, rebus },
+    localState: { selectedCellKey, orientation, pencilMode, rebus, autocheck },
   } = sessionState;
 
   const keyboardRef: MutableRefObject<SimpleKeyboard | null> =
@@ -80,14 +80,14 @@ const Solve: React.FC = () => {
       isLoading={false}
       showToolbar
       toolbarChildren={
-        <div className="space-x-2 flex-row flex h-8">
+        <div className="space-x-2 flex-row flex h-8 relative">
           <div className="my-auto">
             <Timer sessionStartDate={session.startTime.toDate()} />
           </div>
           <div
             className={`h-8 w-8 rounded-md ${
               pencilMode ? "bg-slate-300" : "bg-white"
-            } p-1 outline-none`}
+            } p-1`}
             onClick={() => {
               dispatch({
                 type: SessionActionTypes.PENCIL_CLICKED,
@@ -97,8 +97,9 @@ const Solve: React.FC = () => {
             <Pencil />
           </div>
           <DropdownMenu
+            selectedItemIndex={autocheck ? 0 : undefined}
             buttonContent={
-              <div className="h-8 w-8 rounded-md p-1 active:bg-slate-300 outline-none">
+              <div className="h-8 w-8 rounded-md p-1 active:bg-slate-300">
                 <Help />
               </div>
             }
@@ -106,17 +107,14 @@ const Solve: React.FC = () => {
               {
                 node: <p>Autocheck</p>,
                 onClick: () => {
-                  console.log("CHECK_SQUARE clicked");
                   dispatch({
-                    type: SessionActionTypes.CHECK_SQUARE,
-                    userID: user.userID,
+                    type: SessionActionTypes.AUTOCHECK_CLICKED,
                   });
                 },
               },
               {
                 node: <p>Check Square</p>,
                 onClick: () => {
-                  console.log("CHECK_SQUARE clicked");
                   dispatch({
                     type: SessionActionTypes.CHECK_SQUARE,
                     userID: user.userID,
@@ -178,11 +176,10 @@ const Solve: React.FC = () => {
                 },
               },
             ]}
-            anchor="right"
           />
           <DropdownMenu
             buttonContent={
-              <div className="h-8 w-8 rounded-md p-1 active:bg-slate-300  outline-none">
+              <div className="h-8 w-8 rounded-md p-1 active:bg-slate-300">
                 <VerticalDots />
               </div>
             }
@@ -204,7 +201,6 @@ const Solve: React.FC = () => {
                 },
               },
             ]}
-            anchor="right"
           />
         </div>
       }

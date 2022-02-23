@@ -10,7 +10,6 @@ import {
   validatePasswordsMatch,
 } from "../utils/validationUtils";
 import { Link, useHistory } from "react-router-dom";
-import { APP_NAME } from "../constants";
 import { createEmailUser, createOrLoginGoogleUser } from "../models/User";
 import useQueryParams from "../hooks/useQueryParams";
 import { UserContext } from "../contexts/UserContext";

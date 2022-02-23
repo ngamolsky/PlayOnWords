@@ -46,6 +46,7 @@ export type LocalSessionState = {
   selectedCellKey: string;
   pencilMode: boolean;
   rebus: boolean;
+  autocheck: boolean;
 };
 
 // #endregion
@@ -63,6 +64,7 @@ export enum SessionActionTypes {
   PREVIOUS_CLUE = "PREVIOUS_CLUE",
   PENCIL_CLICKED = "PENCIL_CLICKED",
   REBUS_CLICKED = "REBUS_CLICKED",
+  AUTOCHECK_CLICKED = "AUTOCHECK_CLICKED",
   CHECK_PUZZLE = "CHECK_PUZZLE",
   CHECK_WORD = "CHECK_WORD",
   CHECK_SQUARE = "CHECK_SQUARE",
@@ -100,6 +102,7 @@ export type SessionActions =
   | { type: SessionActionTypes.PREVIOUS_CLUE }
   | { type: SessionActionTypes.PENCIL_CLICKED }
   | { type: SessionActionTypes.REBUS_CLICKED }
+  | { type: SessionActionTypes.AUTOCHECK_CLICKED }
   | { type: SessionActionTypes.CHECK_SQUARE; userID: string }
   | { type: SessionActionTypes.CHECK_WORD; userID: string }
   | { type: SessionActionTypes.CHECK_PUZZLE; userID: string }
@@ -184,6 +187,16 @@ const _toggleRebus = (currentState: SessionState): SessionState => {
   };
 };
 
+const _toggleAutocheck = (currentState: SessionState): SessionState => {
+  return {
+    ...currentState,
+    localState: {
+      ...currentState.localState,
+      autocheck: !currentState.localState.autocheck,
+    },
+  };
+};
+
 const _selectCell = (
   currentState: SessionState,
   cellKey: string
@@ -256,7 +269,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
   action
 ) => {
   const {
-    localState: { orientation, selectedCellKey, pencilMode, rebus },
+    localState: { orientation, selectedCellKey, pencilMode, rebus, autocheck },
     session,
   } = state;
 
@@ -276,36 +289,20 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     case SessionActionTypes.LETTER_PRESSED: {
       const { boardState, sessionID, puzzle } = _requireSession(session);
       const { letter, userID, solutionState } = action;
-      const cellState = boardState[selectedCellKey];
-      if (rebus) {
-        _updateCellState(
-          sessionID,
-          userID,
-          boardState,
-          selectedCellKey,
-          solutionState,
-          cellState.currentLetter
-            ? cellState.currentLetter.concat(letter)
-            : letter
-        );
-      } else {
-        _updateCellState(
-          sessionID,
-          userID,
-          boardState,
-          selectedCellKey,
-          solutionState,
-          letter
-        );
-        const nextCellKey = getNextCellKey(
-          selectedCellKey,
-          puzzle,
-          orientation
-        );
-        return _selectCell(state, nextCellKey);
-      }
+      const cellSolution = puzzle.solutions[selectedCellKey];
 
-      return state;
+      if (!cellSolution) return state;
+
+      _updateCellState(
+        sessionID,
+        userID,
+        boardState,
+        selectedCellKey,
+        autocheck ? _checkCell(cellSolution, letter) : solutionState,
+        letter
+      );
+      const nextCellKey = getNextCellKey(selectedCellKey, puzzle, orientation);
+      return _selectCell(state, nextCellKey);
     }
     case SessionActionTypes.BACKSPACE: {
       const { boardState, puzzle, sessionID } = _requireSession(session);
@@ -316,6 +313,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       if (rebus) {
         newState = _toggleRebus(newState);
       }
+
+      console.log("test");
 
       const previousCellKey = getPreviousCellKey(
         selectedCellKey,
@@ -447,13 +446,14 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     case SessionActionTypes.REBUS_CLICKED: {
       return _toggleRebus(state);
     }
+    case SessionActionTypes.AUTOCHECK_CLICKED: {
+      return _toggleAutocheck(state);
+    }
     case SessionActionTypes.CHECK_SQUARE: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
       const { userID } = action;
       const currentCellValue = boardState[selectedCellKey].currentLetter;
       const cellSolution = puzzle.solutions[selectedCellKey];
-
-      console.log(currentCellValue, cellSolution);
 
       if (!currentCellValue || !cellSolution) return state;
 
@@ -589,10 +589,9 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     case SessionActionTypes.REVEAL_PUZZLE: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
       const { userID } = action;
-      const currentCellValue = boardState[selectedCellKey].currentLetter;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
-      if (!currentCellValue || !cellSolution) return state;
+      if (!cellSolution) return state;
 
       const newBoardState = boardState;
       Object.keys(boardState).forEach((cellKey) => {

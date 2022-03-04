@@ -18,6 +18,7 @@ export const useSessionState = (
   puzzleSessionID: string
 ): [SessionState, Dispatch<SessionActions>] => {
   const [sessionState, dispatch] = useReducer(sessionReducer, {
+    sessionLoading: true,
     localState: {
       orientation: STARTING_ORIENTATION,
       selectedCellKey: STARTING_SELECTED_CELL,
@@ -35,10 +36,18 @@ export const useSessionState = (
       (doc) => {
         const session = doc.data();
         if (session) {
-          dispatch({
-            type: SessionActionTypes.SET_SHARED_STATE,
-            session: session,
-          });
+          // If there is no session yet, we are loading for the first time
+          if (!sessionState.session) {
+            dispatch({
+              type: SessionActionTypes.SET_ORIGINAL_STATE,
+              session: session,
+            });
+          } else {
+            dispatch({
+              type: SessionActionTypes.SET_SHARED_STATE,
+              session: session,
+            });
+          }
         } else {
           console.log("No session data found");
         }
@@ -53,6 +62,7 @@ export const useSessionState = (
 
 export const useSessionActions = (): Dispatch<SessionActions> => {
   const [, dispatch] = useReducer(sessionReducer, {
+    sessionLoading: true,
     localState: {
       orientation: STARTING_ORIENTATION,
       selectedCellKey: STARTING_SELECTED_CELL,

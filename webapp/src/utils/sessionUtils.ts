@@ -316,3 +316,26 @@ export const getSizeFromCellKeys = (
     height,
   };
 };
+
+export const getSortedCellKeyArray = (cellKeys: string[]): string[] => {
+  return cellKeys.sort((cellKeyA, cellKeyB) => {
+    const { x: xA, y: yA } = getCellCoordinatesFromKey(cellKeyA);
+    const { x: xB, y: yB } = getCellCoordinatesFromKey(cellKeyB);
+
+    return yA - yB || xA - xB;
+  });
+};
+
+export const getFirstSelectableCellKey = (puzzle: Puzzle): string => {
+  const sortedKeys = getSortedCellKeyArray(Object.keys(puzzle.solutions));
+  const cellKey = sortedKeys.find((cellKey) => {
+    const cellSelectable = puzzle.solutions[cellKey] != null;
+    if (cellSelectable) {
+      return cellKey;
+    }
+  });
+  if (!cellKey) {
+    throw Error("No selectable key found!");
+  }
+  return cellKey;
+};

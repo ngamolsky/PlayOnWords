@@ -28,11 +28,13 @@ import {
   getCombinedBoardState,
   getClueFromCellKeyOrientationAndPuzzle,
   getSizeFromCellKeys,
+  getFirstSelectableCellKey,
 } from "../utils/sessionUtils";
 
 // #region State
 export type SessionState = {
   session?: Session;
+  sessionLoading: boolean;
   localState: LocalSessionState;
 };
 
@@ -54,7 +56,9 @@ export type LocalSessionState = {
 // #region Actions
 
 export enum SessionActionTypes {
+  SET_ORIGINAL_STATE = "SET_ORIGINAL_STATE",
   SET_SHARED_STATE = "SET_SHARED_STATE",
+  SET_SESSION_LOADING = "SET_SESSION_LOADING",
   JOIN_SESSION_PARTICIPANTS = "JOIN_SESSION_PARTICIPANTS",
   LETTER_PRESSED = "LETTER_PRESSED",
   BACKSPACE = "BACKSPACE",
@@ -76,8 +80,16 @@ export enum SessionActionTypes {
 
 export type SessionActions =
   | {
+      type: SessionActionTypes.SET_ORIGINAL_STATE;
+      session: Session;
+    }
+  | {
       type: SessionActionTypes.SET_SHARED_STATE;
       session: Session;
+    }
+  | {
+      type: SessionActionTypes.SET_SESSION_LOADING;
+      sessionLoading: boolean;
     }
   | {
       type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS;
@@ -274,11 +286,30 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
   } = state;
 
   switch (action.type) {
+    case SessionActionTypes.SET_ORIGINAL_STATE: {
+      const { session: nextSession } = action;
+      const firstSelectedKey = getFirstSelectableCellKey(nextSession.puzzle);
+      return {
+        ...state,
+        localState: {
+          ...state.localState,
+          selectedCellKey: firstSelectedKey,
+        },
+        session: nextSession,
+      };
+    }
     case SessionActionTypes.SET_SHARED_STATE: {
       const { session: nextSession } = action;
       return {
         ...state,
         session: nextSession,
+      };
+    }
+    case SessionActionTypes.SET_SESSION_LOADING: {
+      const { sessionLoading } = action;
+      return {
+        ...state,
+        sessionLoading,
       };
     }
     case SessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
@@ -313,8 +344,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       if (rebus) {
         newState = _toggleRebus(newState);
       }
-
-      console.log("test");
 
       const previousCellKey = getPreviousCellKey(
         selectedCellKey,

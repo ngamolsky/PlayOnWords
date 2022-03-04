@@ -10,6 +10,7 @@ import { ClueSelector } from "../components/mobile/ClueSelector";
 import {
   getClueFromCellKeyOrientationAndPuzzle,
   getCombinedBoardState,
+  getFirstSelectableCellKey,
   isUserInSession,
 } from "../utils/sessionUtils";
 import { signOut, useLoggedInUser } from "../models/User";

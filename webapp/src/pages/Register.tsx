@@ -19,7 +19,12 @@ const Register: React.FC = () => {
   const queryParams = useQueryParams();
   const [user, userLoading] = useContext(UserContext);
   const [googleLoading, setGoogleLoading] = useState<boolean>(false);
-  const loading = userLoading || googleLoading;
+
+  const loadingMessage = googleLoading
+    ? "Waiting for google..."
+    : userLoading
+    ? "Loading user..."
+    : undefined;
 
   const continueUrl = queryParams.get("continueUrl");
   useEffect(() => {
@@ -29,7 +34,7 @@ const Register: React.FC = () => {
     }
   }, [user, continueUrl, history]);
   return (
-    <XWordContainer isLoading={loading} showToolbar={false}>
+    <XWordContainer loadingMessage={loadingMessage} showToolbar={false}>
       <h1 className="text-3xl mx-auto mt-8">XWord</h1>
 
       <Formik

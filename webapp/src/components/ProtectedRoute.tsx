@@ -7,7 +7,12 @@ export const ProtectedRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
   const path = useLocation().pathname;
   const [user, userLoading] = useContext(UserContext);
   if (userLoading)
-    return <XWordContainer isLoading={userLoading} showToolbar />;
+    return (
+      <XWordContainer
+        loadingMessage={userLoading ? "Loading user..." : undefined}
+        showToolbar
+      />
+    );
   if (!user) {
     const nextUrl = path !== "/" ? `/login?continueUrl=${path}` : "/login";
     return <Redirect to={nextUrl} />;

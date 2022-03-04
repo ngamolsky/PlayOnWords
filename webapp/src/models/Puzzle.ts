@@ -38,13 +38,13 @@ export type Solutions = Record<string, string | null | string[]>;
 
 export const useRecentPuzzles = (
   numPuzzles: number
-): [Puzzle[] | undefined, boolean] => {
+): [Puzzle[] | undefined, string | undefined] => {
   const [puzzleState, setPuzzleState] = useState<{
     puzzles: Puzzle[];
-    loading: boolean;
+    loadingMessage?: string;
   }>({
     puzzles: [],
-    loading: true,
+    loadingMessage: "Loading recent puzzles...",
   });
 
   useEffect(() => {
@@ -62,13 +62,13 @@ export const useRecentPuzzles = (
 
       setPuzzleState({
         puzzles,
-        loading: false,
+        loadingMessage: undefined,
       });
     });
     return unsub;
   }, [numPuzzles]);
 
-  return [puzzleState.puzzles, puzzleState.loading];
+  return [puzzleState.puzzles, puzzleState.loadingMessage];
 };
 
 const puzzleConverter: FirestoreDataConverter<Puzzle> = {

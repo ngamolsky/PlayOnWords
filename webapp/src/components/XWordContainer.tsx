@@ -1,22 +1,21 @@
 import React, { ReactNode } from "react";
-import Spinner from "./Spinner";
 import { XWordToolbar } from "./XWordToolbar";
 
 type XWordContainerProps = {
-  isLoading: boolean;
+  loadingMessage?: string;
   showToolbar: boolean;
   toolbarChildren?: ReactNode;
 };
 
 export const XWordContainer: React.FC<XWordContainerProps> = ({
-  isLoading,
+  loadingMessage,
   children,
   toolbarChildren,
   showToolbar,
 }) => {
-  const content = isLoading ? (
+  const content = loadingMessage ? (
     <div className="grow flex justify-center items-center">
-      <Spinner />
+      {loadingMessage}
     </div>
   ) : (
     children

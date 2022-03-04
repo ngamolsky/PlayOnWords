@@ -10,7 +10,6 @@ import { ClueSelector } from "../components/mobile/ClueSelector";
 import {
   getClueFromCellKeyOrientationAndPuzzle,
   getCombinedBoardState,
-  getFirstSelectableCellKey,
   isUserInSession,
 } from "../utils/sessionUtils";
 import { signOut, useLoggedInUser } from "../models/User";
@@ -43,6 +42,7 @@ const Solve: React.FC = () => {
   const {
     session,
     localState: { selectedCellKey, orientation, pencilMode, rebus, autocheck },
+    loadingMessage,
   } = sessionState;
 
   const keyboardRef: MutableRefObject<SimpleKeyboard | null> =
@@ -65,7 +65,7 @@ const Solve: React.FC = () => {
   }, [user, session]);
 
   if (!session) {
-    return <XWordContainer isLoading={true} showToolbar />;
+    return <XWordContainer loadingMessage={loadingMessage} showToolbar />;
   }
 
   const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
@@ -78,7 +78,6 @@ const Solve: React.FC = () => {
 
   return (
     <XWordContainer
-      isLoading={false}
       showToolbar
       toolbarChildren={
         <div className="space-x-2 flex-row flex h-8 relative">

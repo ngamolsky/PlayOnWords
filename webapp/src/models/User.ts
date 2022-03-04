@@ -167,7 +167,7 @@ export const useAuth = (): [User | undefined, boolean] => {
   }>({
     user: undefined,
     userLoading: true,
-  });
+  });  
 
   useEffect(() => {
     let snapshotUnsub: Unsubscribe;

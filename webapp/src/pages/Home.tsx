@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../constants";
 import { useHistory } from "react-router-dom";
@@ -11,14 +11,23 @@ import { startSession } from "../reducers/session";
 
 const Home: React.FC = () => {
   const history = useHistory();
-  const [puzzles, loading] = useRecentPuzzles(NUM_PUZZLES_TO_SHOW_ON_HOME);
+  const [puzzles, puzzleLoadingMessage] = useRecentPuzzles(
+    NUM_PUZZLES_TO_SHOW_ON_HOME
+  );
+
+  const [sessionLoading, setSessionLoading] = useState<boolean>(false);
 
   const user = useLoggedInUser();
 
+  const loadingMessage = sessionLoading
+    ? "Starting your session..."
+    : puzzleLoadingMessage
+    ? puzzleLoadingMessage
+    : undefined;
   return (
     <XWordContainer
       showToolbar
-      isLoading={loading}
+      loadingMessage={loadingMessage}
       toolbarChildren={<Avatar user={user} onClick={signOut} />}
     >
       {puzzles &&
@@ -29,6 +38,7 @@ const Home: React.FC = () => {
             onClick={async (action) => {
               switch (action) {
                 case PuzzleCardAction.NEW_GAME:
+                  setSessionLoading(true);
                   const sessionID = `session.${v4()}`;
 
                   await startSession(sessionID, puzzle, user);

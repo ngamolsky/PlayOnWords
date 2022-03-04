@@ -1,5 +1,6 @@
 import {
   doc,
+  getDoc,
   updateDoc,
   arrayUnion,
   Timestamp,
@@ -34,7 +35,7 @@ import {
 // #region State
 export type SessionState = {
   session?: Session;
-  sessionLoading: boolean;
+  loadingMessage?: string;
   localState: LocalSessionState;
 };
 
@@ -274,6 +275,13 @@ export const startSession = async (
   await setDoc(sessionRef, session);
 };
 
+export const getSession = async (sessionID: string): Promise<Session> => {
+  const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
+
+  console.log("Getting Session:", sessionID);
+  return (await getDoc(sessionRef)).data() as Session;
+};
+
 // #endregion
 
 export const sessionReducer: Reducer<SessionState, SessionActions> = (
@@ -284,6 +292,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     localState: { orientation, selectedCellKey, pencilMode, rebus, autocheck },
     session,
   } = state;
+
+  console.log("Doing action", action);
 
   switch (action.type) {
     case SessionActionTypes.SET_ORIGINAL_STATE: {
@@ -296,6 +306,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           selectedCellKey: firstSelectedKey,
         },
         session: nextSession,
+        loadingMessage: undefined,
       };
     }
     case SessionActionTypes.SET_SHARED_STATE: {
@@ -303,6 +314,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       return {
         ...state,
         session: nextSession,
+        loadingMessage: undefined,
       };
     }
     case SessionActionTypes.SET_SESSION_LOADING: {
@@ -321,6 +333,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       const { boardState, sessionID, puzzle } = _requireSession(session);
       const { letter, userID, solutionState } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
+      console.log(state);
 
       if (!cellSolution) return state;
 

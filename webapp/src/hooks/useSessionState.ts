@@ -8,17 +8,29 @@ import {
 } from "../constants";
 import { Session } from "../models/Session";
 import {
+  getSession,
   SessionActions,
   SessionActionTypes,
   sessionReducer,
   SessionState,
 } from "../reducers/session";
 
+const setInitialState = async (
+  sessionID: string,
+  dispatch: Dispatch<SessionActions>
+) => {
+  const session = await getSession(sessionID);
+  dispatch({
+    type: SessionActionTypes.SET_ORIGINAL_STATE,
+    session,
+  });
+};
+
 export const useSessionState = (
-  puzzleSessionID: string
+  sessionID: string
 ): [SessionState, Dispatch<SessionActions>] => {
   const [sessionState, dispatch] = useReducer(sessionReducer, {
-    sessionLoading: true,
+    loadingMessage: "Starting your session...",
     localState: {
       orientation: STARTING_ORIENTATION,
       selectedCellKey: STARTING_SELECTED_CELL,
@@ -29,25 +41,21 @@ export const useSessionState = (
   });
 
   useEffect(() => {
+    setInitialState(sessionID, dispatch);
+  }, []);
+
+  useEffect(() => {
     const unsub = onSnapshot(
-      doc(db, PUZZLE_SESSIONS_COLLECTION, puzzleSessionID).withConverter(
+      doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID).withConverter(
         sessionConverter
       ),
       (doc) => {
         const session = doc.data();
         if (session) {
-          // If there is no session yet, we are loading for the first time
-          if (!sessionState.session) {
-            dispatch({
-              type: SessionActionTypes.SET_ORIGINAL_STATE,
-              session: session,
-            });
-          } else {
-            dispatch({
-              type: SessionActionTypes.SET_SHARED_STATE,
-              session: session,
-            });
-          }
+          dispatch({
+            type: SessionActionTypes.SET_SHARED_STATE,
+            session: session,
+          });
         } else {
           console.log("No session data found");
         }
@@ -62,7 +70,6 @@ export const useSessionState = (
 
 export const useSessionActions = (): Dispatch<SessionActions> => {
   const [, dispatch] = useReducer(sessionReducer, {
-    sessionLoading: true,
     localState: {
       orientation: STARTING_ORIENTATION,
       selectedCellKey: STARTING_SELECTED_CELL,

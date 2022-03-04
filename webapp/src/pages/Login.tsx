@@ -14,7 +14,12 @@ const Login: React.FC = () => {
   const [user, userLoading] = useContext(UserContext);
   const continueUrl = queryParams.get("continueUrl");
   const [googleLoading, setGoogleLoading] = useState<boolean>(false);
-  const loading = userLoading || googleLoading;
+
+  const loadingMessage = googleLoading
+    ? "Waiting for google..."
+    : userLoading
+    ? "Loading user..."
+    : undefined;
 
   useEffect(() => {
     if (user) {
@@ -24,7 +29,7 @@ const Login: React.FC = () => {
   }, [user, continueUrl, history]);
 
   return (
-    <XWordContainer isLoading={loading} showToolbar={false}>
+    <XWordContainer loadingMessage={loadingMessage} showToolbar={false}>
       <h1 className="text-3xl mx-auto mt-8">XWord</h1>
       <Formik
         initialValues={{ email: "", password: "" }}

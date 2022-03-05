@@ -33,8 +33,6 @@ export const Keyboard = ({ onKeyPress, keyboardRef, rebus }: KeyboardProps) => {
         layout={{
           default: rows,
         }}
-        physicalKeyboardHighlight
-        physicalKeyboardHighlightPress
         disableButtonHold
         onKeyPress={(letter: string) => {
           if (Object.values<string>(ACTION_KEYS).includes(letter)) {

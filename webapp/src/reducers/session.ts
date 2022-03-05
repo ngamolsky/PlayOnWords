@@ -9,10 +9,7 @@ import {
 } from "firebase/firestore";
 import { Reducer } from "react";
 import { db } from "../config/firebase";
-import {
-  PUZZLE_SESSIONS_COLLECTION,
-  STARTING_SELECTED_CELL,
-} from "../constants";
+import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
 import { Puzzle } from "../models/Puzzle";
 import {
   CellState,
@@ -382,20 +379,24 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       return state;
     }
     case SessionActionTypes.LETTER_PRESSED: {
-      const { boardState, sessionID, puzzle } = _requireSession(session);
+      const { boardState, sessionID, puzzle, sessionStatus } =
+        _requireSession(session);
       const { letter, userID, solutionState } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
       if (!cellSolution) return state;
 
-      _updateCellState(
-        sessionID,
-        userID,
-        boardState,
-        selectedCellKey,
-        autocheck ? _checkCell(cellSolution, letter) : solutionState,
-        letter
-      );
+      if (sessionStatus != SessionStatus.COMPLETE) {
+        _updateCellState(
+          sessionID,
+          userID,
+          boardState,
+          selectedCellKey,
+          autocheck ? _checkCell(cellSolution, letter) : solutionState,
+          letter
+        );
+      }
+
       const nextCellKey = getNextCellKey(selectedCellKey, puzzle, orientation);
       return _selectCell(state, nextCellKey);
     }
@@ -477,10 +478,12 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       const isLastClue =
         currentClueIndex == puzzle.clues[orientation].length - 1;
+
       let newState: SessionState = state;
       if (isLastClue) {
+        const firstSelectableCellKey = getFirstSelectableCellKey(puzzle);
         newState = _toggleOrientation(newState);
-        newState = _selectCell(newState, STARTING_SELECTED_CELL);
+        newState = _selectCell(newState, firstSelectableCellKey);
       } else {
         const nextClue = puzzle.clues[orientation][currentClueIndex + 1];
         const newSelectedCellKey = getCellKeysForClueAndOrientation(

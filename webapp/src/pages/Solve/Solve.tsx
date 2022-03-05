@@ -13,8 +13,8 @@ import {
   getCombinedBoardState,
   isUserInSession,
 } from "../../utils/sessionUtils";
-import { signOut, useLoggedInUser } from "../../models/User";
 import { ACTION_KEYS } from "../../utils/keyboardUtils";
+import { signOut, useLoggedInUser } from "../../models/User";
 import { useSessionState } from "../../hooks/useSessionState";
 import { SessionActionTypes } from "../../reducers/session";
 import Pencil from "../../components/icons/Pencil";
@@ -41,6 +41,7 @@ const Solve: React.FC = () => {
   const location = useLocation();
 
   const [sessionState, dispatch] = useSessionState(sessionID);
+
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const {
@@ -237,9 +238,7 @@ const Solve: React.FC = () => {
               session.boardState,
               session.puzzle.solutions
             )}
-            sessionDuration={
-              session.endTime.seconds - session.startTime.seconds
-            }
+            session={session}
           />
         )}
 

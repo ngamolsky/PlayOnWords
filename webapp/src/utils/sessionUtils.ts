@@ -339,3 +339,17 @@ export const getFirstSelectableCellKey = (puzzle: Puzzle): string => {
   }
   return cellKey;
 };
+
+export const getPercentageSolved = (
+  boardState: BoardState,
+  solutions: Solutions
+): number => {
+  const filledCellCount = Object.values(boardState).filter(
+    (each) => !!each.currentLetter
+  ).length;
+  const totalFillableCellCount = Object.values(solutions).filter(
+    (each) => !!each
+  ).length;
+
+  return (filledCellCount / totalFillableCellCount) * 100;
+};

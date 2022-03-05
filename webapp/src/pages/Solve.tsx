@@ -10,6 +10,7 @@ import { ClueSelector } from "../components/mobile/ClueSelector";
 import {
   getClueFromCellKeyOrientationAndPuzzle,
   getCombinedBoardState,
+  getPercentageSolved,
   isUserInSession,
 } from "../utils/sessionUtils";
 import { signOut, useLoggedInUser } from "../models/User";
@@ -75,6 +76,11 @@ const Solve: React.FC = () => {
   );
 
   const boardState = getCombinedBoardState(sessionState);
+
+  const solvedPercent = getPercentageSolved(
+    session.boardState,
+    session.puzzle.solutions
+  );
 
   return (
     <XWordContainer

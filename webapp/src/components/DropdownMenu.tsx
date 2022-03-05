@@ -16,7 +16,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({
   selectedItemIndex,
 }) => {
   return (
-    <Menu as="div">
+    <Menu as="div" className={"outline-none"}>
       <Menu.Button as="div">{buttonContent}</Menu.Button>
       <Transition
         as={Fragment}

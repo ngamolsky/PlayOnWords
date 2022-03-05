@@ -56,11 +56,11 @@ export const Keyboard = ({ onKeyPress, keyboardRef, rebus }: KeyboardProps) => {
             buttons: "{rebus} {backspace}",
           },
           {
-            class: "text-2xl",
+            class: "text-3xl",
             buttons: "{backspace}",
           },
           {
-            class: rebus ? "bg-blue-300 w-10 text-xl" : "w-10 text-xl",
+            class: rebus ? "bg-blue-300 w-12 text-l" : "w-12 text-l",
             buttons: "{rebus}",
           },
           {

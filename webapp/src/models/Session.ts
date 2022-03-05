@@ -1,6 +1,10 @@
 import { Puzzle } from "./Puzzle";
-import { Timestamp } from "firebase/firestore";
+import { FirestoreDataConverter, Timestamp } from "firebase/firestore";
 
+export enum SessionStatus {
+  STARTED = "STARTED",
+  COMPLETE = "COMPLETE",
+}
 
 export type Session = {
   sessionID: string;
@@ -9,6 +13,8 @@ export type Session = {
   ownerID: string;
   startTime: Timestamp;
   boardState: BoardState;
+  sessionStatus: SessionStatus;
+  endTime?: Timestamp;
 };
 
 export type BoardState = {
@@ -41,4 +47,9 @@ export type CombinedCellState = CellState & {
 
 export type CombinedBoardState = {
   [key: string]: CombinedCellState;
+};
+
+export const sessionConverter: FirestoreDataConverter<Session> = {
+  fromFirestore: (snapshot) => snapshot.data() as Session,
+  toFirestore: (session: Session) => session,
 };

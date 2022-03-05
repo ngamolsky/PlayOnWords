@@ -27,3 +27,30 @@ export const toXWordDate = (date: Date): string => {
     MONTHS[date.getUTCMonth()]
   } ${date.getUTCDate()}`;
 };
+
+
+export const secondsToTimeString = (seconds: number): string => {
+  const durationDate = new Date(seconds * 1000);
+
+  const hh = durationDate.getUTCHours();
+  const mm = durationDate.getUTCMinutes();
+  const ss = durationDate.getSeconds();
+
+  let hourString = hh.toString();
+  if (hh < 10) {
+    hourString = "0" + hourString;
+  }
+
+  let minuteString = mm.toString();
+  if (mm < 10) {
+    minuteString = "0" + minuteString;
+  }
+  let secondString = ss.toString();
+  if (ss < 10) {
+    secondString = "0" + secondString;
+  }
+
+  return hourString == "00"
+    ? `${minuteString}:${secondString}`
+    : `${hourString}:${minuteString}:${secondString}`;
+};

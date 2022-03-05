@@ -1,27 +1,29 @@
-import React, { MutableRefObject, useEffect, useRef } from "react";
+import React, { MutableRefObject, useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { SimpleKeyboard } from "react-simple-keyboard";
 
-import { XWordContainer } from "../components/XWordContainer";
-import { CellSolutionState } from "../models/Session";
-import { XBoard } from "../components/XBoard/XBoard";
-import { Keyboard } from "../components/mobile/Keyboard";
-import { ClueSelector } from "../components/mobile/ClueSelector";
+import { XWordContainer } from "../../components/XWordContainer";
+import { CellSolutionState, SessionStatus } from "../../models/Session";
+import { XBoard } from "../../components/XBoard/XBoard";
+import { Keyboard } from "../../components/mobile/Keyboard";
+import { ClueSelector } from "../../components/mobile/ClueSelector";
 import {
+  checkPuzzle,
   getClueFromCellKeyOrientationAndPuzzle,
   getCombinedBoardState,
-  getPercentageSolved,
   isUserInSession,
-} from "../utils/sessionUtils";
-import { signOut, useLoggedInUser } from "../models/User";
-import { ACTION_KEYS } from "../utils/keyboardUtils";
-import { useSessionState } from "../hooks/useSessionState";
-import { SessionActionTypes } from "../reducers/session";
-import Pencil from "../components/icons/Pencil";
-import Help from "../components/icons/Help";
-import VerticalDots from "../components/icons/VerticalDots";
-import Timer from "../components/Timer";
-import DropdownMenu from "../components/DropdownMenu";
+} from "../../utils/sessionUtils";
+import { signOut, useLoggedInUser } from "../../models/User";
+import { ACTION_KEYS } from "../../utils/keyboardUtils";
+import { useSessionState } from "../../hooks/useSessionState";
+import { SessionActionTypes } from "../../reducers/session";
+import Pencil from "../../components/icons/Pencil";
+import Help from "../../components/icons/Help";
+import VerticalDots from "../../components/icons/VerticalDots";
+import Timer from "../../components/Timer";
+import DropdownMenu from "../../components/DropdownMenu";
+import EndSessionModal from "./EndSessionModal";
+import { secondsToTimeString } from "../../utils/timeAndDateUtils";
 
 export type SelectionState = {
   orientation: OrientationType;
@@ -39,6 +41,7 @@ const Solve: React.FC = () => {
   const location = useLocation();
 
   const [sessionState, dispatch] = useSessionState(sessionID);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   const {
     session,
@@ -65,6 +68,12 @@ const Solve: React.FC = () => {
     joinPuzzleSessionIfNeeded();
   }, [user, session]);
 
+  useEffect(() => {
+    if (session?.sessionStatus == SessionStatus.COMPLETE) {
+      setModalOpen(true);
+    }
+  }, [session?.sessionStatus]);
+
   if (!session) {
     return <XWordContainer loadingMessage={loadingMessage} showToolbar />;
   }
@@ -77,18 +86,19 @@ const Solve: React.FC = () => {
 
   const boardState = getCombinedBoardState(sessionState);
 
-  const solvedPercent = getPercentageSolved(
-    session.boardState,
-    session.puzzle.solutions
-  );
-
   return (
     <XWordContainer
       showToolbar
       toolbarChildren={
         <div className="space-x-2 flex-row flex h-8 relative">
           <div className="my-auto">
-            <Timer sessionStartDate={session.startTime.toDate()} />
+            {session && session.endTime ? (
+              secondsToTimeString(
+                session.endTime.seconds - session.startTime.seconds
+              )
+            ) : (
+              <Timer sessionStartDate={session.startTime.toDate()} />
+            )}
           </div>
           <div
             className={`h-8 w-8 rounded-md ${
@@ -212,6 +222,27 @@ const Solve: React.FC = () => {
       }
     >
       <>
+        {session.endTime && (
+          <EndSessionModal
+            onClickResetButton={() => {
+              setModalOpen(false);
+              dispatch({
+                type: SessionActionTypes.RESET_PUZZLE,
+                userID: user.userID,
+              });
+            }}
+            isOpen={modalOpen}
+            setIsOpen={setModalOpen}
+            isCorrect={checkPuzzle(
+              session.boardState,
+              session.puzzle.solutions
+            )}
+            sessionDuration={
+              session.endTime.seconds - session.startTime.seconds
+            }
+          />
+        )}
+
         <XBoard
           boardState={boardState}
           puzzle={session.puzzle}

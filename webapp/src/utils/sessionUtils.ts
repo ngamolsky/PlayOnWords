@@ -298,7 +298,6 @@ export const isUserInSession = (session: Session, userID: string): boolean => {
   return !!matchingUser;
 };
 
-
 export const getSizeFromCellKeys = (
   cellKeys: string[]
 ): { width: number; height: number } => {
@@ -340,7 +339,7 @@ export const getFirstSelectableCellKey = (puzzle: Puzzle): string => {
   return cellKey;
 };
 
-export const getPercentageSolved = (
+export const getPercentageComplete = (
   boardState: BoardState,
   solutions: Solutions
 ): number => {
@@ -352,4 +351,25 @@ export const getPercentageSolved = (
   ).length;
 
   return (filledCellCount / totalFillableCellCount) * 100;
+};
+
+export const checkPuzzle = (
+  boardState: BoardState,
+  solutions: Solutions
+): boolean => {
+  for (const cellKey of Object.keys(solutions)) {
+    const cellSolution = solutions[cellKey];
+    const currentLetter = boardState[cellKey].currentLetter;
+
+    if (!currentLetter) continue;
+    if (Array.isArray(cellSolution)) {
+      if (!cellSolution.includes(currentLetter)) {
+        return false;
+      }
+    } else if (cellSolution !== currentLetter) {
+      return false;
+    }
+  }
+
+  return true;
 };

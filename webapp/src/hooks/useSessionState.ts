@@ -1,4 +1,4 @@
-import { onSnapshot, doc, FirestoreDataConverter } from "firebase/firestore";
+import { onSnapshot, doc } from "firebase/firestore";
 import { Dispatch, useReducer, useEffect } from "react";
 import { db } from "../config/firebase";
 import {
@@ -6,7 +6,7 @@ import {
   STARTING_ORIENTATION,
   STARTING_SELECTED_CELL,
 } from "../constants";
-import { Session } from "../models/Session";
+import { sessionConverter } from "../models/Session";
 import {
   getSession,
   SessionActions,
@@ -80,9 +80,4 @@ export const useSessionActions = (): Dispatch<SessionActions> => {
   });
 
   return dispatch;
-};
-
-const sessionConverter: FirestoreDataConverter<Session> = {
-  fromFirestore: (snapshot) => snapshot.data() as Session,
-  toFirestore: (session: Session) => session,
 };

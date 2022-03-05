@@ -5,6 +5,7 @@ import {
   arrayUnion,
   Timestamp,
   setDoc,
+  deleteField,
 } from "firebase/firestore";
 import { Reducer } from "react";
 import { db } from "../config/firebase";
@@ -19,6 +20,8 @@ import {
   Session,
   CellSelectionState,
   CellSolutionState,
+  sessionConverter,
+  SessionStatus,
 } from "../models/Session";
 import { User } from "../models/User";
 import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
@@ -31,6 +34,7 @@ import {
   getClueFromCellKeyOrientationAndPuzzle,
   getSizeFromCellKeys,
   getFirstSelectableCellKey,
+  getPercentageComplete,
 } from "../utils/sessionUtils";
 
 // #region State
@@ -140,6 +144,26 @@ const _updateBoardState = (sessionID: string, boardState: BoardState): void => {
   updateDoc(sessionRef, {
     boardState,
   });
+};
+
+const _updateSessionStatus = (
+  sessionID: string,
+  sessionStatus: SessionStatus
+): void => {
+  const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
+
+  if (sessionStatus == SessionStatus.COMPLETE) {
+    updateDoc(sessionRef, {
+      sessionStatus,
+      endTime: Timestamp.now(),
+    });
+  } else {
+    updateDoc(sessionRef, {
+      sessionStatus,
+      endTime: deleteField(),
+      startTime: Timestamp.now(),
+    });
+  }
 };
 
 const _updateCellState = (
@@ -261,15 +285,20 @@ export const startSession = async (
   puzzle: Puzzle,
   user: User
 ): Promise<void> => {
-  const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
+  const sessionRef = doc(
+    db,
+    PUZZLE_SESSIONS_COLLECTION,
+    sessionID
+  ).withConverter(sessionConverter);
 
-  const session = {
+  const session: Session = {
     sessionID,
     puzzle,
     participantIDs: [user.userID],
     ownerID: user.userID,
     startTime: Timestamp.now(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),
+    sessionStatus: SessionStatus.STARTED,
   };
 
   console.log("Starting Session:", sessionID);
@@ -277,10 +306,20 @@ export const startSession = async (
 };
 
 export const getSession = async (sessionID: string): Promise<Session> => {
-  const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
+  const sessionRef = doc(
+    db,
+    PUZZLE_SESSIONS_COLLECTION,
+    sessionID
+  ).withConverter(sessionConverter);
 
   console.log("Getting Session:", sessionID);
-  return (await getDoc(sessionRef)).data() as Session;
+
+  const session = (await getDoc(sessionRef)).data();
+
+  if (!session) {
+    throw Error("No session found");
+  }
+  return session;
 };
 
 // #endregion
@@ -314,6 +353,16 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.SET_SHARED_STATE: {
       const { session: nextSession } = action;
+      const { boardState, puzzle, sessionStatus } = nextSession;
+
+      const percentComplete = getPercentageComplete(
+        boardState,
+        puzzle.solutions
+      );
+      if (percentComplete == 100 && sessionStatus !== SessionStatus.COMPLETE) {
+        _updateSessionStatus(nextSession.sessionID, SessionStatus.COMPLETE);
+      }
+
       return {
         ...state,
         session: nextSession,
@@ -663,6 +712,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       );
 
       _updateBoardState(sessionID, newBoardState);
+      _updateSessionStatus(sessionID, SessionStatus.STARTED);
       return state;
     }
   }

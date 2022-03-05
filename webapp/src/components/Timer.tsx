@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { secondsToTimeString } from "../utils/timeAndDateUtils";
 
 const calcDiffInSeconds = (dateA: Date, dateB: Date) => {
-  return Math.floor((dateA.getTime() - dateB.getTime()) / 1000);
+  return Math.max(
+    Math.floor((dateA.getTime() - dateB.getTime()) / 1000 + 1),
+    0
+  );
 };
 
 const Timer = ({ sessionStartDate }: { sessionStartDate: Date }) => {
@@ -22,31 +26,7 @@ const Timer = ({ sessionStartDate }: { sessionStartDate: Date }) => {
     setSecondsDiff(calcDiffInSeconds(currentDate, sessionStartDate));
   }, [currentDate, sessionStartDate]);
 
-
-  const durationDate = new Date(secondsDiff * 1000);
-
-  const hh = durationDate.getUTCHours();
-  const mm = durationDate.getUTCMinutes();
-  const ss = durationDate.getSeconds();
-
-  let hourString = hh.toString();
-  if (hh < 10) {
-    hourString = "0" + hourString;
-  }
-
-  let minuteString = mm.toString();
-  if (mm < 10) {
-    minuteString = "0" + minuteString;
-  }
-  let secondString = ss.toString();
-  if (ss < 10) {
-    secondString = "0" + secondString;
-  }
-
-  const timerString =
-    hourString == "00"
-      ? `${minuteString}:${secondString}`
-      : `${hourString}:${minuteString}:${secondString}`;
+  const timerString = secondsToTimeString(secondsDiff);
   return <>{timerString}</>;
 };
 

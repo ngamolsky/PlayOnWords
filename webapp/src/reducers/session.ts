@@ -21,6 +21,7 @@ import {
   CellSolutionState,
 } from "../models/Session";
 import { User } from "../models/User";
+import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
 import {
   getNextCellKey,
   getPreviousCellKey,
@@ -293,7 +294,9 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     session,
   } = state;
 
-  console.log("Doing action", action);
+  if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+    console.log("Session Action:", action);
+  }
 
   switch (action.type) {
     case SessionActionTypes.SET_ORIGINAL_STATE: {
@@ -333,7 +336,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       const { boardState, sessionID, puzzle } = _requireSession(session);
       const { letter, userID, solutionState } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
-      console.log(state);
 
       if (!cellSolution) return state;
 

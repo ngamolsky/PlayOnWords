@@ -43,6 +43,7 @@ export const Keyboard = ({ onKeyPress, keyboardRef, rebus }: KeyboardProps) => {
             onKeyPress(letter.toUpperCase());
           }
         }}
+        theme="hg-theme-default keyboard"
         display={{
           ...characters,
           "{space}": "Space",
@@ -51,8 +52,20 @@ export const Keyboard = ({ onKeyPress, keyboardRef, rebus }: KeyboardProps) => {
         }}
         buttonTheme={[
           {
-            class: rebus ? "bg-blue-300 w-10" : "w-10",
+            class: "h-12",
+            buttons: "{rebus} {backspace}",
+          },
+          {
+            class: "text-2xl",
+            buttons: "{backspace}",
+          },
+          {
+            class: rebus ? "bg-blue-300 w-10 text-xl" : "w-10 text-xl",
             buttons: "{rebus}",
+          },
+          {
+            class: "text-xl h-12",
+            buttons: Object.keys(characters).join(" "),
           },
         ]}
       />

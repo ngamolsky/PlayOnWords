@@ -9,9 +9,3 @@
   
 }
 
-
-@layer utilities {
-  .rebus {
-     width: 40px !important;
-  }
-}

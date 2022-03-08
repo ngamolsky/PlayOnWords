@@ -27,46 +27,44 @@ export const Keyboard = ({ onKeyPress, keyboardRef, rebus }: KeyboardProps) => {
     );
 
   return (
-    <div>
-      <KeyboardLib
-        keyboardRef={(r) => (keyboardRef.current = r)}
-        layout={{
-          default: rows,
-        }}
-        disableButtonHold
-        onKeyPress={(letter: string) => {
-          if (Object.values<string>(ACTION_KEYS).includes(letter)) {
-            onKeyPress(letter);
-          } else {
-            onKeyPress(letter.toUpperCase());
-          }
-        }}
-        theme="hg-theme-default keyboard"
-        display={{
-          ...characters,
-          "{space}": "Space",
-          "{rebus}": "Rebus",
-          "{backspace}": "⌫",
-        }}
-        buttonTheme={[
-          {
-            class: "h-12",
-            buttons: "{rebus} {backspace}",
-          },
-          {
-            class: "text-3xl",
-            buttons: "{backspace}",
-          },
-          {
-            class: rebus ? "bg-blue-300 w-12 text-l" : "w-12 text-l",
-            buttons: "{rebus}",
-          },
-          {
-            class: "text-xl h-12",
-            buttons: Object.keys(characters).join(" "),
-          },
-        ]}
-      />
-    </div>
+    <KeyboardLib
+      keyboardRef={(r) => (keyboardRef.current = r)}
+      layout={{
+        default: rows,
+      }}
+      disableButtonHold
+      onKeyPress={(letter: string) => {
+        if (Object.values<string>(ACTION_KEYS).includes(letter)) {
+          onKeyPress(letter);
+        } else {
+          onKeyPress(letter.toUpperCase());
+        }
+      }}
+      theme="hg-theme-default keyboard"
+      display={{
+        ...characters,
+        "{space}": "Space",
+        "{rebus}": "Rebus",
+        "{backspace}": "⌫",
+      }}
+      buttonTheme={[
+        {
+          class: "h-12",
+          buttons: "{rebus} {backspace}",
+        },
+        {
+          class: "text-3xl",
+          buttons: "{backspace}",
+        },
+        {
+          class: rebus ? "bg-blue-300 w-12 text-l" : "w-12 text-l",
+          buttons: "{rebus}",
+        },
+        {
+          class: "text-xl h-12",
+          buttons: Object.keys(characters).join(" "),
+        },
+      ]}
+    />
   );
 };

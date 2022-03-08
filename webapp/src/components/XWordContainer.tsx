@@ -23,7 +23,9 @@ export const XWordContainer: React.FC<XWordContainerProps> = ({
   return (
     <div className="min-h-full flex flex-col">
       {showToolbar && <XWordToolbar>{toolbarChildren}</XWordToolbar>}
-      {content}
+      <div className="max-w-sm flex flex-col mx-auto h-full grow">
+        {content}
+      </div>
     </div>
   );
 };

@@ -224,83 +224,79 @@ const Solve: React.FC = () => {
         </div>
       }
     >
-      <>
-        {session.endTime && (
-          <EndSessionModal
-            onClickResetButton={() => {
-              setModalOpen(false);
+      {session.endTime && (
+        <EndSessionModal
+          onClickResetButton={() => {
+            setModalOpen(false);
+            dispatch({
+              type: SessionActionTypes.RESET_PUZZLE,
+              username: user.username,
+            });
+          }}
+          isOpen={modalOpen}
+          setIsOpen={setModalOpen}
+          isCorrect={checkPuzzle(session.boardState, session.puzzle.solutions)}
+          session={session}
+        />
+      )}
+
+      <XBoard
+        boardState={boardState}
+        puzzle={session.puzzle}
+        onCellClicked={(cellKey) => {
+          dispatch({ type: SessionActionTypes.CELL_CLICKED, cellKey });
+        }}
+      />
+      <div className="flex-grow" />
+      <ClueSelector
+        clue={currentSelectedClue}
+        orientation={orientation}
+        onNextClue={() => {
+          dispatch({
+            type: SessionActionTypes.NEXT_CLUE,
+          });
+        }}
+        onPreviousClue={() => {
+          dispatch({
+            type: SessionActionTypes.PREVIOUS_CLUE,
+          });
+        }}
+        onCluePressed={() => {
+          dispatch({
+            type: SessionActionTypes.TOGGLE_ORIENTATION,
+          });
+        }}
+      />
+      <Keyboard
+        onKeyPress={(key) => {
+          switch (key) {
+            case ACTION_KEYS.BACKSPACE:
               dispatch({
-                type: SessionActionTypes.RESET_PUZZLE,
+                type: SessionActionTypes.BACKSPACE,
                 username: user.username,
               });
-            }}
-            isOpen={modalOpen}
-            setIsOpen={setModalOpen}
-            isCorrect={checkPuzzle(
-              session.boardState,
-              session.puzzle.solutions
-            )}
-            session={session}
-          />
-        )}
 
-        <XBoard
-          boardState={boardState}
-          puzzle={session.puzzle}
-          onCellClicked={(cellKey) => {
-            dispatch({ type: SessionActionTypes.CELL_CLICKED, cellKey });
-          }}
-        />
-        <ClueSelector
-          clue={currentSelectedClue}
-          orientation={orientation}
-          onNextClue={() => {
-            dispatch({
-              type: SessionActionTypes.NEXT_CLUE,
-            });
-          }}
-          onPreviousClue={() => {
-            dispatch({
-              type: SessionActionTypes.PREVIOUS_CLUE,
-            });
-          }}
-          onCluePressed={() => {
-            dispatch({
-              type: SessionActionTypes.TOGGLE_ORIENTATION,
-            });
-          }}
-        />
-        <Keyboard
-          onKeyPress={(key) => {
-            switch (key) {
-              case ACTION_KEYS.BACKSPACE:
-                dispatch({
-                  type: SessionActionTypes.BACKSPACE,
-                  username: user.username,
-                });
-
-                return;
-              case ACTION_KEYS.REBUS:
-                dispatch({
-                  type: SessionActionTypes.REBUS_CLICKED,
-                });
-                return;
-              default: {
-                dispatch({
-                  type: SessionActionTypes.LETTER_PRESSED,
-                  username: user.username,
-                  letter: key,
-                  solutionState: pencilMode
-                    ? CellSolutionState.PENCIL
-                    : CellSolutionState.NONE,
-                });
-              }
+              return;
+            case ACTION_KEYS.REBUS:
+              dispatch({
+                type: SessionActionTypes.REBUS_CLICKED,
+              });
+              return;
+            default: {
+              dispatch({
+                type: SessionActionTypes.LETTER_PRESSED,
+                username: user.username,
+                letter: key,
+                solutionState: pencilMode
+                  ? CellSolutionState.PENCIL
+                  : CellSolutionState.NONE,
+              });
             }
-          }}
-          rebus={rebus}
-          keyboardRef={keyboardRef}
-        />
-      </>
+          }
+        }}
+        rebus={rebus}
+        keyboardRef={keyboardRef}
+      />
     </XWordContainer>
   );
 };

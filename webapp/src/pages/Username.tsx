@@ -1,9 +1,9 @@
 import { Form, Formik } from "formik";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
-import { validateUsername, validatePassword } from "../utils/validationUtils";
-import { Link, useHistory } from "react-router-dom";
+import { validateUsername } from "../utils/validationUtils";
+import { useHistory } from "react-router-dom";
 import { createBasicUser } from "../models/User";
 import useQueryParams from "../hooks/useQueryParams";
 import { UserContext } from "../contexts/UserContext";

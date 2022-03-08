@@ -14,7 +14,8 @@ export const ProtectedRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
       />
     );
   if (!user) {
-    const nextUrl = path !== "/" ? `/login?continueUrl=${path}` : "/login";
+    const nextUrl =
+      path !== "/" ? `/username?continueUrl=${path}` : "/username";
     return <Redirect to={nextUrl} />;
   }
 

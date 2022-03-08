@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import Login from "./pages/Login";
+import Login from "./pages/Username";
 import Home from "./pages/Home";
 import Solve from "./pages/Solve/Solve";
 import { UserContext } from "./contexts/UserContext";
@@ -13,10 +13,9 @@ export const App = () => {
     <UserContext.Provider value={[user, userLoading]}>
       <Router>
         <Switch>
-          <Route path="/login">
+          <Route path="/username">
             <Login />
           </Route>
-
           <ProtectedRoute path="/solve/:sessionID">
             <Solve />
           </ProtectedRoute>

@@ -44,7 +44,7 @@ const EndSessionModal: React.FC<EndSessionModalProps> = ({
               session.endTime.seconds - session.startTime.seconds
             )}
           </p>
-          <p>People: {participants.map((each) => each.email)}</p>
+          <p>People: {participants.map((each) => each.username)}</p>
           <button onClick={() => setIsOpen(false)}>Close</button>
           <button onClick={onClickResetButton}>Reset</button>
         </div>

@@ -18,7 +18,7 @@ export enum PuzzleCardAction {
 export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
   return (
     <Menu as="div" className="relative inline-block text-center">
-      <Menu.Button className="mx-auto p-4 w-1/2 text-left">
+      <Menu.Button className="mx-auto p-4 w-4/5 text-left">
         <img src={puzzleSVG} className="w-full" />
         <p className="mt-1">{toXWordDate(puzzle.puzzleTimestamp.toDate())}</p>
       </Menu.Button>

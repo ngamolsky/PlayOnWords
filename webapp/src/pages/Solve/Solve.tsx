@@ -57,10 +57,10 @@ const Solve: React.FC = () => {
   useEffect(() => {
     const joinPuzzleSessionIfNeeded = async () => {
       if (user && session) {
-        if (!isUserInSession(session, user.userID)) {
+        if (!isUserInSession(session, user.username)) {
           dispatch({
             type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS,
-            userID: user.userID,
+            username: user.username,
           });
         }
       }
@@ -134,7 +134,7 @@ const Solve: React.FC = () => {
                 onClick: () => {
                   dispatch({
                     type: SessionActionTypes.CHECK_SQUARE,
-                    userID: user.userID,
+                    username: user.username,
                   });
                 },
               },
@@ -143,7 +143,7 @@ const Solve: React.FC = () => {
                 onClick: () => {
                   dispatch({
                     type: SessionActionTypes.CHECK_WORD,
-                    userID: user.userID,
+                    username: user.username,
                   });
                 },
               },
@@ -152,7 +152,7 @@ const Solve: React.FC = () => {
                 onClick: () => {
                   dispatch({
                     type: SessionActionTypes.CHECK_PUZZLE,
-                    userID: user.userID,
+                    username: user.username,
                   });
                 },
               },
@@ -161,7 +161,7 @@ const Solve: React.FC = () => {
                 onClick: () => {
                   dispatch({
                     type: SessionActionTypes.REVEAL_SQUARE,
-                    userID: user.userID,
+                    username: user.username,
                   });
                 },
               },
@@ -170,7 +170,7 @@ const Solve: React.FC = () => {
                 onClick: () => {
                   dispatch({
                     type: SessionActionTypes.REVEAL_WORD,
-                    userID: user.userID,
+                    username: user.username,
                   });
                 },
               },
@@ -179,7 +179,7 @@ const Solve: React.FC = () => {
                 onClick: () => {
                   dispatch({
                     type: SessionActionTypes.REVEAL_PUZZLE,
-                    userID: user.userID,
+                    username: user.username,
                   });
                 },
               },
@@ -188,7 +188,7 @@ const Solve: React.FC = () => {
                 onClick: () => {
                   dispatch({
                     type: SessionActionTypes.RESET_PUZZLE,
-                    userID: user.userID,
+                    username: user.username,
                   });
                 },
               },
@@ -203,7 +203,9 @@ const Solve: React.FC = () => {
             items={[
               {
                 node: <p>Sign Out</p>,
-                onClick: signOut,
+                onClick: () => {
+                  signOut(user.username);
+                },
               },
               {
                 node: <p>Log Particpants</p>,
@@ -229,7 +231,7 @@ const Solve: React.FC = () => {
               setModalOpen(false);
               dispatch({
                 type: SessionActionTypes.RESET_PUZZLE,
-                userID: user.userID,
+                username: user.username,
               });
             }}
             isOpen={modalOpen}
@@ -274,7 +276,7 @@ const Solve: React.FC = () => {
               case ACTION_KEYS.BACKSPACE:
                 dispatch({
                   type: SessionActionTypes.BACKSPACE,
-                  userID: user.userID,
+                  username: user.username,
                 });
 
                 return;
@@ -286,7 +288,7 @@ const Solve: React.FC = () => {
               default: {
                 dispatch({
                   type: SessionActionTypes.LETTER_PRESSED,
-                  userID: user.userID,
+                  username: user.username,
                   letter: key,
                   solutionState: pencilMode
                     ? CellSolutionState.PENCIL

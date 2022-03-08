@@ -1,5 +1,5 @@
 import React from "react";
-import { signOut, User } from "../models/User";
+import { User } from "../models/User";
 
 interface UserGroupProps {
   currentUser: User;
@@ -11,7 +11,7 @@ export const UserGroup = ({ currentUser, users }: UserGroupProps) => {
   const orderedUsers: User[] = [currentUser];
 
   users?.forEach((user) => {
-    if (user.userID !== currentUser.userID) {
+    if (user.username !== currentUser.username) {
       orderedUsers.push(user);
     }
   });

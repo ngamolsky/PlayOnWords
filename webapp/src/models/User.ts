@@ -1,9 +1,6 @@
 import {
-  createUserWithEmailAndPassword,
-  GoogleAuthProvider,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signInWithPopup,
+  signInAnonymously,
   signOut as firebaseSignOut,
   Unsubscribe,
   User as FirebaseUser,
@@ -17,19 +14,20 @@ import {
   documentId,
   doc,
   setDoc,
-  getDocs,
+  getDoc,
   Timestamp,
+  getDocs,
+  deleteDoc,
 } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
-import { v4 } from "uuid";
 import { auth, db } from "../config/firebase";
 import { USERS_COLLECTION } from "../constants";
 import { UserContext } from "../contexts/UserContext";
+import { ManyUserFoundForFirebaseIDError, UserExistsError } from "../errors";
 
 export type User = {
-  userID: string;
-  email: string;
-  username?: string;
+  email?: string;
+  username: string;
   displayName?: string;
   firebaseAuthID: string;
   loginType: LoginType;
@@ -37,11 +35,11 @@ export type User = {
 };
 
 export enum LoginType {
-  EMAIL = "email",
+  BASIC = "basic",
   GOOGLE = "google",
 }
 
-export const getUserIDFromFirebaseAuthUser = async (
+export const getUsernameFromFirebaseAuthUser = async (
   firebaseUser: FirebaseUser
 ): Promise<string | undefined> => {
   console.log(
@@ -63,98 +61,55 @@ export const getUserIDFromFirebaseAuthUser = async (
     return undefined;
   }
   if (userResult.docs.length > 1) {
-    throw Error(
-      `Found more than one user with firebaseAuthID: ${firebaseUser.uid}`
-    );
+    throw ManyUserFoundForFirebaseIDError(firebaseUser.uid);
   }
 
   const firstResult = userResult.docs[0].data();
-  return firstResult.userID;
+  return firstResult.username;
 };
 
-export const createOrLoginGoogleUser = async (): Promise<string> => {
-  console.log(`createOrLoginGoogleUser: Creating/logging in google user`);
+export const getUserByUsername = async (
+  username: string
+): Promise<User | undefined> => {
+  console.log(username);
 
-  const googleAuthProvider = new GoogleAuthProvider();
-  const { user: firebaseUser } = await signInWithPopup(
-    auth,
-    googleAuthProvider
+  const userDocument = await getDoc(
+    doc(db, USERS_COLLECTION, username).withConverter(userConverter)
   );
 
-  console.log(`createOrLoginGoogleUser: got firebase User: ${firebaseUser}`);
-
-  let userID: string | undefined;
-  if (firebaseUser) {
-    if (!firebaseUser.email) {
-      throw new Error("No email set on firebaseUser");
-    }
-
-    if (!firebaseUser.metadata.creationTime) {
-      throw new Error("No creatime time set on firebaseUser");
-    }
-    userID = await getUserIDFromFirebaseAuthUser(firebaseUser);
-    if (!userID) {
-      userID = `user.${v4()}`;
-      const user: User = {
-        userID,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName
-          ? firebaseUser.displayName
-          : undefined,
-        createDate: Timestamp.fromDate(
-          new Date(firebaseUser.metadata.creationTime)
-        ),
-        loginType:
-          firebaseUser.providerData[0].providerId === "google.com"
-            ? LoginType.GOOGLE
-            : LoginType.EMAIL,
-        firebaseAuthID: firebaseUser.uid,
-      };
-
-      await setDoc(doc(db, USERS_COLLECTION, user.userID), user);
-      console.log(`createOrLoginGoogleUser: Created user: ${user}`);
-    } else {
-      console.log(`createOrLoginGoogleUser: User already exists: ${userID}`);
-    }
-  }
-  if (!userID) {
-    throw new Error("No user ID found");
-  }
-  return userID;
+  return userDocument.data();
 };
 
-export const createEmailUser = async (
-  email: string,
-  password: string
-): Promise<User> => {
-  console.log(`createEmailUser: Creating email user: ${email}`);
+export const createBasicUser = async (username: string): Promise<User> => {
+  console.log(`createBasicUser: Creating basic user: ${username}`);
 
-  const { user: firebaseUser } = await createUserWithEmailAndPassword(
-    auth,
-    email,
-    password
-  );
-  console.log(`createEmailUser: Created firebaseUser: ${firebaseUser}`);
+  const anonymousUser = await signInAnonymously(auth);
+
+  // const existingUsername = await getUsernameFromFirebaseAuthUser();
+
+  console.log(`createBasicUser: Created anonymousUser: ${anonymousUser}`);
+
+  const existingUser = await getUserByUsername(username);
+
+  if (existingUser) {
+    throw UserExistsError;
+  }
 
   const user: User = {
-    userID: `user.${v4()}`,
-    firebaseAuthID: firebaseUser.uid,
-    email,
-    loginType: LoginType.EMAIL,
+    username,
+    firebaseAuthID: anonymousUser.user.uid,
+    loginType: LoginType.BASIC,
     createDate: Timestamp.now(),
   };
-  await setDoc(doc(db, USERS_COLLECTION, user.userID), user);
-  console.log(`createEmailUser: Created user: ${user}`);
+  await setDoc(doc(db, USERS_COLLECTION, username), user);
+  console.log(`createBasicUser: Created user: ${user}`);
   return user;
 };
 
-export const loginEmailUser = async (email: string, password: string) => {
-  console.log(`loginEmailUser: ${email}`);
-  return signInWithEmailAndPassword(auth, email, password);
-};
+export const signOut = async (username: string) => {
+  // Delete the user
+  deleteDoc(doc(db, USERS_COLLECTION, username));
 
-export const signOut = async () => {
-  console.log("signOut");
   return firebaseSignOut(auth);
 };
 
@@ -167,7 +122,7 @@ export const useAuth = (): [User | undefined, boolean] => {
   }>({
     user: undefined,
     userLoading: true,
-  });  
+  });
 
   useEffect(() => {
     let snapshotUnsub: Unsubscribe;
@@ -186,14 +141,14 @@ export const useAuth = (): [User | undefined, boolean] => {
           if (authUser) {
             const users: User[] = [];
             querySnapshot.forEach((doc) => {
+              console.log("here", doc.data());
+
               users.push(doc.data());
             });
             if (!users) {
               throw new Error(`No user found for firebase ID: ${authUser.uid}`);
             } else if (users.length > 1) {
-              throw new Error(
-                `More than one user found for firebase ID: ${authUser.uid}`
-              );
+              throw ManyUserFoundForFirebaseIDError(authUser.uid);
             } else {
               const user = users[0];
               console.log(
@@ -211,7 +166,7 @@ export const useAuth = (): [User | undefined, boolean] => {
           }
         });
       } else {
-        // If we are signed out, remove the snapsho
+        // If we are signed out, remove the snapshot
         if (snapshotUnsub) {
           snapshotUnsub();
         }

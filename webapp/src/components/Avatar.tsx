@@ -8,7 +8,9 @@ type AvatarProps = {
 };
 
 const Avatar: React.FC<AvatarProps> = ({ user, onClick }) => {
-  const nameParts = user.displayName ? user.displayName.split(" ") : user.email;
+  const nameParts = user.displayName
+    ? user.displayName.split(" ")
+    : user.username;
   const inits =
     nameParts.length > 1
       ? nameParts[0][0].concat(nameParts[1][0]).toUpperCase()

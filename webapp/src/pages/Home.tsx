@@ -28,7 +28,14 @@ const Home: React.FC = () => {
     <XWordContainer
       showToolbar
       loadingMessage={loadingMessage}
-      toolbarChildren={<Avatar user={user} onClick={signOut} />}
+      toolbarChildren={
+        <Avatar
+          user={user}
+          onClick={() => {
+            signOut(user.username);
+          }}
+        />
+      }
     >
       {puzzles &&
         puzzles.map((puzzle) => (

@@ -96,17 +96,17 @@ export type SessionActions =
     }
   | {
       type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS;
-      userID: string;
+      username: string;
     }
   | {
       type: SessionActionTypes.LETTER_PRESSED;
       letter: string;
-      userID: string;
+      username: string;
       solutionState: CellSolutionState;
     }
   | {
       type: SessionActionTypes.BACKSPACE;
-      userID: string;
+      username: string;
     }
   | {
       type: SessionActionTypes.CELL_CLICKED;
@@ -118,13 +118,13 @@ export type SessionActions =
   | { type: SessionActionTypes.PENCIL_CLICKED }
   | { type: SessionActionTypes.REBUS_CLICKED }
   | { type: SessionActionTypes.AUTOCHECK_CLICKED }
-  | { type: SessionActionTypes.CHECK_SQUARE; userID: string }
-  | { type: SessionActionTypes.CHECK_WORD; userID: string }
-  | { type: SessionActionTypes.CHECK_PUZZLE; userID: string }
-  | { type: SessionActionTypes.REVEAL_SQUARE; userID: string }
-  | { type: SessionActionTypes.REVEAL_WORD; userID: string }
-  | { type: SessionActionTypes.REVEAL_PUZZLE; userID: string }
-  | { type: SessionActionTypes.RESET_PUZZLE; userID: string };
+  | { type: SessionActionTypes.CHECK_SQUARE; username: string }
+  | { type: SessionActionTypes.CHECK_WORD; username: string }
+  | { type: SessionActionTypes.CHECK_PUZZLE; username: string }
+  | { type: SessionActionTypes.REVEAL_SQUARE; username: string }
+  | { type: SessionActionTypes.REVEAL_WORD; username: string }
+  | { type: SessionActionTypes.REVEAL_PUZZLE; username: string }
+  | { type: SessionActionTypes.RESET_PUZZLE; username: string };
 
 // #endregion
 
@@ -165,7 +165,7 @@ const _updateSessionStatus = (
 
 const _updateCellState = (
   sessionID: string,
-  userID: string,
+  username: string,
   boardState: BoardState,
   cellKey: string,
   solutionState: CellSolutionState,
@@ -174,7 +174,7 @@ const _updateCellState = (
   const newCell: CellState = {
     solutionState,
     currentLetter: letter,
-    lastEditedBy: userID,
+    lastEditedBy: username,
   };
 
   const newBoardState: BoardState = {
@@ -185,11 +185,11 @@ const _updateCellState = (
   _updateBoardState(sessionID, newBoardState);
 };
 
-const _joinSessionParticpants = (sessionID: string, userID: string): void => {
+const _joinSessionParticpants = (sessionID: string, username: string): void => {
   const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
 
   updateDoc(sessionRef, {
-    participantIDs: arrayUnion(userID),
+    participantIDs: arrayUnion(username),
   });
 };
 
@@ -291,8 +291,8 @@ export const startSession = async (
   const session: Session = {
     sessionID,
     puzzle,
-    participantIDs: [user.userID],
-    ownerID: user.userID,
+    participantIDs: [user.username],
+    ownerID: user.username,
     startTime: Timestamp.now(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),
     sessionStatus: SessionStatus.STARTED,
@@ -375,13 +375,13 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
       const { sessionID } = _requireSession(session);
-      _joinSessionParticpants(sessionID, action.userID);
+      _joinSessionParticpants(sessionID, action.username);
       return state;
     }
     case SessionActionTypes.LETTER_PRESSED: {
       const { boardState, sessionID, puzzle, sessionStatus } =
         _requireSession(session);
-      const { letter, userID, solutionState } = action;
+      const { letter, username, solutionState } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
       if (!cellSolution) return state;
@@ -389,7 +389,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       if (sessionStatus != SessionStatus.COMPLETE) {
         _updateCellState(
           sessionID,
-          userID,
+          username,
           boardState,
           selectedCellKey,
           autocheck ? _checkCell(cellSolution, letter) : solutionState,
@@ -402,7 +402,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.BACKSPACE: {
       const { boardState, puzzle, sessionID } = _requireSession(session);
-      const { userID } = action;
+      const { username } = action;
 
       let newState = state;
 
@@ -419,7 +419,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       if (boardState[selectedCellKey].currentLetter) {
         _updateCellState(
           sessionID,
-          userID,
+          username,
           boardState,
           selectedCellKey,
           CellSolutionState.NONE,
@@ -428,7 +428,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       } else if (boardState[previousCellKey].currentLetter) {
         _updateCellState(
           sessionID,
-          userID,
+          username,
           boardState,
           previousCellKey,
           CellSolutionState.NONE,
@@ -547,7 +547,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.CHECK_SQUARE: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
+      const { username } = action;
       const currentCellValue = boardState[selectedCellKey].currentLetter;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
@@ -557,7 +557,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       _updateCellState(
         sessionID,
-        userID,
+        username,
         boardState,
         selectedCellKey,
         solutionState,
@@ -568,7 +568,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.CHECK_WORD: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
+      const { username } = action;
       const currentCellValue = boardState[selectedCellKey].currentLetter;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
@@ -596,7 +596,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         newBoardState[cellKey] = {
           ...newBoardState[cellKey],
           solutionState,
-          lastEditedBy: userID,
+          lastEditedBy: username,
         };
       });
 
@@ -605,7 +605,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.CHECK_PUZZLE: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
+      const { username } = action;
       const currentCellValue = boardState[selectedCellKey].currentLetter;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
@@ -623,7 +623,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         newBoardState[cellKey] = {
           ...newBoardState[cellKey],
           solutionState,
-          lastEditedBy: userID,
+          lastEditedBy: username,
         };
       });
 
@@ -632,14 +632,14 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.REVEAL_SQUARE: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
+      const { username } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
       if (!cellSolution) return state;
 
       _updateCellState(
         sessionID,
-        userID,
+        username,
         boardState,
         selectedCellKey,
         CellSolutionState.REVEALED,
@@ -650,7 +650,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.REVEAL_WORD: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
+      const { username } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
       if (!cellSolution) return state;
@@ -675,7 +675,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           ...newBoardState[cellKey],
           currentLetter: cellSolution[0],
           solutionState: CellSolutionState.REVEALED,
-          lastEditedBy: userID,
+          lastEditedBy: username,
         };
       });
 
@@ -684,7 +684,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.REVEAL_PUZZLE: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
+      const { username } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
       if (!cellSolution) return state;
@@ -699,7 +699,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           ...newBoardState[cellKey],
           currentLetter: cellSolution[0],
           solutionState: CellSolutionState.REVEALED,
-          lastEditedBy: userID,
+          lastEditedBy: username,
         };
       });
 
@@ -708,10 +708,10 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.RESET_PUZZLE: {
       const { sessionID, puzzle } = _requireSession(session);
-      const { userID } = action;
+      const { username } = action;
       const newBoardState = getBoardStateFromSolutions(
         puzzle.solutions,
-        userID
+        username
       );
 
       _updateBoardState(sessionID, newBoardState);

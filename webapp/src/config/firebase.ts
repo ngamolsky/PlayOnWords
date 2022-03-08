@@ -4,8 +4,8 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyAa2f3b-WWQAoMtGV8SSfYK0CX-ptAvTo8",
-  authDomain: "xword-b9f56.firebaseapp.com",
+  apiKey: "AIzaSyCIoer7B2m6K54W3CBmspqmr3qA-Yb-zhc",
+  authDomain: "auth.gamolsky.net",
   databaseURL: "https://xword-b9f56.firebaseio.com",
   projectId: "xword-b9f56",
   storageBucket: "xword-b9f56.appspot.com",

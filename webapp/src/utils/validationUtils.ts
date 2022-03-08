@@ -9,13 +9,16 @@ export type RegisterInput = UserPasswordInput & {
   confirmPassword: string;
 };
 
-export const validateEmail = (email: string): string | undefined => {
+export const validateUsername = async (
+  username: string
+): Promise<string | undefined> => {
   let error = undefined;
-  if (!email) {
+  if (!username) {
     error = "Required";
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(email)) {
-    error = "Invalid email address";
+  } else if (username.length < 5) {
+    error = "Username is too short.";
   }
+
   return error;
 };
 
@@ -24,7 +27,7 @@ export const validatePassword = (password: string): string | undefined => {
   if (!password) {
     error = "Required";
   } else if (password.length < MIN_PASSWORD_LENGTH) {
-    error = "Password to short";
+    error = "Password is too short";
   }
   return error;
 };

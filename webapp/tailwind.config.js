@@ -1,7 +1,14 @@
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        alfa: ["Alfa Slab One", "cursive"],
+      },
+      animation: {
+        "pulse-fast": "pulse 1s cubic-bezier(0,0,.58,1) infinite",
+      },
+    },
   },
   plugins: [],
   important: true,

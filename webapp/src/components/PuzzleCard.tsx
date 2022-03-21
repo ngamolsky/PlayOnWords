@@ -17,10 +17,17 @@ export enum PuzzleCardAction {
 
 export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
   return (
-    <Menu as="div" className="relative inline-block text-center">
-      <Menu.Button className="mx-auto p-4 w-4/5 text-left">
+    <Menu as="div" className="relative inline-block text-center ">
+      <Menu.Button
+        className="mx-auto p-4 w-4/5 text-left hover:bg-slate-500 
+                            active:bg-slate-500 hover:bg-opacity-95 
+                            active:bg-opacity-95 rounded-lg"
+      >
         <img src={puzzleSVG} className="w-full" />
-        <p className="mt-1">{toXWordDate(puzzle.puzzleTimestamp.toDate())}</p>
+        <p className="mt-2 ml-1 text-lg text-ellipsis">
+          {toXWordDate(puzzle.puzzleTimestamp.toDate())}
+        </p>
+        <p className="ml-1 opacity-50">New York Times</p>
       </Menu.Button>
       <Transition
         as={Fragment}
@@ -33,9 +40,9 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
       >
         <Menu.Items
           className="absolute p-2 px-8 mt-2 left-1/2 -translate-x-1/2
-                   bg-white divide-y divide-gray-100 rounded-md 
+                   divide-y divide-gray-100 rounded-md 
                      shadow-lg ring-1 ring-black ring-opacity-5 
-                     focus:outline-none z-10 hover:bg-zinc-200"
+                     focus:outline-none z-10 "
         >
           <Menu.Item>
             <button

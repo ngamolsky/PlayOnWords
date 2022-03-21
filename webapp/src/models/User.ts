@@ -108,7 +108,7 @@ export const createBasicUser = async (username: string): Promise<User> => {
 
 export const signOut = async (username: string) => {
   // Delete the user
-  deleteDoc(doc(db, USERS_COLLECTION, username));
+  await deleteDoc(doc(db, USERS_COLLECTION, username));
 
   return firebaseSignOut(auth);
 };

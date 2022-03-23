@@ -16,7 +16,7 @@ export const XWordContainer: React.FC<XWordContainerProps> = ({
     
  
   return (
-    <div className="min-h-screen flex flex-col dark:bg-slate-800 dark:text-white">
+    <div className="min-h-full flex flex-col dark:bg-slate-800 dark:text-white">
       {showToolbar && <XWordToolbar>{toolbarChildren}</XWordToolbar>}
       {loadingMessage && (
         <div className="min-h-screen min-w-full flex">

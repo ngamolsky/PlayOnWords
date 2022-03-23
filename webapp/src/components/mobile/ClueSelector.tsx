@@ -23,12 +23,12 @@ export const ClueSelector: React.FC<ClueSelectorProps> = ({
     <div className="flex flex-row max-h-16">
       <div
         onClick={onPreviousClue}
-        className="bg-slate-300 active:bg-slate-400 p-2 py-4 flex"
+        className="bg-slate-300 hover:bg-slate-400 p-2 py-4 flex"
       >
         <ChevronLeft />
       </div>
       <div
-        className="text-left grow bg-slate-300 active:bg-slate-400 p-2 flex select-none"
+        className="text-left grow bg-slate-300 hover:bg-slate-400 p-2 flex select-none"
         onClick={onCluePressed}
       >
         <p className="text-sm self-center">
@@ -38,7 +38,7 @@ export const ClueSelector: React.FC<ClueSelectorProps> = ({
       </div>
       <div
         onClick={onNextClue}
-        className="bg-slate-300 active:bg-slate-400 p-2 py-4 justify-center flex"
+        className="bg-slate-300 hover:bg-slate-400 p-2 py-4 justify-center flex"
       >
         <ChevronRight />
       </div>

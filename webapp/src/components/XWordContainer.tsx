@@ -13,18 +13,20 @@ export const XWordContainer: React.FC<XWordContainerProps> = ({
   toolbarChildren,
   showToolbar,
 }) => {
-  const content = loadingMessage ? (
-    <div className="grow flex justify-center items-center motion-safe:animate-pulse-fast">
-      {loadingMessage}
-    </div>
-  ) : (
-    children
-  );
+    
+ 
   return (
-    <div className="min-h-full flex flex-col dark:bg-slate-800 dark:text-white">
+    <div className="min-h-screen flex flex-col dark:bg-slate-800 dark:text-white">
       {showToolbar && <XWordToolbar>{toolbarChildren}</XWordToolbar>}
+      {loadingMessage && (
+        <div className="min-h-screen min-w-full flex">
+          <div className="grow flex justify-center items-center motion-safe:animate-pulse-fast">
+            {loadingMessage}
+          </div>
+        </div>
+      )}
       <div className="max-w-sm flex flex-col mx-auto h-full grow w-full">
-        {content}
+        {children}
       </div>
     </div>
   );

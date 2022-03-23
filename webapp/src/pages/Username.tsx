@@ -14,8 +14,8 @@ const Login: React.FC = () => {
   const history = useHistory();
   const queryParams = useQueryParams();
   const [user, userLoading] = useContext(UserContext);
-  const [creatingUser, setCreatingUser] = useState<boolean>(false);
   const continueUrl = queryParams.get("continueUrl");
+  const [creatingUser, setCreatingUser] = useState<boolean>(false);
 
   const loadingMessage =
     userLoading || creatingUser ? "Loading user..." : undefined;
@@ -35,6 +35,8 @@ const Login: React.FC = () => {
         onSubmit={async ({ username }, { setErrors }) => {
           setCreatingUser(true);
           await createBasicUser(username).catch((error) => {
+            setCreatingUser(false);
+
             const errorCode = error.code;
             const errorMessage = error.message;
 
@@ -48,8 +50,8 @@ const Login: React.FC = () => {
           });
         }}
       >
-        <Form className="flex grow flex-col space-y-4 my-8">
-          <img src={puzzleSVG} className="w-full mb-16 p-8" />
+        <Form className="flex grow flex-col  my-8">
+          <img src={puzzleSVG} className="w-full p-8" />
           <div className="grow" />
 
           <InputField
@@ -63,7 +65,7 @@ const Login: React.FC = () => {
 
           <button
             type="submit"
-            className="text-white bg-teal-600 active:bg-teal-700 hover:bg-teal-700 rounded-lg py-2 mx-8"
+            className="text-white bg-teal-600 active:bg-teal-700 rounded-lg py-2 mx-8"
           >
             Start
           </button>

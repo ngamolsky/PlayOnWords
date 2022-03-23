@@ -103,7 +103,7 @@ const Solve: React.FC = () => {
           </div>
           <div
             className={`h-8 w-8 rounded-md ${
-              pencilMode ? "bg-slate-300" : "bg-white"
+              pencilMode ? "dark:bg-slate-500 dark:bg-opacity-95" : "bg-inherit"
             } p-1`}
             onClick={() => {
               dispatch({
@@ -116,7 +116,7 @@ const Solve: React.FC = () => {
           <DropdownMenu
             selectedItemIndex={autocheck ? 0 : undefined}
             buttonContent={
-              <div className="h-8 w-8 rounded-md p-1 active:bg-slate-300">
+              <div className="h-8 w-8 rounded-md p-1 hover:bg-slate-500 hover:bg-opacity-95">
                 <Help />
               </div>
             }
@@ -196,7 +196,7 @@ const Solve: React.FC = () => {
           />
           <DropdownMenu
             buttonContent={
-              <div className="h-8 w-8 rounded-md p-1 active:bg-slate-300">
+              <div className="h-8 w-8 rounded-md p-1 hover:bg-slate-300">
                 <VerticalDots />
               </div>
             }

@@ -19,9 +19,8 @@ const Avatar: React.FC<AvatarProps> = ({ user, onClick }) => {
     <Menu as="div" className="inline-block text-center">
       <Menu.Button
         className="border-black border dark:border-white rounded-full 
-                bg-slate-300aspect-square h-8 w-8 
-                flex justify-center items-center p-5 hover:bg-slate-500 active:bg-slate-100 
-                hover:bg-opacity-95 active:bg-opacity-95"
+                aspect-square h-8 w-8 active:bg-slate-200 active:bg-opacity-95
+                flex justify-center items-center p-5 dark:active:bg-slate-500 dark:active:bg-opacity-95"
       >
         {inits}
       </Menu.Button>
@@ -38,7 +37,8 @@ const Avatar: React.FC<AvatarProps> = ({ user, onClick }) => {
           className="absolute p-2 px-8 mt-2 right-0
                    bg-white dark:bg-slate-800 divide-y rounded-md 
                      shadow-lg ring-1 ring-white 
-                     hover:bg-zinc-200 mr-2 hover:dark:bg-slate-600"
+                     active:bg-slate-200 active:bg-opacity-95
+                   dark:active:bg-slate-500 dark:active:bg-opacity-95"
         >
           <Menu.Item>
             <button onClick={onClick}>Sign Out</button>

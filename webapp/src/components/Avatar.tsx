@@ -34,7 +34,7 @@ const Avatar: React.FC<AvatarProps> = ({ user, onClick }) => {
         leaveTo="transform opacity-0 scale-50"
       >
         <Menu.Items
-          className="absolute p-2 px-8 mt-2 right-0
+          className="absolute p-2 px-8 mt-2 right-2
                    bg-white dark:bg-slate-800 divide-y rounded-md 
                      shadow-lg ring-1 ring-white 
                      active:bg-slate-200 active:bg-opacity-95

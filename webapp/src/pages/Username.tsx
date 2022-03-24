@@ -50,7 +50,7 @@ const Login: React.FC = () => {
           });
         }}
       >
-        <Form className="flex grow flex-col  my-8">
+        <Form className="flex grow flex-col">
           <img src={puzzleSVG} className="w-full p-8" />
           <div className="grow" />
 
@@ -65,7 +65,7 @@ const Login: React.FC = () => {
 
           <button
             type="submit"
-            className="text-white bg-teal-600 active:bg-teal-700 rounded-lg py-2 mx-8"
+            className="text-white bg-teal-600 active:bg-teal-700 rounded-lg py-2 mx-8 mb-4"
           >
             Start
           </button>

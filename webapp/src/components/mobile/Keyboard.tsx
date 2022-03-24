@@ -49,7 +49,7 @@ export const Keyboard = ({ onKeyPress, keyboardRef, rebus }: KeyboardProps) => {
       }}
       buttonTheme={[
         {
-          class: "h-12",
+          class: "h-10",
           buttons: "{rebus} {backspace}",
         },
         {
@@ -61,7 +61,7 @@ export const Keyboard = ({ onKeyPress, keyboardRef, rebus }: KeyboardProps) => {
           buttons: "{rebus}",
         },
         {
-          class: "text-xl h-12",
+          class: "text-xl h-10",
           buttons: Object.keys(characters).join(" "),
         },
       ]}

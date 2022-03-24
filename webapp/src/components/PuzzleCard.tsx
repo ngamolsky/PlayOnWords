@@ -17,9 +17,12 @@ export enum PuzzleCardAction {
 
 export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
   return (
-    <Menu as="div" className="relative inline-block text-center">
+    <Menu
+      as="div"
+      className="relative inline-block text-center select-none outline-none"
+    >
       <Menu.Button
-        className="mx-auto p-4 w-4/5 text-left  rounded-lg
+        className="mx-auto p-4 w-4/5 text-left rounded-lg
                  dark:active:bg-slate-500
                    active:bg-slate-200 "
       >

@@ -65,7 +65,7 @@ const Login: React.FC = () => {
 
           <button
             type="submit"
-            className="text-white bg-teal-600 active:bg-teal-700 rounded-lg py-2 mx-8 mb-4"
+            className="text-white bg-teal-600 active:bg-teal-700 rounded-lg py-2 mx-8 mb-8"
           >
             Start
           </button>

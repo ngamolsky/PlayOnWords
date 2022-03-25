@@ -16,16 +16,14 @@ export const XWordContainer: React.FC<XWordContainerProps> = ({
     
  
   return (
-    <div className="min-h-full flex flex-col dark:bg-slate-800 dark:text-white">
+    <div className="flex flex-col min-h-full dark:bg-slate-800 dark:text-white">
       {showToolbar && <XWordToolbar>{toolbarChildren}</XWordToolbar>}
       {loadingMessage && (
-        <div className="min-h-screen min-w-full flex">
-          <div className="grow flex justify-center items-center motion-safe:animate-pulse-fast">
-            {loadingMessage}
-          </div>
+        <div className="flex items-center justify-center min-w-full min-h-screen grow motion-safe:animate-pulse-fast">
+          {loadingMessage}
         </div>
       )}
-      <div className="max-w-sm flex flex-col mx-auto h-full grow w-full">
+      <div className="flex flex-col w-full h-full max-w-sm p-8 mx-auto grow">
         {children}
       </div>
     </div>

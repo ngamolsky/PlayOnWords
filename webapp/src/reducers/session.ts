@@ -280,7 +280,8 @@ const _checkCell = (
 export const startSession = async (
   sessionID: string,
   puzzle: Puzzle,
-  user: User
+  user: User,
+  participantIDs: string[]
 ): Promise<void> => {
   const sessionRef = doc(
     db,
@@ -291,7 +292,7 @@ export const startSession = async (
   const session: Session = {
     sessionID,
     puzzle,
-    participantIDs: [user.username],
+    participantIDs: [user.username].concat(participantIDs),
     ownerID: user.username,
     startTime: Timestamp.now(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),

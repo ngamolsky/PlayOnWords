@@ -8,21 +8,14 @@ type AvatarProps = {
 };
 
 const Avatar: React.FC<AvatarProps> = ({ user, onClick }) => {
-  const nameParts = user.displayName
-    ? user.displayName.split(" ")
-    : user.username;
-  const inits =
-    nameParts.length > 1
-      ? nameParts[0][0].concat(nameParts[1][0]).toUpperCase()
-      : nameParts[0][0].toUpperCase();
+
   return (
     <Menu as="div" className="inline-block text-center">
       <Menu.Button
-        className="border-black border dark:border-white rounded-full 
-                aspect-square h-8 w-8 active:bg-slate-200 active:bg-opacity-95
-                flex justify-center items-center p-5 dark:active:bg-slate-500 dark:active:bg-opacity-95"
+        className="rounded-full aspect-square h-8 w-8 dark:bg-slate-600  active:bg-slate-200 active:bg-opacity-95
+                   flex justify-center items-center p-5 dark:active:bg-slate-500 dark:active:bg-opacity-95 outline-none"
       >
-        {inits}
+        {user.username[0].toUpperCase()}
       </Menu.Button>
       <Transition
         as={Fragment}
@@ -35,10 +28,11 @@ const Avatar: React.FC<AvatarProps> = ({ user, onClick }) => {
       >
         <Menu.Items
           className="absolute p-2 px-8 mt-2 right-2
-                   bg-white dark:bg-slate-800 divide-y rounded-md 
-                     shadow-lg ring-1 ring-white 
+                     bg-white dark:bg-slate-800 divide-y rounded-md 
+                     shadow-lg
                      active:bg-slate-200 active:bg-opacity-95
-                   dark:active:bg-slate-500 dark:active:bg-opacity-95"
+                     dark:active:bg-slate-500 dark:active:bg-opacity-95
+                     outline-none"
         >
           <Menu.Item>
             <button onClick={onClick}>Sign Out</button>

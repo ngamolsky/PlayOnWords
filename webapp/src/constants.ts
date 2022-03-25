@@ -1,6 +1,6 @@
 import { OrientationType } from "./reducers/session";
 
-export const APP_NAME = "XWord";
+export const APP_NAME = "WeWord";
 
 export const __prod__ = process.env.NODE_ENV === "production";
 

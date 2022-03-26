@@ -25,7 +25,7 @@ const StartSessionModal = ({
   setSessionID: (sessionID: string) => void;
 }) => {
   return (
-    <Modal isOpen={modalShowing} setIsOpen={setModalShowing} title="Session">
+    <Modal isOpen={modalShowing} setIsOpen={setModalShowing} className="h-full">
       <HomeTabs
         tabArray={[
           <div className="flex flex-col justify-between h-full space-y-4">

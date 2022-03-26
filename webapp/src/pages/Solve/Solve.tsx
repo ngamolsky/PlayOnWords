@@ -14,16 +14,12 @@ import {
   isUserInSession,
 } from "../../utils/sessionUtils";
 import { ACTION_KEYS } from "../../utils/keyboardUtils";
-import { signOut, useLoggedInUser } from "../../models/User";
+import { useLoggedInUser } from "../../models/User";
 import { useSessionState } from "../../hooks/useSessionState";
 import { SessionActionTypes } from "../../reducers/session";
-import Pencil from "../../components/icons/Pencil";
-import Help from "../../components/icons/Help";
-import VerticalDots from "../../components/icons/VerticalDots";
-import Timer from "../../components/Timer";
-import DropdownMenu from "../../components/DropdownMenu";
 import EndSessionModal from "./EndSessionModal";
-import { secondsToTimeString } from "../../utils/timeAndDateUtils";
+import InviteUsersModal from "./InviteUsersModal";
+import SolveToolbarItems from "./SolveToolbarItems";
 
 export type SelectionState = {
   orientation: OrientationType;
@@ -42,7 +38,10 @@ const Solve: React.FC = () => {
 
   const [sessionState, dispatch] = useSessionState(sessionID);
 
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [endSessionModalOpen, setEndSessionModalOpen] =
+    useState<boolean>(false);
+  const [inviteUsersModalOpen, setInviteUsersModalOpen] =
+    useState<boolean>(false);
 
   const {
     session,
@@ -71,9 +70,13 @@ const Solve: React.FC = () => {
 
   useEffect(() => {
     if (session?.sessionStatus == SessionStatus.COMPLETE) {
-      setModalOpen(true);
+      setEndSessionModalOpen(true);
     }
   }, [session?.sessionStatus]);
+
+  useEffect(() => {
+    setInviteUsersModalOpen(true);
+  }, []);
 
   if (!session) {
     return <XWordContainer loadingMessage={loadingMessage} showToolbar />;
@@ -91,154 +94,34 @@ const Solve: React.FC = () => {
     <XWordContainer
       showToolbar
       toolbarChildren={
-        <div className="space-x-2 flex-row flex h-8 relative">
-          <div className="my-auto">
-            {session && session.endTime ? (
-              secondsToTimeString(
-                session.endTime.seconds - session.startTime.seconds
-              )
-            ) : (
-              <Timer sessionStartDate={session.startTime.toDate()} />
-            )}
-          </div>
-          <div
-            className={`h-8 w-8 rounded-md ${
-              pencilMode ? "dark:bg-slate-500 dark:bg-opacity-95" : "bg-inherit"
-            } p-1`}
-            onClick={() => {
-              dispatch({
-                type: SessionActionTypes.PENCIL_CLICKED,
-              });
-            }}
-          >
-            <Pencil />
-          </div>
-          <DropdownMenu
-            selectedItemIndex={autocheck ? 0 : undefined}
-            buttonContent={
-              <div className="h-8 w-8 rounded-md p-1 hover:bg-slate-500 hover:bg-opacity-95">
-                <Help />
-              </div>
-            }
-            items={[
-              {
-                node: <p>Autocheck</p>,
-                onClick: () => {
-                  dispatch({
-                    type: SessionActionTypes.AUTOCHECK_CLICKED,
-                  });
-                },
-              },
-              {
-                node: <p>Check Square</p>,
-                onClick: () => {
-                  dispatch({
-                    type: SessionActionTypes.CHECK_SQUARE,
-                    username: user.username,
-                  });
-                },
-              },
-              {
-                node: <p>Check Word</p>,
-                onClick: () => {
-                  dispatch({
-                    type: SessionActionTypes.CHECK_WORD,
-                    username: user.username,
-                  });
-                },
-              },
-              {
-                node: <p>Check Puzzle</p>,
-                onClick: () => {
-                  dispatch({
-                    type: SessionActionTypes.CHECK_PUZZLE,
-                    username: user.username,
-                  });
-                },
-              },
-              {
-                node: <p>Reveal Square</p>,
-                onClick: () => {
-                  dispatch({
-                    type: SessionActionTypes.REVEAL_SQUARE,
-                    username: user.username,
-                  });
-                },
-              },
-              {
-                node: <p>Reveal Word</p>,
-                onClick: () => {
-                  dispatch({
-                    type: SessionActionTypes.REVEAL_WORD,
-                    username: user.username,
-                  });
-                },
-              },
-              {
-                node: <p>Reveal Puzzle</p>,
-                onClick: () => {
-                  dispatch({
-                    type: SessionActionTypes.REVEAL_PUZZLE,
-                    username: user.username,
-                  });
-                },
-              },
-              {
-                node: <p>Reset Puzzle</p>,
-                onClick: () => {
-                  dispatch({
-                    type: SessionActionTypes.RESET_PUZZLE,
-                    username: user.username,
-                  });
-                },
-              },
-            ]}
-          />
-          <DropdownMenu
-            buttonContent={
-              <div className="h-8 w-8 rounded-md p-1 hover:bg-slate-300">
-                <VerticalDots />
-              </div>
-            }
-            items={[
-              {
-                node: <p>Sign Out</p>,
-                onClick: () => {
-                  signOut(user.username);
-                },
-              },
-              {
-                node: <p>Log Particpants</p>,
-                onClick: () => {
-                  console.log(session.participantIDs);
-                },
-              },
-              {
-                node: <p>Get Share Link</p>,
-                onClick: () => {
-                  console.log(location.pathname);
-                },
-              },
-            ]}
-          />
-        </div>
+        <SolveToolbarItems
+          session={session}
+          user={user}
+          autocheck={autocheck}
+          pencilMode={pencilMode}
+          dispatch={dispatch}
+        />
       }
     >
-      {session.endTime && (
-        <EndSessionModal
-          onClickResetButton={() => {
-            setModalOpen(false);
-            dispatch({
-              type: SessionActionTypes.RESET_PUZZLE,
-              username: user.username,
-            });
-          }}
-          isOpen={modalOpen}
-          setIsOpen={setModalOpen}
-          isCorrect={checkPuzzle(session.boardState, session.puzzle.solutions)}
-          session={session}
-        />
-      )}
+      <InviteUsersModal
+        modalShowing={inviteUsersModalOpen}
+        session={session}
+        user={user}
+        setModalShowing={setInviteUsersModalOpen}
+      />
+      <EndSessionModal
+        onClickResetButton={() => {
+          setEndSessionModalOpen(false);
+          dispatch({
+            type: SessionActionTypes.RESET_PUZZLE,
+            username: user.username,
+          });
+        }}
+        isOpen={endSessionModalOpen}
+        setIsOpen={setEndSessionModalOpen}
+        isCorrect={checkPuzzle(session.boardState, session.puzzle.solutions)}
+        session={session}
+      />
 
       <XBoard
         boardState={boardState}

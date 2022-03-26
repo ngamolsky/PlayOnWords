@@ -85,15 +85,7 @@ export const createBasicUser = async (username: string): Promise<User> => {
 
   const anonymousUser = await signInAnonymously(auth);
 
-  // const existingUsername = await getUsernameFromFirebaseAuthUser();
-
   console.log(`createBasicUser: Created anonymousUser: ${anonymousUser}`);
-
-  const existingUser = await getUserByUsername(username);
-
-  if (existingUser) {
-    throw UserExistsError;
-  }
 
   const user: User = {
     username,

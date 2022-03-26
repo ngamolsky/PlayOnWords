@@ -281,7 +281,7 @@ export const startSession = async (
   sessionID: string,
   puzzle: Puzzle,
   user: User,
-  participantIDs: string[]
+  participantIDs?: string[]
 ): Promise<void> => {
   const sessionRef = doc(
     db,
@@ -292,7 +292,9 @@ export const startSession = async (
   const session: Session = {
     sessionID,
     puzzle,
-    participantIDs: [user.username].concat(participantIDs),
+    participantIDs: participantIDs
+      ? [user.username].concat(participantIDs)
+      : [user.username],
     ownerID: user.username,
     startTime: Timestamp.now(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),

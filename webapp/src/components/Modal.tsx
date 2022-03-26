@@ -5,12 +5,12 @@ const Modal = ({
   isOpen,
   setIsOpen,
   title,
-  content,
+  children,
 }: {
   isOpen: boolean;
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsOpen: (isOpen: boolean) => void;
   title: string;
-  content: React.ReactNode;
+  children?: React.ReactNode;
 }) => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -43,14 +43,14 @@ const Modal = ({
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 scale-95"
         >
-          <div className="flex flex-col w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl h-4/5 rounded-2xl dark:bg-slate-700 dark:text-white">
+          <div className="flex flex-col w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl h-4/5 rounded-2xl dark:bg-slate-800 dark:text-white">
             <Dialog.Title
               as="h3"
               className="mb-4 text-lg font-medium leading-6"
             >
               {title}
             </Dialog.Title>
-            {content}
+            {children}
           </div>
         </Transition.Child>
       </Dialog>

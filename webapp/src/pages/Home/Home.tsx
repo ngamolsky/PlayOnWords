@@ -46,6 +46,9 @@ const Home: React.FC = () => {
           user={user}
           setSessionLoading={setSessionLoading}
           setModalShowing={setModalShowing}
+          setSessionID={(sessionID) => {
+            history.push(`/solve/${sessionID}`);
+          }}
         />
       )}
 

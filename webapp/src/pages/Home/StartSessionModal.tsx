@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+
 import { v4 } from "uuid";
 import Button from "../../components/Button";
 import Modal from "../../components/Modal";
@@ -6,12 +7,14 @@ import { Puzzle } from "../../models/Puzzle";
 import { User } from "../../models/User";
 import { startSession } from "../../reducers/session";
 import HomeTabs from "./HomeTabs";
+import { PuzzleCard } from "../../components/PuzzleCard";
 
 const StartSessionModal = ({
   modalShowing,
   selectedPuzzle,
   user,
   setSessionLoading,
+  setSessionID,
   setModalShowing,
 }: {
   modalShowing: boolean;
@@ -19,75 +22,36 @@ const StartSessionModal = ({
   user: User;
   setSessionLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setModalShowing: React.Dispatch<React.SetStateAction<boolean>>;
+  setSessionID: (sessionID: string) => void;
 }) => {
-  const [invitedUsernames, setInvitedUsernames] = useState<Set<string>>(
-    new Set()
-  );
-  const [usernameToInvite, setUsernameToInvite] = useState<string>("");
-
   return (
-    <Modal
-      isOpen={modalShowing}
-      setIsOpen={setModalShowing}
-      title="Sessions"
-      content={
-        <HomeTabs
-          tabArray={[
-            <div className="flex flex-col justify-center h-full space-y-4">
-              <p className="mt-4">
-                Invite friends by username and start your session:
-              </p>
-              <div className="flex mb-4">
-                <input
-                  className="p-2 border border-black rounded-lg outline-none dark:border-white focus:border-teal-600 dark:bg-slate-500 grow"
-                  value={usernameToInvite}
-                  onChange={(event) => {
-                    setUsernameToInvite(event.target.value);
-                  }}
-                />
-                <Button
-                  type="button"
-                  onClick={() => {
-                    if (usernameToInvite) {
-                      setInvitedUsernames(
-                        invitedUsernames.add(usernameToInvite)
-                      );
-                      setUsernameToInvite("");
-                    }
-                  }}
-                >
-                  <div className="mx-4">+</div>
-                </Button>
-              </div>
-              <div className="flex-col divide-y grow divide-solid divide-slate-400">
-                {[user.username]
-                  .concat(Array.from(invitedUsernames))
-                  .map((username, index) => (
-                    <div key={index}>{username}</div>
-                  ))}
-              </div>
-              <Button
-                type="button"
-                onClick={async () => {
-                  setSessionLoading(true);
-                  const sessionID = `session.${v4()}`;
+    <Modal isOpen={modalShowing} setIsOpen={setModalShowing} title="Session">
+      <HomeTabs
+        tabArray={[
+          <div className="flex flex-col justify-between h-full space-y-4">
+            <p className="w-full mx-auto mt-4 text-lg">
+              Start a Session for the puzzle:
+            </p>
+            <PuzzleCard puzzle={selectedPuzzle} />
+            <Button
+              type="button"
+              className="w-full mx-auto"
+              onClick={async () => {
+                setSessionLoading(true);
+                setModalShowing(false);
 
-                  await startSession(
-                    sessionID,
-                    selectedPuzzle,
-                    user,
-                    Array.from(invitedUsernames)
-                  );
-                  setModalShowing(true);
-                }}
-              >
-                Start Session
-              </Button>
-            </div>,
-          ]}
-        />
-      }
-    />
+                const sessionID = `session.${v4()}`;
+
+                await startSession(sessionID, selectedPuzzle, user);
+                setSessionID(sessionID);
+              }}
+            >
+              Start Session
+            </Button>
+          </div>,
+        ]}
+      />
+    </Modal>
   );
 };
 

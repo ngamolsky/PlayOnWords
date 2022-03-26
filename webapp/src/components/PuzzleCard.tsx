@@ -1,12 +1,11 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { toXWordDate } from "../utils/timeAndDateUtils";
 import puzzleSVG from "../images/XWordSquare.svg";
 import { Puzzle } from "../models/Puzzle";
-import { Menu, Transition } from "@headlessui/react";
 
 interface PuzzleCardProps {
   puzzle: Puzzle;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 export enum PuzzleCardAction {

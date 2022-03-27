@@ -16,7 +16,7 @@ import { useLoggedInUser } from "../../models/User";
 import { useSessionState } from "../../hooks/useSessionState";
 import { SessionActionTypes } from "../../reducers/session";
 import EndSessionModal from "./EndSessionModal";
-import InviteUsersModal from "./InviteUsersModal";
+import ShareUserModal from "./ShareModal";
 import SolveToolbarItems from "./SolveToolbarItems";
 
 export type SelectionState = {
@@ -89,15 +89,18 @@ const Solve: React.FC = () => {
           autocheck={autocheck}
           pencilMode={pencilMode}
           dispatch={dispatch}
+          showShareModal={setInviteUsersModalOpen}
         />
       }
     >
-      <InviteUsersModal
-        modalShowing={inviteUsersModalOpen}
-        session={session}
-        user={user}
-        setModalShowing={setInviteUsersModalOpen}
-      />
+      {inviteUsersModalOpen && (
+        <ShareUserModal
+          modalShowing={inviteUsersModalOpen}
+          session={session}
+          user={user}
+          setModalShowing={setInviteUsersModalOpen}
+        />
+      )}
       {endSessionModalOpen && (
         <EndSessionModal
           onClickResetButton={() => {

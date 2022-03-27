@@ -3,6 +3,7 @@ import React, { Dispatch } from "react";
 import Dropdown from "../../components/Dropdown";
 import Help from "../../components/icons/Help";
 import Pencil from "../../components/icons/Pencil";
+import Share from "../../components/icons/Share";
 import VerticalDots from "../../components/icons/VerticalDots";
 import Timer from "../../components/Timer";
 import { Session } from "../../models/Session";
@@ -16,12 +17,14 @@ const SolveToolbarItems = ({
   pencilMode,
   autocheck,
   dispatch,
+  showShareModal,
 }: {
   session: Session;
   user: User;
   pencilMode: boolean;
   autocheck: boolean;
   dispatch: Dispatch<SessionActions>;
+  showShareModal: (isOpen: boolean) => void;
 }) => {
   return (
     <div className="relative flex flex-row h-8 space-x-2">
@@ -35,6 +38,16 @@ const SolveToolbarItems = ({
         )}
       </div>
       <div
+        className={classNames(
+          "h-8 w-8 rounded-md p-1 active:dark:bg-slate-600 active:bg-slate-300"
+        )}
+        onClick={() => {
+          showShareModal(true);
+        }}
+      >
+        <Share />
+      </div>
+      <div
         className={classNames("h-8 w-8 rounded-md p-1", {
           "dark:bg-slate-600 bg-slate-300": pencilMode,
         })}
@@ -46,6 +59,7 @@ const SolveToolbarItems = ({
       >
         <Pencil />
       </div>
+
       <Dropdown
         selectedItemIndex={autocheck ? 0 : undefined}
         buttonContent={
@@ -135,21 +149,9 @@ const SolveToolbarItems = ({
         }
         items={[
           {
-            node: <p>Sign Out</p>,
+            node: <p className="px-4">Sign Out</p>,
             onClick: () => {
               signOut(user.username);
-            },
-          },
-          {
-            node: <p>Log Particpants</p>,
-            onClick: () => {
-              console.log(session.participantIDs);
-            },
-          },
-          {
-            node: <p>Get Share Link</p>,
-            onClick: () => {
-              console.log(location.pathname);
             },
           },
         ]}

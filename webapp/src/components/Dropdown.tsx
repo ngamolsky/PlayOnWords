@@ -1,4 +1,5 @@
 import { Menu, Transition } from "@headlessui/react";
+import classNames from "classnames";
 import React, { Fragment, ReactNode } from "react";
 
 type DropdownProps = {
@@ -27,12 +28,38 @@ const Dropdown: React.FC<DropdownProps> = ({
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-50"
       >
-        <Menu.Items className="absolute p-2 px-8 mt-2 bg-white divide-y rounded-md shadow-lg outline-none right-2 dark:bg-slate-800 active:bg-slate-200 active:bg-opacity-95 dark:active:bg-slate-500 dark:active:bg-opacity-95">
-          {items.map((item, index) => (
-            <Menu.Item key={index} onClick={item.onClick}>
-              {item.node}
-            </Menu.Item>
-          ))}
+        <Menu.Items
+          className={classNames(
+            "absolute grid grid-cols-1 bg-white divide-y rounded-md shadow-lg outline-none right-2 dark:bg-slate-800"
+          )}
+        >
+          {items.map((item, index) => {
+            return (
+              <Menu.Item key={index} onClick={item.onClick}>
+                {({ active }) => (
+                  <div
+                    className={classNames(
+                      "p-2 active:bg-slate-200",
+                      {
+                        "bg-blue-300 dark:bg-blue-600 first:rounded-t-md last:rounded-b-md":
+                          index == selectedItemIndex,
+                      },
+                      {
+                        "bg-blue-400 dark:bg-blue-700 first:rounded-t-md last:rounded-b-md":
+                          index == selectedItemIndex && active,
+                      },
+                      {
+                        "bg-slate-200 dark:bg-slate-600 first:rounded-t-md last:rounded-b-md":
+                          active,
+                      }
+                    )}
+                  >
+                    {item.node}
+                  </div>
+                )}
+              </Menu.Item>
+            );
+          })}
         </Menu.Items>
       </Transition>
     </Menu>

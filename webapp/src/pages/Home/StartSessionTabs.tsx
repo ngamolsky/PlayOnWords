@@ -1,12 +1,13 @@
 import { Tab } from "@headlessui/react";
 import React, { ReactNode } from "react";
 
-const HomeTabs = ({ tabArray }: { tabArray: ReactNode[] }) => {
+const StartSessionTabs = ({ tabArray }: { tabArray: ReactNode[] }) => {
   return (
     <Tab.Group>
       <Tab.List
         className={`w-full rounded-md 
-           bg-slate-600/20 flex justify-around`}
+           bg-slate-600/20 flex justify-around outline-none`}
+        tabIndex={0}
       >
         <Tab
           className={({ selected }) =>
@@ -47,4 +48,4 @@ const HomeTabs = ({ tabArray }: { tabArray: ReactNode[] }) => {
   );
 };
 
-export default HomeTabs;
+export default StartSessionTabs;

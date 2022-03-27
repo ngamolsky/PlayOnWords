@@ -2,7 +2,7 @@ import { onSnapshot, doc } from "firebase/firestore";
 import { Dispatch, useReducer, useEffect } from "react";
 import { db } from "../config/firebase";
 import {
-  PUZZLE_SESSIONS_COLLECTION,
+  SESSIONS_COLLECTION,
   STARTING_ORIENTATION,
   STARTING_SELECTED_CELL,
 } from "../constants";
@@ -46,9 +46,7 @@ export const useSessionState = (
 
   useEffect(() => {
     const unsub = onSnapshot(
-      doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID).withConverter(
-        sessionConverter
-      ),
+      doc(db, SESSIONS_COLLECTION, sessionID).withConverter(sessionConverter),
       (doc) => {
         const session = doc.data();
         if (session) {

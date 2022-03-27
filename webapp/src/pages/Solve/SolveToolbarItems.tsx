@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React, { Dispatch } from "react";
 import Dropdown from "../../components/Dropdown";
 import Help from "../../components/icons/Help";
@@ -34,9 +35,9 @@ const SolveToolbarItems = ({
         )}
       </div>
       <div
-        className={`h-8 w-8 rounded-md ${
-          pencilMode ? "dark:bg-slate-500 dark:bg-opacity-95" : "bg-inherit"
-        } p-1`}
+        className={classNames("h-8 w-8 rounded-md p-1", {
+          "dark:bg-slate-600 bg-slate-300": pencilMode,
+        })}
         onClick={() => {
           dispatch({
             type: SessionActionTypes.PENCIL_CLICKED,
@@ -48,7 +49,7 @@ const SolveToolbarItems = ({
       <Dropdown
         selectedItemIndex={autocheck ? 0 : undefined}
         buttonContent={
-          <div className="w-8 h-8 p-1 rounded-md hover:bg-slate-500 hover:bg-opacity-95">
+          <div className="w-8 h-8 p-1 rounded-md active:bg-slate-300 active:dark:bg-slate-600">
             <Help />
           </div>
         }
@@ -128,7 +129,7 @@ const SolveToolbarItems = ({
       />
       <Dropdown
         buttonContent={
-          <div className="w-8 h-8 p-1 rounded-md hover:bg-slate-300">
+          <div className="w-8 h-8 p-1 rounded-md active:bg-slate-300">
             <VerticalDots />
           </div>
         }

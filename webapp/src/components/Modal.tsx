@@ -19,7 +19,7 @@ const Modal = ({
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="fixed inset-0 z-10 p-4"
+        className="fixed inset-0 z-10 p-8"
         onClose={() => {
           setIsOpen(false);
         }}
@@ -47,7 +47,7 @@ const Modal = ({
         >
           <div
             className={classNames(
-              "flex flex-col w-full max-w-md overflow-hidden text-left transition-all transform bg-white shadow-xl dark:bg-slate-800 dark:text-white outline-none p-4",
+              "flex flex-col w-full max-w-md overflow-hidden text-left transition-all transform bg-white shadow-xl dark:bg-slate-800 dark:text-white outline-none p-4 mx-auto rounded-lg",
               className
             )}
           >

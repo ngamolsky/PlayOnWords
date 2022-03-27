@@ -1,11 +1,10 @@
-import React, { MutableRefObject, useEffect, useRef, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
-import { SimpleKeyboard } from "react-simple-keyboard";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import { XWordContainer } from "../../components/XWordContainer";
 import { CellSolutionState, SessionStatus } from "../../models/Session";
 import { XBoard } from "../../components/XBoard/XBoard";
-import { Keyboard } from "../../components/mobile/Keyboard";
+import { ACTION_KEYS, Keyboard } from "../../components/mobile/Keyboard";
 import { ClueSelector } from "../../components/mobile/ClueSelector";
 import {
   checkPuzzle,
@@ -13,7 +12,6 @@ import {
   getCombinedBoardState,
   isUserInSession,
 } from "../../utils/sessionUtils";
-import { ACTION_KEYS } from "../../utils/keyboardUtils";
 import { useLoggedInUser } from "../../models/User";
 import { useSessionState } from "../../hooks/useSessionState";
 import { SessionActionTypes } from "../../reducers/session";
@@ -34,7 +32,6 @@ const Solve: React.FC = () => {
   }
 
   const user = useLoggedInUser();
-  const location = useLocation();
 
   const [sessionState, dispatch] = useSessionState(sessionID);
 
@@ -49,17 +46,14 @@ const Solve: React.FC = () => {
     loadingMessage,
   } = sessionState;
 
-  const keyboardRef: MutableRefObject<SimpleKeyboard | null> =
-    useRef<SimpleKeyboard>(null);
-
   // Join puzzle session if the user isn't already in it when joining
   useEffect(() => {
     const joinPuzzleSessionIfNeeded = async () => {
       if (user && session) {
-        if (!isUserInSession(session, user.username)) {
+        if (!isUserInSession(session, user.firebaseAuthID)) {
           dispatch({
             type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS,
-            username: user.username,
+            userID: user.firebaseAuthID,
           });
         }
       }
@@ -74,10 +68,6 @@ const Solve: React.FC = () => {
     }
   }, [session?.sessionStatus]);
 
-  useEffect(() => {
-    setInviteUsersModalOpen(true);
-  }, []);
-
   if (!session) {
     return <XWordContainer loadingMessage={loadingMessage} showToolbar />;
   }
@@ -87,7 +77,6 @@ const Solve: React.FC = () => {
     orientation,
     session.puzzle
   );
-
   const boardState = getCombinedBoardState(sessionState);
 
   return (
@@ -109,19 +98,21 @@ const Solve: React.FC = () => {
         user={user}
         setModalShowing={setInviteUsersModalOpen}
       />
-      <EndSessionModal
-        onClickResetButton={() => {
-          setEndSessionModalOpen(false);
-          dispatch({
-            type: SessionActionTypes.RESET_PUZZLE,
-            username: user.username,
-          });
-        }}
-        isOpen={endSessionModalOpen}
-        setIsOpen={setEndSessionModalOpen}
-        isCorrect={checkPuzzle(session.boardState, session.puzzle.solutions)}
-        session={session}
-      />
+      {endSessionModalOpen && (
+        <EndSessionModal
+          onClickResetButton={() => {
+            setEndSessionModalOpen(false);
+            dispatch({
+              type: SessionActionTypes.RESET_PUZZLE,
+              username: user.username,
+            });
+          }}
+          isOpen={endSessionModalOpen}
+          setIsOpen={setEndSessionModalOpen}
+          isCorrect={checkPuzzle(session.boardState, session.puzzle.solutions)}
+          session={session}
+        />
+      )}
 
       <XBoard
         boardState={boardState}
@@ -151,8 +142,16 @@ const Solve: React.FC = () => {
         }}
       />
       <Keyboard
-        onKeyPress={(key) => {
+        rebus={rebus}
+        pencilMode={pencilMode}
+        onKeyPress={(key, newPencilMode) => {
           switch (key) {
+            case ACTION_KEYS.TAB:
+              dispatch({
+                type: SessionActionTypes.TOGGLE_ORIENTATION,
+              });
+
+              return;
             case ACTION_KEYS.BACKSPACE:
               dispatch({
                 type: SessionActionTypes.BACKSPACE,
@@ -170,15 +169,13 @@ const Solve: React.FC = () => {
                 type: SessionActionTypes.LETTER_PRESSED,
                 username: user.username,
                 letter: key,
-                solutionState: pencilMode
+                solutionState: newPencilMode
                   ? CellSolutionState.PENCIL
                   : CellSolutionState.NONE,
               });
             }
           }
         }}
-        rebus={rebus}
-        keyboardRef={keyboardRef}
       />
     </XWordContainer>
   );

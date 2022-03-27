@@ -339,6 +339,23 @@ export const getFirstSelectableCellKey = (puzzle: Puzzle): string => {
   return cellKey;
 };
 
+export const getLastSelectableCellKey = (puzzle: Puzzle): string => {
+  const sortedKeys = getSortedCellKeyArray(
+    Object.keys(puzzle.solutions)
+  ).reverse();
+  const cellKey = sortedKeys.find((cellKey) => {
+    const cellSelectable = puzzle.solutions[cellKey] != null;
+    if (cellSelectable) {
+      return cellKey;
+    }
+  });
+  if (!cellKey) {
+    throw Error("No selectable key found!");
+  }
+
+  return cellKey;
+};
+
 export const getPercentageComplete = (
   boardState: BoardState,
   solutions: Solutions

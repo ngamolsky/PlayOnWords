@@ -23,22 +23,22 @@ export const ClueSelector: React.FC<ClueSelectorProps> = ({
     <div className="flex flex-row max-h-16">
       <div
         onClick={onPreviousClue}
-        className="dark:bg-slate-800 dark:text-white p-2 py-4 flex"
+        className="flex p-2 py-4 dark:bg-slate-700 dark:text-white active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300"
       >
         <ChevronLeft />
       </div>
       <div
-        className="text-left grow bg-slate-300 dark:bg-slate-800 dark:text-white p-2 flex select-none"
+        className="flex p-2 text-left select-none grow dark:bg-slate-700 dark:text-white active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300"
         onClick={onCluePressed}
       >
-        <p className="text-sm self-center">
+        <p className="self-center text-sm">
           {clue.number}
           {orientation == OrientationType.HORIZONTAL ? "A" : "D"}: {clue.hint}
         </p>
       </div>
       <div
         onClick={onNextClue}
-        className="bg-slate-300 dark:bg-slate-800 dark:text-white p-2 py-4 justify-center flex"
+        className="flex justify-center p-2 py-4 dark:bg-slate-700 dark:text-white active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300"
       >
         <ChevronRight />
       </div>

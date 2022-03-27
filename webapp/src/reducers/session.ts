@@ -9,7 +9,7 @@ import {
 } from "firebase/firestore";
 import { Reducer } from "react";
 import { db } from "../config/firebase";
-import { PUZZLE_SESSIONS_COLLECTION } from "../constants";
+import { SESSIONS_COLLECTION } from "../constants";
 import { Puzzle } from "../models/Puzzle";
 import {
   CellState,
@@ -29,9 +29,9 @@ import {
   getCellKeysForClueAndOrientation,
   getCombinedBoardState,
   getClueFromCellKeyOrientationAndPuzzle,
-  getSizeFromCellKeys,
   getFirstSelectableCellKey,
   getPercentageComplete,
+  getLastSelectableCellKey,
 } from "../utils/sessionUtils";
 
 // #region State
@@ -96,7 +96,7 @@ export type SessionActions =
     }
   | {
       type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS;
-      username: string;
+      userID: string;
     }
   | {
       type: SessionActionTypes.LETTER_PRESSED;
@@ -137,9 +137,10 @@ export type SessionActions =
 // #region Shared Functions
 
 const _updateBoardState = (sessionID: string, boardState: BoardState): void => {
-  const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
+  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID);
   updateDoc(sessionRef, {
     boardState,
+    lastUpdatedTime: Timestamp.now(),
   });
 };
 
@@ -147,18 +148,20 @@ const _updateSessionStatus = (
   sessionID: string,
   sessionStatus: SessionStatus
 ): void => {
-  const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
+  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID);
 
   if (sessionStatus == SessionStatus.COMPLETE) {
     updateDoc(sessionRef, {
       sessionStatus,
       endTime: Timestamp.now(),
+      lastUpdatedTime: Timestamp.now(),
     });
   } else {
     updateDoc(sessionRef, {
       sessionStatus,
       endTime: deleteField(),
       startTime: Timestamp.now(),
+      lastUpdatedTime: Timestamp.now(),
     });
   }
 };
@@ -185,11 +188,12 @@ const _updateCellState = (
   _updateBoardState(sessionID, newBoardState);
 };
 
-const _joinSessionParticpants = (sessionID: string, username: string): void => {
-  const sessionRef = doc(db, PUZZLE_SESSIONS_COLLECTION, sessionID);
+const _joinSessionParticpants = (sessionID: string, userID: string): void => {
+  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID);
 
   updateDoc(sessionRef, {
-    participantIDs: arrayUnion(username),
+    participantIDs: arrayUnion(userID),
+    lastUpdatedTime: Timestamp.now(),
   });
 };
 
@@ -283,11 +287,9 @@ export const startSession = async (
   user: User,
   participantIDs?: string[]
 ): Promise<void> => {
-  const sessionRef = doc(
-    db,
-    PUZZLE_SESSIONS_COLLECTION,
-    sessionID
-  ).withConverter(sessionConverter);
+  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID).withConverter(
+    sessionConverter
+  );
 
   const session: Session = {
     sessionID,
@@ -299,6 +301,7 @@ export const startSession = async (
     startTime: Timestamp.now(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),
     sessionStatus: SessionStatus.STARTED,
+    lastUpdatedTime: Timestamp.now(),
   };
 
   console.log("Starting Session:", sessionID);
@@ -306,11 +309,9 @@ export const startSession = async (
 };
 
 export const getSession = async (sessionID: string): Promise<Session> => {
-  const sessionRef = doc(
-    db,
-    PUZZLE_SESSIONS_COLLECTION,
-    sessionID
-  ).withConverter(sessionConverter);
+  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID).withConverter(
+    sessionConverter
+  );
 
   console.log("Getting Session:", sessionID);
 
@@ -378,7 +379,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
       const { sessionID } = _requireSession(session);
-      _joinSessionParticpants(sessionID, action.username);
+      _joinSessionParticpants(sessionID, action.userID);
       return state;
     }
     case SessionActionTypes.LETTER_PRESSED: {
@@ -386,8 +387,15 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         _requireSession(session);
       const { letter, username, solutionState } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
+      const cellState = boardState[selectedCellKey];
 
       if (!cellSolution) return state;
+
+      const newLetters = !cellState.currentLetter
+        ? letter
+        : rebus
+        ? cellState.currentLetter.concat(letter)
+        : letter;
 
       if (sessionStatus != SessionStatus.COMPLETE) {
         _updateCellState(
@@ -396,11 +404,13 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           boardState,
           selectedCellKey,
           autocheck ? _checkCell(cellSolution, letter) : solutionState,
-          letter
+          newLetters
         );
       }
 
-      const nextCellKey = getNextCellKey(selectedCellKey, puzzle, orientation);
+      const nextCellKey = rebus
+        ? selectedCellKey
+        : getNextCellKey(selectedCellKey, puzzle, orientation);
       return _selectCell(state, nextCellKey);
     }
     case SessionActionTypes.BACKSPACE: {
@@ -515,12 +525,18 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       const isFirstClue = currentClueIndex == 0;
       let newState: SessionState = state;
       if (isFirstClue) {
-        const { width, height } = getSizeFromCellKeys(
-          Object.keys(puzzle.solutions)
-        );
-        const lastCellKey = `${width - 1},${height - 1}`;
         newState = _toggleOrientation(newState);
-        newState = _selectCell(newState, lastCellKey);
+
+        const lastClue =
+          puzzle.clues[newState.localState.orientation][
+            puzzle.clues[newState.localState.orientation].length - 1
+          ];
+        const newSelectedCellKey = getCellKeysForClueAndOrientation(
+          lastClue,
+          orientation
+        )[0];
+
+        newState = _selectCell(newState, newSelectedCellKey);
       } else {
         const nextClue = puzzle.clues[orientation][currentClueIndex - 1];
         const newSelectedCellKey = getCellKeysForClueAndOrientation(
@@ -543,7 +559,18 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       };
     }
     case SessionActionTypes.REBUS_CLICKED: {
-      return _toggleRebus(state);
+      let newState = state;
+      if (rebus) {
+        const session = _requireSession(state.session);
+        const nextCellKey = getNextCellKey(
+          selectedCellKey,
+          session.puzzle,
+          orientation
+        );
+        newState = _selectCell(state, nextCellKey);
+      }
+
+      return _toggleRebus(newState);
     }
     case SessionActionTypes.AUTOCHECK_CLICKED: {
       return _toggleAutocheck(state);

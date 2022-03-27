@@ -9,10 +9,9 @@ module.exports = {
         "pulse-fast": "pulse 1s cubic-bezier(0,0,.58,1) infinite",
       },
       screens: {
-        better: { raw: "(hover: hover)" },
+        "can-hover": { raw: "(hover: hover)" },
       },
     },
   },
   plugins: [],
-  // important: true,
 };

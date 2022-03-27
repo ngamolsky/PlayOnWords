@@ -19,7 +19,7 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
     <div
       className="m-4 mx-auto p-4 w-4/5 text-left 
                 dark:bg-slate-900 rounded-lg
-                active:scale-[1.01] outline-none"
+                active:scale-[1.01] outline-none select-none"
       onClick={onClick}
     >
       <img src={puzzleSVG} className="w-full pointer-events-none" />

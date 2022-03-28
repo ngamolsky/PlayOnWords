@@ -17,7 +17,7 @@ const Avatar: React.FC<AvatarProps> = ({ user, onClick }) => {
       }
       items={[
         {
-          node: <button>Sign Out</button>,
+          node: <button className="px-4">Sign Out</button>,
           onClick: onClick,
         },
       ]}

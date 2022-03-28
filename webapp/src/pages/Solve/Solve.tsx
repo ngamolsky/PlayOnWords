@@ -107,7 +107,7 @@ const Solve: React.FC = () => {
             setEndSessionModalOpen(false);
             dispatch({
               type: SessionActionTypes.RESET_PUZZLE,
-              username: user.username,
+              userID: user.firebaseAuthID,
             });
           }}
           isOpen={endSessionModalOpen}
@@ -158,7 +158,7 @@ const Solve: React.FC = () => {
             case ACTION_KEYS.BACKSPACE:
               dispatch({
                 type: SessionActionTypes.BACKSPACE,
-                username: user.username,
+                userID: user.firebaseAuthID,
               });
 
               return;
@@ -170,7 +170,7 @@ const Solve: React.FC = () => {
             default: {
               dispatch({
                 type: SessionActionTypes.LETTER_PRESSED,
-                username: user.username,
+                userID: user.firebaseAuthID,
                 letter: key,
                 solutionState: newPencilMode
                   ? CellSolutionState.PENCIL

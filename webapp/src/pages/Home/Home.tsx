@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import { Puzzle, useRecentPuzzles } from "../../models/Puzzle";
 import { signOut, useLoggedInUser } from "../../models/User";
 import Avatar from "../../components/Avatar";
-import { PuzzleCard } from "../../components/PuzzleCard";
+import { PuzzleCard } from "./PuzzleCard";
 import StartSessionModal from "./StartSessionModal";
 
 const Home: React.FC = () => {

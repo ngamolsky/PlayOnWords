@@ -8,6 +8,7 @@ import {
   Session,
   CellState,
 } from "../models/Session";
+import { User } from "../models/User";
 import { OrientationType, SessionState } from "../reducers/session";
 
 export const getBoardStateFromSolutions = (
@@ -389,4 +390,29 @@ export const checkPuzzle = (
   }
 
   return true;
+};
+
+export const getSessionCompletionPercentages = (
+  session: Session,
+  participants: User[]
+): Record<string, number> => {
+  const userPercentages: Record<string, number> = {};
+  const { puzzle } = session;
+
+  const totalSelectableCellCount = Object.values(puzzle.solutions).filter(
+    (each) => !!each
+  ).length;
+
+  participants.forEach((participant) => {
+    const participantCellCount = Object.values(session.boardState).filter(
+      (each) => each.lastEditedBy == participant.firebaseAuthID
+    ).length;
+
+    console.log();
+
+    userPercentages[participant.username] =
+      participantCellCount / totalSelectableCellCount;
+  });
+
+  return userPercentages;
 };

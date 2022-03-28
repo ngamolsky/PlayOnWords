@@ -64,7 +64,9 @@ export type CombinedBoardState = {
 
 export const useRecentSessionsForUser = (
   numSessions: number,
-  userID: string
+  userID: string,
+  puzzle: Puzzle,
+  completed?: boolean
 ): [Session[] | undefined, string | undefined] => {
   const [sessionsState, setSessionsState] = useState<{
     sessions: Session[];
@@ -75,12 +77,23 @@ export const useRecentSessionsForUser = (
   });
 
   useEffect(() => {
-    const q = query(
-      collection(db, SESSIONS_COLLECTION).withConverter(sessionConverter),
-      where("participantIDs", "array-contains", userID),
-      orderBy("lastUpdatedTime", "desc"),
-      limit(numSessions)
-    );
+    const q = completed
+      ? query(
+          collection(db, SESSIONS_COLLECTION).withConverter(sessionConverter),
+          where("participantIDs", "array-contains", userID),
+          where("sessionStatus", "==", SessionStatus.COMPLETE),
+          where("puzzle.puzzleID", "==", puzzle.puzzleID),
+          orderBy("lastUpdatedTime", "desc"),
+          limit(numSessions)
+        )
+      : query(
+          collection(db, SESSIONS_COLLECTION).withConverter(sessionConverter),
+          where("participantIDs", "array-contains", userID),
+          where("sessionStatus", "==", SessionStatus.STARTED),
+          where("puzzle.puzzleID", "==", puzzle.puzzleID),
+          orderBy("lastUpdatedTime", "desc"),
+          limit(numSessions)
+        );
 
     const unsub = onSnapshot(q, (querySnapshot) => {
       const sessions: Session[] = [];

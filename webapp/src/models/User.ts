@@ -3,7 +3,6 @@ import {
   signInAnonymously,
   signOut as firebaseSignOut,
   Unsubscribe,
-  User as FirebaseUser,
 } from "firebase/auth";
 import {
   collection,
@@ -16,14 +15,14 @@ import {
   setDoc,
   getDoc,
   Timestamp,
-  getDocs,
   deleteDoc,
+  getDocs,
 } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
 import { auth, db } from "../config/firebase";
 import { USERS_COLLECTION } from "../constants";
 import { UserContext } from "../contexts/UserContext";
-import { ManyUserFoundForFirebaseIDError, UserExistsError } from "../errors";
+import { ManyUserFoundForFirebaseIDError } from "../errors";
 
 export type User = {
   email?: string;
@@ -36,52 +35,22 @@ export type User = {
 
 export enum LoginType {
   BASIC = "basic",
+  ANONYMOUS = "anonymous",
   GOOGLE = "google",
 }
 
-export const getUsernameFromFirebaseAuthUser = async (
-  firebaseUser: FirebaseUser
-): Promise<string | undefined> => {
-  console.log(
-    `getUserIDFromFirebaseAuthUser: getting User for ${firebaseUser}`
-  );
-
-  const q = query(
-    collection(db, USERS_COLLECTION).withConverter(userConverter),
-    where("firebaseAuthID", "==", firebaseUser.uid)
-  );
-
-  const userResult = await getDocs(q);
-
-  if (userResult.docs.length === 0) {
-    console.log(
-      `getUserIDFromFirebaseAuthUser: No user found for firebaseUser: ${firebaseUser}`
-    );
-
-    return undefined;
-  }
-  if (userResult.docs.length > 1) {
-    throw ManyUserFoundForFirebaseIDError(firebaseUser.uid);
-  }
-
-  const firstResult = userResult.docs[0].data();
-  return firstResult.username;
-};
-
-export const getUserByUsername = async (
-  username: string
+export const getUserByID = async (
+  firebaseAuthID: string
 ): Promise<User | undefined> => {
-  console.log(username);
-
   const userDocument = await getDoc(
-    doc(db, USERS_COLLECTION, username).withConverter(userConverter)
+    doc(db, USERS_COLLECTION, firebaseAuthID).withConverter(userConverter)
   );
 
   return userDocument.data();
 };
 
 export const createBasicUser = async (username: string): Promise<User> => {
-  console.log(`createBasicUser: Creating basic user: ${username}`);
+  console.log(`createBasicUser: Creating anonymous user: ${username}`);
 
   const anonymousUser = await signInAnonymously(auth);
 
@@ -90,17 +59,17 @@ export const createBasicUser = async (username: string): Promise<User> => {
   const user: User = {
     username,
     firebaseAuthID: anonymousUser.user.uid,
-    loginType: LoginType.BASIC,
+    loginType: LoginType.ANONYMOUS,
     createDate: Timestamp.now(),
   };
-  await setDoc(doc(db, USERS_COLLECTION, username), user);
+  await setDoc(doc(db, USERS_COLLECTION, anonymousUser.user.uid), user);
   console.log(`createBasicUser: Created user: ${user}`);
   return user;
 };
 
-export const signOut = async (username: string) => {
+export const signOut = async (firebaseAuthID: string) => {
   // Delete the user
-  await deleteDoc(doc(db, USERS_COLLECTION, username));
+  await deleteDoc(doc(db, USERS_COLLECTION, firebaseAuthID));
 
   return firebaseSignOut(auth);
 };
@@ -133,8 +102,6 @@ export const useAuth = (): [User | undefined, boolean] => {
           if (authUser) {
             const users: User[] = [];
             querySnapshot.forEach((doc) => {
-              console.log("here", doc.data());
-
               users.push(doc.data());
             });
             if (!users) {
@@ -182,8 +149,25 @@ export const useAuth = (): [User | undefined, boolean] => {
   return [userState.user, userState.userLoading];
 };
 
+export const getUsersByID = async (
+  userIDs: string[] | undefined
+): Promise<User[]> => {
+  const q = query(
+    collection(db, USERS_COLLECTION).withConverter(userConverter),
+    where(documentId(), "in", userIDs)
+  );
+
+  const results = await getDocs(q);
+
+  const users = results.docs.map((result) => result.data());
+
+  return users;
+};
+
 export const useUsersByID = (userIDs: string[] | undefined): User[] => {
   const [userState, setUserState] = useState<User[]>([]);
+
+  console.log(userIDs);
 
   useEffect(() => {
     if (userIDs) {

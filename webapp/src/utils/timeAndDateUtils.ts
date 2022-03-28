@@ -29,6 +29,13 @@ export const toXWordDate = (date: Date): string => {
 };
 
 
+export const toXWordTime = (date: Date): string => {
+  return `${DAYS[date.getDay()]}, ${
+    MONTHS[date.getMonth()]
+  } ${date.getDate()} at ${date.getHours()}:${date.getMinutes()}`;
+};
+
+
 export const secondsToTimeString = (seconds: number): string => {
   const durationDate = new Date(seconds * 1000);
 

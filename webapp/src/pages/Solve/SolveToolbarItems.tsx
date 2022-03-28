@@ -39,7 +39,7 @@ const SolveToolbarItems = ({
       </div>
       <div
         className={classNames(
-          "h-8 w-8 rounded-md p-1 active:dark:bg-slate-600 active:bg-slate-300"
+          "h-8 w-8 rounded-md p-1 active:dark:bg-slate-600 active:bg-slate-300 cursor-pointer"
         )}
         onClick={() => {
           showShareModal(true);
@@ -48,7 +48,7 @@ const SolveToolbarItems = ({
         <Share />
       </div>
       <div
-        className={classNames("h-8 w-8 rounded-md p-1", {
+        className={classNames("h-8 w-8 rounded-md p-1 cursor-pointer", {
           "dark:bg-slate-600 bg-slate-300": pencilMode,
         })}
         onClick={() => {
@@ -81,7 +81,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_SQUARE,
-                username: user.username,
+                userID: user.firebaseAuthID,
               });
             },
           },
@@ -90,7 +90,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_WORD,
-                username: user.username,
+                userID: user.firebaseAuthID,
               });
             },
           },
@@ -99,7 +99,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_PUZZLE,
-                username: user.username,
+                userID: user.firebaseAuthID,
               });
             },
           },
@@ -108,7 +108,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_SQUARE,
-                username: user.username,
+                userID: user.firebaseAuthID,
               });
             },
           },
@@ -117,7 +117,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_WORD,
-                username: user.username,
+                userID: user.firebaseAuthID,
               });
             },
           },
@@ -126,7 +126,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_PUZZLE,
-                username: user.username,
+                userID: user.firebaseAuthID,
               });
             },
           },
@@ -135,7 +135,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.RESET_PUZZLE,
-                username: user.username,
+                userID: user.firebaseAuthID,
               });
             },
           },

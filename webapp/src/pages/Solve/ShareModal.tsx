@@ -37,7 +37,7 @@ const ShareModal = ({
       <p>Invite Users to this session with the following URL:</p>
       <div className="flex p-4 mt-2 overflow-auto rounded-md bg-slate-200 dark:bg-slate-700">
         <div
-          className="w-8 h-8 p-1 rounded-md active:bg-slate-300 dark:active:bg-slate-800"
+          className="w-8 h-8 p-1 rounded-md outline-none active:bg-slate-300 dark:active:bg-slate-800 "
           onClick={() => {
             navigator.clipboard.writeText(shareURL);
             setShowCopied(true);
@@ -46,7 +46,7 @@ const ShareModal = ({
         >
           <CopyToClipboard />
         </div>
-        <p className="my-auto ml-1 whitespace-nowrap">{shareURL}</p>
+        <p className="my-auto ml-3 font-mono whitespace-nowrap">{shareURL}</p>
       </div>
       <Transition
         show={showCopied}

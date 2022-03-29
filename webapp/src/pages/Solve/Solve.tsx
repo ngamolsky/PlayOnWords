@@ -2,18 +2,20 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { XWordContainer } from "../../components/XWordContainer";
-import { CellSolutionState, SessionStatus } from "../../models/Session";
+import {
+  CellSolutionState,
+  SessionStatus,
+  useSessionState,
+} from "../../models/Session";
 import { XBoard } from "../../components/XBoard/XBoard";
 import { ACTION_KEYS, Keyboard } from "../../components/mobile/Keyboard";
 import { ClueSelector } from "../../components/mobile/ClueSelector";
 import {
-  checkPuzzle,
   getClueFromCellKeyOrientationAndPuzzle,
   getCombinedBoardState,
   isUserInSession,
 } from "../../utils/sessionUtils";
 import { useLoggedInUser } from "../../models/User";
-import { useSessionState } from "../../hooks/useSessionState";
 import { SessionActionTypes } from "../../reducers/session";
 import EndSessionModal from "./EndSessionModal";
 import ShareUserModal from "./ShareModal";
@@ -50,10 +52,10 @@ const Solve: React.FC = () => {
   useEffect(() => {
     const joinPuzzleSessionIfNeeded = async () => {
       if (user && session) {
-        if (!isUserInSession(session, user.firebaseAuthID)) {
+        if (!isUserInSession(session, user.userID)) {
           dispatch({
             type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS,
-            userID: user.firebaseAuthID,
+            user: user,
           });
         }
       }
@@ -103,16 +105,8 @@ const Solve: React.FC = () => {
       )}
       {endSessionModalOpen && (
         <EndSessionModal
-          onClickResetButton={() => {
-            setEndSessionModalOpen(false);
-            dispatch({
-              type: SessionActionTypes.RESET_PUZZLE,
-              userID: user.firebaseAuthID,
-            });
-          }}
           isOpen={endSessionModalOpen}
           setIsOpen={setEndSessionModalOpen}
-          isCorrect={checkPuzzle(session.boardState, session.puzzle.solutions)}
           session={session}
         />
       )}
@@ -158,7 +152,7 @@ const Solve: React.FC = () => {
             case ACTION_KEYS.BACKSPACE:
               dispatch({
                 type: SessionActionTypes.BACKSPACE,
-                userID: user.firebaseAuthID,
+                userID: user.userID,
               });
 
               return;
@@ -170,7 +164,7 @@ const Solve: React.FC = () => {
             default: {
               dispatch({
                 type: SessionActionTypes.LETTER_PRESSED,
-                userID: user.firebaseAuthID,
+                userID: user.userID,
                 letter: key,
                 solutionState: newPencilMode
                   ? CellSolutionState.PENCIL

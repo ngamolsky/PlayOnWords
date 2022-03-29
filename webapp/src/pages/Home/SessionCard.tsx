@@ -1,32 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { toXWordTime } from "../../utils/timeAndDateUtils";
 import puzzleSVG from "../../images/XWordSquare.svg";
-import { Session } from "../../models/Session";
-import { User, getUsersByID } from "../../models/User";
+import { Session, SessionStatus } from "../../models/Session";
 import classNames from "classnames";
 
 interface SessionCardProps {
   session: Session;
   onClick?: () => void;
-  completed?: boolean;
 }
 
 export const SessionCard: React.FC<SessionCardProps> = ({
   session,
   onClick,
-  completed,
 }) => {
-  const [participants, setParticipants] = useState<User[]>([]);
-
-  useEffect(() => {
-    const getParticipants = async () => {
-      const users = await getUsersByID(session.participantIDs);
-      setParticipants(users);
-    };
-
-    getParticipants();
-  }, [session.participantIDs]);
-
+  const { sessionStatus, participants } = session;
+  const completed = sessionStatus == SessionStatus.COMPLETE;
   return (
     <div
       className={classNames(

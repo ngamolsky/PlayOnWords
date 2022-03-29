@@ -1,24 +1,14 @@
-import {
-  doc,
-  getDoc,
-  updateDoc,
-  arrayUnion,
-  Timestamp,
-  setDoc,
-  deleteField,
-} from "firebase/firestore";
 import { Reducer } from "react";
-import { db } from "../config/firebase";
-import { SESSIONS_COLLECTION } from "../constants";
-import { Puzzle } from "../models/Puzzle";
 import {
-  CellState,
   BoardState,
   Session,
   CellSelectionState,
   CellSolutionState,
-  sessionConverter,
   SessionStatus,
+  updateBoardState,
+  updateSessionStatus,
+  updateCellState,
+  joinSessionParticipants,
 } from "../models/Session";
 import { User } from "../models/User";
 import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
@@ -95,7 +85,7 @@ export type SessionActions =
     }
   | {
       type: SessionActionTypes.JOIN_SESSION_PARTICIPANTS;
-      userID: string;
+      user: User;
     }
   | {
       type: SessionActionTypes.LETTER_PRESSED;
@@ -136,33 +126,14 @@ export type SessionActions =
 // #region Shared Functions
 
 const _updateBoardState = (sessionID: string, boardState: BoardState): void => {
-  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID);
-  updateDoc(sessionRef, {
-    boardState,
-    lastUpdatedTime: Timestamp.now(),
-  });
+  updateBoardState(sessionID, boardState);
 };
 
 const _updateSessionStatus = (
   sessionID: string,
   sessionStatus: SessionStatus
 ): void => {
-  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID);
-
-  if (sessionStatus == SessionStatus.COMPLETE) {
-    updateDoc(sessionRef, {
-      sessionStatus,
-      endTime: Timestamp.now(),
-      lastUpdatedTime: Timestamp.now(),
-    });
-  } else {
-    updateDoc(sessionRef, {
-      sessionStatus,
-      endTime: deleteField(),
-      startTime: Timestamp.now(),
-      lastUpdatedTime: Timestamp.now(),
-    });
-  }
+  updateSessionStatus(sessionID, sessionStatus);
 };
 
 const _updateCellState = (
@@ -173,31 +144,21 @@ const _updateCellState = (
   solutionState: CellSolutionState,
   letter: string
 ): void => {
-  const oldCell = boardState[cellKey];
-  const newCell: CellState = {
+  updateCellState(
+    sessionID,
+    userID,
+    boardState,
+    cellKey,
     solutionState,
-    currentLetter: letter,
-    lastEditedBy:
-      solutionState == CellSolutionState.REVEALED
-        ? oldCell.lastEditedBy
-        : userID,
-  };
-
-  const newBoardState: BoardState = {
-    ...boardState,
-    [cellKey]: newCell,
-  };
-
-  _updateBoardState(sessionID, newBoardState);
+    letter
+  );
 };
 
-const _joinSessionParticpants = (sessionID: string, userID: string): void => {
-  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID);
-
-  updateDoc(sessionRef, {
-    participantIDs: arrayUnion(userID),
-    lastUpdatedTime: Timestamp.now(),
-  });
+export const _joinSessionParticipants = (
+  sessionID: string,
+  user: User
+): void => {
+  joinSessionParticipants(sessionID, user);
 };
 
 // #endregion
@@ -282,52 +243,6 @@ const _checkCell = (
 
 // #endregion
 
-// #region Public
-
-export const startSession = async (
-  sessionID: string,
-  puzzle: Puzzle,
-  user: User,
-  participantIDs?: string[]
-): Promise<void> => {
-  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID).withConverter(
-    sessionConverter
-  );
-
-  const session: Session = {
-    sessionID,
-    puzzle,
-    participantIDs: participantIDs
-      ? [user.firebaseAuthID].concat(participantIDs)
-      : [user.firebaseAuthID],
-    ownerID: user.firebaseAuthID,
-    startTime: Timestamp.now(),
-    boardState: getBoardStateFromSolutions(puzzle.solutions),
-    sessionStatus: SessionStatus.STARTED,
-    lastUpdatedTime: Timestamp.now(),
-  };
-
-  console.log("Starting Session:", sessionID);
-  await setDoc(sessionRef, session);
-};
-
-export const getSession = async (sessionID: string): Promise<Session> => {
-  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID).withConverter(
-    sessionConverter
-  );
-
-  console.log("Getting Session:", sessionID);
-
-  const session = (await getDoc(sessionRef)).data();
-
-  if (!session) {
-    throw Error("No session found");
-  }
-  return session;
-};
-
-// #endregion
-
 export const sessionReducer: Reducer<SessionState, SessionActions> = (
   state,
   action
@@ -382,7 +297,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.JOIN_SESSION_PARTICIPANTS: {
       const { sessionID } = _requireSession(session);
-      _joinSessionParticpants(sessionID, action.userID);
+      _joinSessionParticipants(sessionID, action.user);
       return state;
     }
     case SessionActionTypes.LETTER_PRESSED: {

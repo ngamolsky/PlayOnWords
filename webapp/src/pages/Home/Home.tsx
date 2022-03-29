@@ -34,7 +34,7 @@ const Home: React.FC = () => {
         <Avatar
           user={user}
           onClick={() => {
-            signOut(user.username);
+            signOut(user);
           }}
         />
       }

@@ -19,12 +19,15 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
+import { v4 } from "uuid";
 import { auth, db } from "../config/firebase";
 import { USERS_COLLECTION } from "../constants";
 import { UserContext } from "../contexts/UserContext";
 import { ManyUserFoundForFirebaseIDError } from "../errors";
+import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
 
 export type User = {
+  userID: string;
   email?: string;
   username: string;
   displayName?: string;
@@ -34,42 +37,80 @@ export type User = {
 };
 
 export enum LoginType {
-  BASIC = "basic",
+  PASSWORD = "password",
   ANONYMOUS = "anonymous",
   GOOGLE = "google",
 }
 
 export const getUserByID = async (
-  firebaseAuthID: string
+  userID: string
 ): Promise<User | undefined> => {
   const userDocument = await getDoc(
-    doc(db, USERS_COLLECTION, firebaseAuthID).withConverter(userConverter)
+    doc(db, USERS_COLLECTION, userID).withConverter(userConverter)
   );
+
+  if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+    console.log("Firestore Request: getUserByID. UserID: ", userID);
+  }
 
   return userDocument.data();
 };
 
-export const createBasicUser = async (username: string): Promise<User> => {
-  console.log(`createBasicUser: Creating anonymous user: ${username}`);
+export const getUsersByID = async (
+  userIDs: string[] | undefined
+): Promise<User[]> => {
+  const q = query(
+    collection(db, USERS_COLLECTION).withConverter(userConverter),
+    where(documentId(), "in", userIDs)
+  );
 
+  const results = await getDocs(q);
+  const users = results.docs.map((result) => result.data());
+
+  if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+    console.log(
+      "Firestore Request: getUsersByID. Users: ",
+      JSON.stringify(users)
+    );
+  }
+  return users;
+};
+
+export const createAnonymousUser = async (username: string): Promise<User> => {
   const anonymousUser = await signInAnonymously(auth);
 
-  console.log(`createBasicUser: Created anonymousUser: ${anonymousUser}`);
-
+  const userID = `user.${v4()}`;
   const user: User = {
+    userID,
     username,
     firebaseAuthID: anonymousUser.user.uid,
     loginType: LoginType.ANONYMOUS,
     createDate: Timestamp.now(),
   };
-  await setDoc(doc(db, USERS_COLLECTION, anonymousUser.user.uid), user);
-  console.log(`createBasicUser: Created user: ${user}`);
+
+  await setDoc(doc(db, USERS_COLLECTION, userID), user);
+
+  if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+    console.log(
+      "Firestore Request: createAnonymousUser. username",
+      username,
+      "userID",
+      userID
+    );
+  }
   return user;
 };
 
-export const signOut = async (firebaseAuthID: string) => {
-  // Delete the user
-  await deleteDoc(doc(db, USERS_COLLECTION, firebaseAuthID));
+export const signOut = async (user: User) => {
+  // If this is an anonymous user, delete the user on logout
+
+  if (user.loginType == LoginType.ANONYMOUS) {
+    await deleteDoc(doc(db, USERS_COLLECTION, user.userID));
+  }
+
+  if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+    console.log("Firestore Request: signOut. UserID: ", user.userID);
+  }
 
   return firebaseSignOut(auth);
 };
@@ -95,9 +136,13 @@ export const useAuth = (): [User | undefined, boolean] => {
           where("firebaseAuthID", "==", authUser.uid)
         );
 
-        console.log(
-          `useAuth: Querying Users Collection for User with firebaseAuthID: ${authUser.uid}`
-        );
+        if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+          console.log(
+            "Firestore Request: useAuth. Watching user with firebaseAuthID:",
+            authUser.uid
+          );
+        }
+
         snapshotUnsub = onSnapshot(q, (querySnapshot) => {
           if (authUser) {
             const users: User[] = [];
@@ -110,12 +155,12 @@ export const useAuth = (): [User | undefined, boolean] => {
               throw ManyUserFoundForFirebaseIDError(authUser.uid);
             } else {
               const user = users[0];
-              console.log(
-                `useAuth: Updating UserState: ${JSON.stringify({
-                  user,
-                  userLoading: false,
-                })}`
-              );
+              if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+                console.log(
+                  "Firestore Request: useAuth. Auth State Updated:",
+                  JSON.stringify(user)
+                );
+              }
 
               setUserState({
                 user,
@@ -130,12 +175,9 @@ export const useAuth = (): [User | undefined, boolean] => {
           snapshotUnsub();
         }
 
-        console.log(
-          `useAuth: Updating UserState: ${JSON.stringify({
-            user: undefined,
-            userLoading: false,
-          })}`
-        );
+        if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+          console.log("Firestore Request: useAuth. Signed out.");
+        }
         setUserState({
           user: undefined,
           userLoading: false,
@@ -149,25 +191,8 @@ export const useAuth = (): [User | undefined, boolean] => {
   return [userState.user, userState.userLoading];
 };
 
-export const getUsersByID = async (
-  userIDs: string[] | undefined
-): Promise<User[]> => {
-  const q = query(
-    collection(db, USERS_COLLECTION).withConverter(userConverter),
-    where(documentId(), "in", userIDs)
-  );
-
-  const results = await getDocs(q);
-
-  const users = results.docs.map((result) => result.data());
-
-  return users;
-};
-
 export const useUsersByID = (userIDs: string[] | undefined): User[] => {
   const [userState, setUserState] = useState<User[]>([]);
-
-  console.log(userIDs);
 
   useEffect(() => {
     if (userIDs) {
@@ -176,18 +201,27 @@ export const useUsersByID = (userIDs: string[] | undefined): User[] => {
         where(documentId(), "in", userIDs)
       );
 
-      console.log(
-        `useUsersByID: Watching Users Collection for Users with IDs: ${userIDs}`
-      );
+      if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+        console.log(
+          "Firestore Request: useUsersByID. Watching Users Collection for Users with IDs:",
+          userIDs
+        );
+      }
+
       const unsub = onSnapshot(q, (querySnapshot) => {
         const users: User[] = [];
         querySnapshot.docs.forEach((doc) => {
           users.push(doc.data());
         });
-        console.log(
-          `useUsersByID: Setting userState: ${JSON.stringify(users)}`
-        );
+
         setUserState(users);
+
+        if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+          console.log(
+            "Firestore Request: useUsersByID. Updating Users:",
+            JSON.stringify(users)
+          );
+        }
       });
       return unsub;
     }

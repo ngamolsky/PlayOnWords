@@ -8,7 +8,6 @@ import {
   Session,
   CellState,
 } from "../models/Session";
-import { User } from "../models/User";
 import { OrientationType, SessionState } from "../reducers/session";
 
 export const getBoardStateFromSolutions = (
@@ -293,8 +292,8 @@ export const getCombinedBoardState = (
 };
 
 export const isUserInSession = (session: Session, userID: string): boolean => {
-  const matchingUser = session.participantIDs.find(
-    (currentUserID) => currentUserID === userID
+  const matchingUser = session.participants.find(
+    (currentUser) => currentUser.userID === userID
   );
   return !!matchingUser;
 };
@@ -393,8 +392,7 @@ export const checkPuzzle = (
 };
 
 export const getSessionCompletionPercentages = (
-  session: Session,
-  participants: User[]
+  session: Session
 ): Record<string, number> => {
   const userPercentages: Record<string, number> = {};
   const { puzzle } = session;
@@ -403,9 +401,9 @@ export const getSessionCompletionPercentages = (
     (each) => !!each
   ).length;
 
-  participants.forEach((participant) => {
+  session.participants.forEach((participant) => {
     const participantCellCount = Object.values(session.boardState).filter(
-      (each) => each.lastEditedBy == participant.firebaseAuthID
+      (each) => each.lastEditedBy == participant.userID
     ).length;
 
     console.log();

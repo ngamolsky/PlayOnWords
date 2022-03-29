@@ -4,7 +4,7 @@ import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { validateUsername } from "../utils/validationUtils";
 import { useHistory } from "react-router-dom";
-import { createBasicUser } from "../models/User";
+import { createAnonymousUser } from "../models/User";
 import useQueryParams from "../hooks/useQueryParams";
 import { UserContext } from "../contexts/UserContext";
 import { UserExistsError } from "../errors";
@@ -24,7 +24,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      const nextURL = continueUrl ? `${continueUrl}/` : "/";
+      const nextURL = continueUrl ? continueUrl : "/";
       history.push(nextURL);
     }
   }, [user, continueUrl, history]);
@@ -36,7 +36,7 @@ const Login: React.FC = () => {
         initialValues={{ username: "" }}
         onSubmit={async ({ username }, { setErrors }) => {
           setCreatingUser(true);
-          await createBasicUser(username).catch((error) => {
+          await createAnonymousUser(username).catch((error) => {
             setCreatingUser(false);
 
             const errorCode = error.code;

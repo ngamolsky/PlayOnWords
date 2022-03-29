@@ -1,33 +1,25 @@
 import React from "react";
 import Modal from "../../components/Modal";
 import { Session } from "../../models/Session";
-import { useUsersByID } from "../../models/User";
 import { getSessionCompletionPercentages } from "../../utils/sessionUtils";
 import { secondsToTimeString } from "../../utils/timeAndDateUtils";
 
 type EndSessionModalProps = {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  isCorrect: boolean;
   session: Session;
-  onClickResetButton: () => void;
 };
 
 const EndSessionModal: React.FC<EndSessionModalProps> = ({
   isOpen,
   setIsOpen,
-  isCorrect,
   session,
-  onClickResetButton,
 }) => {
-  const participants = useUsersByID(session.participantIDs);
-
-  const sessionResults = getSessionCompletionPercentages(session, participants);
+  const sessionResults = getSessionCompletionPercentages(session);
   console.log(session.boardState);
 
-  const title = isCorrect ? "Puzzle Complete!" : "Almost there!";
   return session.endTime ? (
-    <Modal isOpen={isOpen} title={title} setIsOpen={setIsOpen}>
+    <Modal isOpen={isOpen} title={"Puzzle Complete!"} setIsOpen={setIsOpen}>
       <>
         <div className="flex-col p-4 rounded-md bg-slate-200 dark:bg-slate-700">
           <table className="w-full table-fixed">

@@ -81,7 +81,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_SQUARE,
-                userID: user.firebaseAuthID,
+                userID: user.userID,
               });
             },
           },
@@ -90,7 +90,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_WORD,
-                userID: user.firebaseAuthID,
+                userID: user.userID,
               });
             },
           },
@@ -99,7 +99,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_PUZZLE,
-                userID: user.firebaseAuthID,
+                userID: user.userID,
               });
             },
           },
@@ -108,7 +108,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_SQUARE,
-                userID: user.firebaseAuthID,
+                userID: user.userID,
               });
             },
           },
@@ -117,7 +117,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_WORD,
-                userID: user.firebaseAuthID,
+                userID: user.userID,
               });
             },
           },
@@ -126,7 +126,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_PUZZLE,
-                userID: user.firebaseAuthID,
+                userID: user.userID,
               });
             },
           },
@@ -135,7 +135,7 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.RESET_PUZZLE,
-                userID: user.firebaseAuthID,
+                userID: user.userID,
               });
             },
           },
@@ -151,7 +151,7 @@ const SolveToolbarItems = ({
           {
             node: <p className="px-4">Sign Out</p>,
             onClick: () => {
-              signOut(user.username);
+              signOut(user);
             },
           },
         ]}

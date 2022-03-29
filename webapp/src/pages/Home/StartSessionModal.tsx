@@ -5,10 +5,9 @@ import Button from "../../components/Button";
 import Modal from "../../components/Modal";
 import { Puzzle } from "../../models/Puzzle";
 import { User } from "../../models/User";
-import { startSession } from "../../reducers/session";
 import StartSessionTabs from "./StartSessionTabs";
 import { PuzzleCard } from "./PuzzleCard";
-import { useRecentSessionsForUser } from "../../models/Session";
+import { startSession, useRecentSessionsForUser } from "../../models/Session";
 import { SessionCard } from "./SessionCard";
 
 const StartSessionModal = ({
@@ -37,8 +36,8 @@ const StartSessionModal = ({
             setModalShowing,
             setSessionID
           ),
-          InProgressTab(user.firebaseAuthID, selectedPuzzle, setSessionID),
-          CompletedTab(user.firebaseAuthID, selectedPuzzle, setSessionID),
+          InProgressTab(user, selectedPuzzle, setSessionID),
+          CompletedTab(user, selectedPuzzle, setSessionID),
         ]}
       />
     </Modal>
@@ -78,81 +77,78 @@ const NewTab = (
 };
 
 const InProgressTab = (
-  userID: string,
+  user: User,
   puzzle: Puzzle,
   setSessionID: (sessionID: string) => void
 ) => {
-  const [sessions, loadingMessage] = useRecentSessionsForUser(
-    5,
-    userID,
-    puzzle
-  );
+  const [sessions, loadingMessage] = useRecentSessionsForUser(5, user, puzzle);
 
   return (
     <div className="h-full py-4">
-      {loadingMessage && (
+      {loadingMessage ? (
         <div className="flex items-center justify-center min-w-full min-h-full grow motion-safe:animate-pulse-fast">
           {loadingMessage}
         </div>
+      ) : (
+        <div className="h-full space-y-4">
+          {sessions && sessions.length > 0 ? (
+            sessions.map((session) => (
+              <SessionCard
+                key={session.sessionID}
+                session={session}
+                onClick={() => {
+                  setSessionID(session.sessionID);
+                }}
+              />
+            ))
+          ) : (
+            <div className="flex w-full h-full">
+              <p className="mx-auto my-auto">No Active Sessions</p>
+            </div>
+          )}
+        </div>
       )}
-      <div className="h-full space-y-4">
-        {sessions && sessions.length > 0 ? (
-          sessions.map((session) => (
-            <SessionCard
-              key={session.sessionID}
-              session={session}
-              onClick={() => {
-                setSessionID(session.sessionID);
-              }}
-            />
-          ))
-        ) : (
-          <div className="flex w-full h-full">
-            <p className="mx-auto my-auto">No Active Sessions</p>
-          </div>
-        )}
-      </div>
     </div>
   );
 };
 
 const CompletedTab = (
-  userID: string,
+  user: User,
   puzzle: Puzzle,
   setSessionID: (sessionID: string) => void
 ) => {
   const [sessions, loadingMessage] = useRecentSessionsForUser(
     5,
-    userID,
+    user,
     puzzle,
     true
   );
 
   return (
     <div className="h-full py-4">
-      {loadingMessage && (
+      {loadingMessage ? (
         <div className="flex items-center justify-center min-w-full min-h-full grow motion-safe:animate-pulse-fast">
           {loadingMessage}
         </div>
+      ) : (
+        <div className="h-full space-y-4">
+          {sessions && sessions.length > 0 ? (
+            sessions.map((session) => (
+              <SessionCard
+                key={session.sessionID}
+                session={session}
+                onClick={() => {
+                  setSessionID(session.sessionID);
+                }}
+              />
+            ))
+          ) : (
+            <div className="flex w-full h-full">
+              <p className="mx-auto my-auto">No Completed Sessions</p>
+            </div>
+          )}
+        </div>
       )}
-      <div className="space-y-4">
-        {sessions && sessions.length > 0 ? (
-          sessions.map((session) => (
-            <SessionCard
-              completed
-              key={session.sessionID}
-              session={session}
-              onClick={() => {
-                setSessionID(session.sessionID);
-              }}
-            />
-          ))
-        ) : (
-          <div className="flex w-full h-full">
-            <p className="mx-auto my-auto">No Completed Sessions</p>
-          </div>
-        )}
-      </div>
     </div>
   );
 };

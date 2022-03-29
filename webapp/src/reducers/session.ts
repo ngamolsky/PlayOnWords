@@ -21,6 +21,7 @@ import {
   getClueFromCellKeyOrientationAndPuzzle,
   getFirstSelectableCellKey,
   getPercentageComplete,
+  checkPuzzle,
 } from "../utils/sessionUtils";
 
 // #region State
@@ -278,7 +279,11 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         boardState,
         puzzle.solutions
       );
-      if (percentComplete == 100 && sessionStatus !== SessionStatus.COMPLETE) {
+      if (
+        percentComplete == 100 &&
+        sessionStatus !== SessionStatus.COMPLETE &&
+        checkPuzzle(boardState, puzzle.solutions)
+      ) {
         _updateSessionStatus(nextSession.sessionID, SessionStatus.COMPLETE);
       }
 

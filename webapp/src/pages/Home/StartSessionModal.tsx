@@ -51,12 +51,24 @@ const NewTab = (
   setModalShowing: React.Dispatch<React.SetStateAction<boolean>>,
   setSessionID: (sessionID: string) => void
 ) => {
+
   return (
     <div className="flex flex-col justify-between h-full space-y-4">
       <p className="w-full mx-auto mt-4 text-lg">
         Start a Session for the puzzle:
       </p>
-      <PuzzleCard puzzle={selectedPuzzle} />
+      <PuzzleCard
+        puzzle={selectedPuzzle}
+        onClick={async () => {
+          setSessionLoading(true);
+          setModalShowing(false);
+
+          const sessionID = `session.${v4()}`;
+
+          await startSession(sessionID, selectedPuzzle, user);
+          setSessionID(sessionID);
+        }}
+      />
       <Button
         type="button"
         className="w-full mx-auto"

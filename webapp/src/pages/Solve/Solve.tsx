@@ -104,11 +104,7 @@ const Solve: React.FC = () => {
         />
       )}
       {endSessionModalOpen && (
-        <EndSessionModal
-          isOpen={endSessionModalOpen}
-          setIsOpen={setEndSessionModalOpen}
-          session={session}
-        />
+        <EndSessionModal setIsOpen={setEndSessionModalOpen} session={session} />
       )}
 
       <XBoard
@@ -121,7 +117,6 @@ const Solve: React.FC = () => {
       <div className="flex-grow" />
       <ClueSelector
         clue={currentSelectedClue}
-        orientation={orientation}
         onNextClue={() => {
           dispatch({
             type: SessionActionTypes.NEXT_CLUE,

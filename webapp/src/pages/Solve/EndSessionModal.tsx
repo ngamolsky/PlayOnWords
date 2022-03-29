@@ -1,25 +1,40 @@
 import React from "react";
 import Modal from "../../components/Modal";
 import { Session } from "../../models/Session";
-import { getSessionCompletionPercentages } from "../../utils/sessionUtils";
+import {
+  checkPuzzle,
+  getSessionCompletionPercentages,
+} from "../../utils/sessionUtils";
 import { secondsToTimeString } from "../../utils/timeAndDateUtils";
 
 type EndSessionModalProps = {
-  isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   session: Session;
 };
 
 const EndSessionModal: React.FC<EndSessionModalProps> = ({
-  isOpen,
   setIsOpen,
   session,
 }) => {
-  const sessionResults = getSessionCompletionPercentages(session);
-  console.log(session.boardState);
+  const isCorrect = checkPuzzle(session.boardState, session.puzzle.solutions);
 
-  return session.endTime ? (
-    <Modal isOpen={isOpen} title={"Puzzle Complete!"} setIsOpen={setIsOpen}>
+  return isCorrect ? (
+    <SessionCompleteModal session={session} setIsOpen={setIsOpen} />
+  ) : (
+    <IncorrectModal setIsOpen={setIsOpen} />
+  );
+};
+
+const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
+  const sessionResults = getSessionCompletionPercentages(session);
+
+  if (!session.endTime)
+    throw new Error(
+      "Tried to show SessionCompleteModal without session end time"
+    );
+
+  return (
+    <Modal isOpen title={"Puzzle Complete!"} setIsOpen={setIsOpen}>
       <>
         <div className="flex-col p-4 rounded-md bg-slate-200 dark:bg-slate-700">
           <table className="w-full table-fixed">
@@ -67,7 +82,24 @@ const EndSessionModal: React.FC<EndSessionModalProps> = ({
         </div>
       </>
     </Modal>
-  ) : null;
+  );
 };
+
+const IncorrectModal = ({
+  setIsOpen,
+}: {
+  setIsOpen: (isOpen: boolean) => void;
+}) => (
+  <Modal isOpen={true} title={"Almost There!"} setIsOpen={setIsOpen}>
+    <button
+      className="p-2 rounded-md bg-slate-200 dark:bg-slate-700"
+      onClick={() => {
+        setIsOpen(false);
+      }}
+    >
+      Close
+    </button>
+  </Modal>
+);
 
 export default EndSessionModal;

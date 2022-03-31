@@ -17,7 +17,11 @@ import {
 } from "firebase/firestore";
 import { useState, useEffect, Dispatch, useReducer } from "react";
 import { db } from "../config/firebase";
-import { SESSIONS_COLLECTION, STARTING_ORIENTATION, STARTING_SELECTED_CELL } from "../constants";
+import {
+  SESSIONS_COLLECTION,
+  STARTING_ORIENTATION,
+  FIRST_CELL_KEY,
+} from "../constants";
 import { SessionActions, SessionActionTypes, SessionState, sessionReducer } from "../reducers/session";
 import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
 import { getBoardStateFromSolutions } from "../utils/sessionUtils";
@@ -153,25 +157,13 @@ export const updateSessionStatus = async (
 
 export const updateCellState = async (
   sessionID: string,
-  userID: string,
-  boardState: BoardState,
   cellKey: string,
-  solutionState: CellSolutionState,
-  letter: string
+  boardState: BoardState,
+  cellState: CellState
 ) => {
-  const oldCell = boardState[cellKey];
-  const newCell: CellState = {
-    solutionState,
-    currentLetter: letter,
-    lastEditedBy:
-      solutionState == CellSolutionState.REVEALED
-        ? oldCell.lastEditedBy
-        : userID,
-  };
-
   const newBoardState: BoardState = {
     ...boardState,
-    [cellKey]: newCell,
+    [cellKey]: cellState,
   };
 
   return updateBoardState(sessionID, newBoardState);
@@ -196,7 +188,7 @@ export const useSessionState = (
     loadingMessage: "Starting your session...",
     localState: {
       orientation: STARTING_ORIENTATION,
-      selectedCellKey: STARTING_SELECTED_CELL,
+      selectedCellKey: FIRST_CELL_KEY,
       pencilMode: false,
       rebus: false,
       autocheck: false,
@@ -244,7 +236,8 @@ export const useSessionState = (
         } else {
           if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
             console.log(
-              "Firestore Request: useSessionState. No Session Found."            );
+              "Firestore Request: useSessionState. No Session Found."
+            );
           }
         }
       }
@@ -260,7 +253,7 @@ export const useSessionActions = (): Dispatch<SessionActions> => {
   const [, dispatch] = useReducer(sessionReducer, {
     localState: {
       orientation: STARTING_ORIENTATION,
-      selectedCellKey: STARTING_SELECTED_CELL,
+      selectedCellKey: FIRST_CELL_KEY,
       pencilMode: false,
       rebus: false,
       autocheck: false,

@@ -20,7 +20,7 @@ export const XWordContainer: React.FC<XWordContainerProps> = ({
     <div className="flex flex-col min-h-full dark:bg-slate-800 dark:text-white ">
       {showToolbar && <XWordToolbar>{toolbarChildren}</XWordToolbar>}
       {loadingMessage ? (
-        <div className="flex items-center justify-center min-w-full min-h-screen grow motion-safe:animate-pulse-fast">
+        <div className="top-0 left-0 flex items-center justify-center min-w-full min-h-screen abosulte grow motion-safe:animate-pulse-fast">
           {loadingMessage}
         </div>
       ) : (

@@ -16,5 +16,5 @@ export const BASE_URL = __prod__
   ? "https://xword.gamolsky.net"
   : "http://localhost:3000";
 
-export const STARTING_SELECTED_CELL = "0,0";
+export const FIRST_CELL_KEY = "0,0";
 export const STARTING_ORIENTATION = OrientationType.HORIZONTAL;

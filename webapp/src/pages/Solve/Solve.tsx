@@ -156,6 +156,24 @@ const Solve: React.FC = () => {
                 type: SessionActionTypes.REBUS_CLICKED,
               });
               return;
+            case ACTION_KEYS.ENTER:
+              dispatch({
+                type: SessionActionTypes.NEXT_CLUE,
+              });
+              return;
+            case ACTION_KEYS.RIGHT:
+              dispatch({
+                type: SessionActionTypes.NEXT_CELL,
+              });
+              return;
+            case ACTION_KEYS.LEFT:
+              dispatch({
+                type: SessionActionTypes.PREVIOUS_CELL,
+              });
+              return;
+            case ACTION_KEYS.UP:
+            case ACTION_KEYS.DOWN:
+              return;
             default: {
               dispatch({
                 type: SessionActionTypes.LETTER_PRESSED,

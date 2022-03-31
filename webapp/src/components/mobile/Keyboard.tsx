@@ -12,6 +12,11 @@ export const ACTION_KEYS = {
   REBUS: "REBUS",
   BACKSPACE: "BACKSPACE",
   TAB: "TAB",
+  ENTER: "ENTER",
+  RIGHT: "ARROWRIGHT",
+  LEFT: "ARROWLEFT",
+  UP: "ARROWUP",
+  DOWN: "ARROWDOWN",
 };
 
 export const Keyboard = ({ onKeyPress, rebus, pencilMode }: KeyboardProps) => {

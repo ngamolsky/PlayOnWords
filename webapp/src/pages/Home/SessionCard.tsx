@@ -26,18 +26,18 @@ export const SessionCard: React.FC<SessionCardProps> = ({
       <div className="flex flex-row">
         <img src={puzzleSVG} className="pointer-events-none w-1/5my-auto" />
         <div className="flex-col px-4">
-          <p className="mt-2 text-lg text-ellipsis">
-            Participants:
+          <p className="mt-2 text-md text-ellipsis">
+            with:
             <span className="mx-2">
               {participants.length > 0
                 ? participants.map((user) => user.username).join(", ")
                 : "Loading..."}
             </span>
           </p>
-          <p className="opacity-50">
+          <p className="text-sm opacity-50 ">
             {completed ? "Completed On: " : "Last Updated: "}
           </p>
-          <p className="opacity-50">
+          <p className="text-sm opacity-50">
             {toXWordTime(session.lastUpdatedTime.toDate())}
           </p>
         </div>

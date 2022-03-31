@@ -9,6 +9,7 @@ import StartSessionTabs from "./StartSessionTabs";
 import { PuzzleCard } from "./PuzzleCard";
 import { startSession, useRecentSessionsForUser } from "../../models/Session";
 import { SessionCard } from "./SessionCard";
+import { toXWordDate } from "../../utils/timeAndDateUtils";
 
 const StartSessionModal = ({
   modalShowing,
@@ -51,7 +52,6 @@ const NewTab = (
   setModalShowing: React.Dispatch<React.SetStateAction<boolean>>,
   setSessionID: (sessionID: string) => void
 ) => {
-
   return (
     <div className="flex flex-col justify-between h-full space-y-4">
       <p className="w-full mx-auto mt-4 text-lg">
@@ -103,6 +103,9 @@ const InProgressTab = (
         </div>
       ) : (
         <div className="h-full space-y-4">
+          <p className="mt-2 text-lg text-ellipsis">
+            {toXWordDate(puzzle.puzzleTimestamp.toDate())}
+          </p>
           {sessions && sessions.length > 0 ? (
             sessions.map((session) => (
               <SessionCard
@@ -144,6 +147,9 @@ const CompletedTab = (
         </div>
       ) : (
         <div className="h-full space-y-4">
+          <p className="mt-2 text-lg text-ellipsis">
+            {toXWordDate(puzzle.puzzleTimestamp.toDate())}
+          </p>
           {sessions && sessions.length > 0 ? (
             sessions.map((session) => (
               <SessionCard

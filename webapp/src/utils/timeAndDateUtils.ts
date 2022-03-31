@@ -32,7 +32,9 @@ export const toXWordDate = (date: Date): string => {
 export const toXWordTime = (date: Date): string => {
   return `${DAYS[date.getDay()]}, ${
     MONTHS[date.getMonth()]
-  } ${date.getDate()} at ${date.getHours()}:${date.getMinutes()}`;
+  } ${date.getDate()} at ${date.getHours()}:${
+    date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()
+  }`;
 };
 
 

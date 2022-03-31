@@ -1,3 +1,4 @@
+import { FIRST_CELL_KEY } from "../constants";
 import { Clue, Puzzle, Solutions } from "../models/Puzzle";
 import {
   CellSelectionState,
@@ -44,49 +45,51 @@ export const getCellCoordinatesFromKey = (
   };
 };
 
+export const isLastCellInClue = (
+  cellKey: string,
+  currentClue: Clue,
+  orientation: OrientationType
+): boolean => {
+  const { x, y } = getCellCoordinatesFromKey(cellKey);
+
+  return orientation == OrientationType.HORIZONTAL
+    ? x == currentClue.x + currentClue.length - 1
+    : y == currentClue.y + currentClue.length - 1;
+};
+
+export const isFirstCellInClue = (
+  cellKey: string,
+  currentClue: Clue,
+  orientation: OrientationType
+): boolean => {
+  const { x, y } = getCellCoordinatesFromKey(cellKey);
+
+  return orientation == OrientationType.HORIZONTAL
+    ? x == currentClue.x
+    : y == currentClue.y;
+};
+
 export const getNextCellKey = (
   currentCellKey: string,
   puzzle: Puzzle,
   orientation: OrientationType
 ): string => {
   const { x: oldX, y: oldY } = getCellCoordinatesFromKey(currentCellKey);
-  const cellKeys = Object.keys(puzzle.solutions);
-  const width =
-    Math.max(
-      ...cellKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).x)
-    ) + 1;
-  const height =
-    Math.max(
-      ...cellKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).y)
-    ) + 1;
-  let newX = oldX;
-  let newY = oldY;
-  if (orientation === OrientationType.HORIZONTAL) {
-    if ((oldX + 1) % width === 0) {
-      newX = 0;
-      newY++;
-      if (newY % width === 0) {
-        newY = 0;
-      }
-    } else {
-      newX++;
-    }
-  } else if (orientation === OrientationType.VERTICAL) {
-    if ((oldY + 1) % height === 0) {
-      newX++;
-      newY = 0;
-      if (newX % height === 0) {
-        newX = 0;
-      }
-    } else {
-      newY++;
-    }
+
+  const currentClue = getClueFromCellKeyOrientationAndPuzzle(
+    currentCellKey,
+    orientation,
+    puzzle
+  );
+
+  if (isLastCellInClue(currentCellKey, currentClue, orientation)) {
+    const nextClue = getNextClue(puzzle, currentClue, orientation);
+    return [nextClue.x, nextClue.y].toString();
+  } else {
+    const newX = orientation == OrientationType.HORIZONTAL ? oldX + 1 : oldX;
+    const newY = orientation == OrientationType.HORIZONTAL ? oldY : oldY + 1;
+    return [newX, newY].toString();
   }
-  const newCellKey = [newX, newY].toString();
-  if (!puzzle.solutions[newCellKey]) {
-    return getNextCellKey(newCellKey, puzzle, orientation);
-  }
-  return newCellKey;
 };
 
 export const getPreviousCellKey = (
@@ -95,49 +98,46 @@ export const getPreviousCellKey = (
   orientation: OrientationType
 ): string => {
   const { x: oldX, y: oldY } = getCellCoordinatesFromKey(currentCellKey);
-  const cellKeys = Object.keys(puzzle.solutions);
-  const width =
-    Math.max(
-      ...cellKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).x)
-    ) + 1;
-  const height =
-    Math.max(
-      ...cellKeys.map((cellKey) => getCellCoordinatesFromKey(cellKey).y)
-    ) + 1;
-  let newX = oldX;
-  let newY = oldY;
 
-  if (orientation === OrientationType.HORIZONTAL) {
-    if (oldX === 0) {
-      newX = width - 1;
-      newY--;
-    } else {
-      newX--;
-    }
+  const currentClue = getClueFromCellKeyOrientationAndPuzzle(
+    currentCellKey,
+    orientation,
+    puzzle
+  );
 
-    if (newY < 0) {
-      newY = width - 1;
-    }
-  } else if (orientation === OrientationType.VERTICAL) {
-    if (oldY === 0) {
-      newY = height - 1;
-      newX--;
-    } else {
-      newY--;
-    }
+  if (isFirstCellInClue(currentCellKey, currentClue, orientation)) {
+    const previousClue = getPreviousClue(puzzle, currentClue, orientation);
 
-    if (newX < 0) {
-      newX = height - 1;
-    }
+    const newX =
+      orientation == OrientationType.HORIZONTAL
+        ? previousClue.x + previousClue.length - 1
+        : previousClue.x;
+    const newY =
+      orientation == OrientationType.HORIZONTAL
+        ? previousClue.y
+        : previousClue.y + previousClue.length - 1;
+
+    return [newX, newY].toString();
+  } else {
+    const newX = orientation == OrientationType.HORIZONTAL ? oldX - 1 : oldX;
+    const newY = orientation == OrientationType.HORIZONTAL ? oldY : oldY - 1;
+    return [newX, newY].toString();
+  }
+};
+
+export const getNextEmptyCellKey = (
+  currentCellKey: string,
+  puzzle: Puzzle,
+  boardState: BoardState,
+  orientation: OrientationType
+): string => {
+  let nextCellKey = currentCellKey;
+
+  while (nextCellKey && boardState[nextCellKey].currentLetter) {
+    nextCellKey = getNextCellKey(nextCellKey, puzzle, orientation);
   }
 
-  const newCellKey = [newX, newY].toString();
-
-  if (!puzzle.solutions[newCellKey]) {
-    return getPreviousCellKey(newCellKey, puzzle, orientation);
-  }
-
-  return newCellKey;
+  return nextCellKey;
 };
 
 export const getClueFromCellKeyOrientationAndPuzzle = (
@@ -166,14 +166,16 @@ export const getNextClue = (
   { clues }: Puzzle,
   currentClue: Clue,
   orientation: OrientationType
-): Clue | null => {
+): Clue => {
   const currentClueIndex = clues[orientation].findIndex(
     (clue) => clue == currentClue
   );
 
-  const isLastClue = currentClueIndex == clues[orientation].length;
-
-  if (isLastClue) return null;
+  const isLastClue = currentClueIndex == clues[orientation].length - 1;
+  if (isLastClue)
+    return orientation == OrientationType.HORIZONTAL
+      ? clues.vertical[0]
+      : clues.horizontal[0];
 
   return clues[orientation][currentClueIndex + 1];
 };
@@ -182,13 +184,17 @@ export const getPreviousClue = (
   { clues }: Puzzle,
   currentClue: Clue,
   orientation: OrientationType
-): Clue | null => {
+): Clue => {
   const currentClueIndex = clues[orientation].findIndex(
     (clue) => clue == currentClue
   );
 
   const isFirstClue = currentClueIndex == 0;
-  if (isFirstClue) return null;
+
+  if (isFirstClue)
+    return orientation == OrientationType.HORIZONTAL
+      ? clues.vertical[0]
+      : clues.horizontal[0];
 
   return clues[orientation][currentClueIndex - 1];
 };
@@ -325,37 +331,6 @@ export const getSortedCellKeyArray = (cellKeys: string[]): string[] => {
   });
 };
 
-export const getFirstSelectableCellKey = (puzzle: Puzzle): string => {
-  const sortedKeys = getSortedCellKeyArray(Object.keys(puzzle.solutions));
-  const cellKey = sortedKeys.find((cellKey) => {
-    const cellSelectable = puzzle.solutions[cellKey] != null;
-    if (cellSelectable) {
-      return cellKey;
-    }
-  });
-  if (!cellKey) {
-    throw Error("No selectable key found!");
-  }
-  return cellKey;
-};
-
-export const getLastSelectableCellKey = (puzzle: Puzzle): string => {
-  const sortedKeys = getSortedCellKeyArray(
-    Object.keys(puzzle.solutions)
-  ).reverse();
-  const cellKey = sortedKeys.find((cellKey) => {
-    const cellSelectable = puzzle.solutions[cellKey] != null;
-    if (cellSelectable) {
-      return cellKey;
-    }
-  });
-  if (!cellKey) {
-    throw Error("No selectable key found!");
-  }
-
-  return cellKey;
-};
-
 export const getPercentageComplete = (
   boardState: BoardState,
   solutions: Solutions
@@ -405,8 +380,6 @@ export const getSessionCompletionPercentages = (
     const participantCellCount = Object.values(session.boardState).filter(
       (each) => each.lastEditedBy == participant.userID
     ).length;
-
-    console.log();
 
     userPercentages[participant.username] =
       participantCellCount / totalSelectableCellCount;

@@ -7,9 +7,9 @@ import { useHistory } from "react-router-dom";
 import { createAnonymousUser, createGoogleUser } from "../models/User";
 import useQueryParams from "../hooks/useQueryParams";
 import { UserContext } from "../contexts/UserContext";
-import puzzleSVG from "../images/XWordSquare.svg";
 import { APP_NAME } from "../constants";
 import Button from "../components/Button";
+import XWordIcon from "../images/XWordIcon";
 
 const Login: React.FC = () => {
   const history = useHistory();
@@ -44,7 +44,7 @@ const Login: React.FC = () => {
       >
         {({ setFieldValue, handleSubmit }) => (
           <Form className="flex flex-col grow">
-            <img src={puzzleSVG} className="w-full" />
+            <XWordIcon />
             <div className="grow" />
 
             <InputField

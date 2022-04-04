@@ -1,8 +1,8 @@
 import React from "react";
 import { toXWordTime } from "../../utils/timeAndDateUtils";
-import puzzleSVG from "../../images/XWordSquare.svg";
 import { Session, SessionStatus } from "../../models/Session";
 import classNames from "classnames";
+import XWordIcon from "../../images/XWordIcon";
 
 interface SessionCardProps {
   session: Session;
@@ -24,7 +24,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
       onClick={onClick}
     >
       <div className="flex flex-row">
-        <img src={puzzleSVG} className="pointer-events-none w-1/5my-auto" />
+        <XWordIcon className="pointer-events-none w-1/5my-auto" />
         <div className="flex-col px-4">
           <p className="mt-2 text-md text-ellipsis">
             with:

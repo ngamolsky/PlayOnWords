@@ -1,7 +1,7 @@
 import React from "react";
 import { toXWordDate } from "../../utils/timeAndDateUtils";
-import puzzleSVG from "../../images/XWordSquare.svg";
 import { Puzzle } from "../../models/Puzzle";
+import XWordIcon from "../../images/XWordIcon";
 
 interface PuzzleCardProps {
   puzzle: Puzzle;
@@ -22,7 +22,7 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
                 active:scale-[1.01] outline-none select-none cursor-pointer"
       onClick={onClick}
     >
-      <img src={puzzleSVG} className="w-full pointer-events-none" />
+      <XWordIcon className="w-full pointer-events-none" />
       <p className="mt-2 ml-1 text-lg text-ellipsis">
         {toXWordDate(puzzle.puzzleTimestamp.toDate())}
       </p>

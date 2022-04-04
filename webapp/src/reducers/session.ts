@@ -301,16 +301,10 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       const newBoardState: BoardState = oldSession.boardState;
       Object.entries(differences).forEach(([cellKey, difference]) => {
-        if (difference.editedBy && difference.editedBy != currentUserID) {
-          console.log("updating difference: ", JSON.stringify(difference));
-
-          newBoardState[cellKey] = {
-            ...nextSession.boardState[cellKey],
-            currentLetter: difference.newLetter,
-          };
-        } else {
-          console.log("ignoring difference: ", JSON.stringify(difference));
-        }
+        newBoardState[cellKey] = {
+          ...nextSession.boardState[cellKey],
+          currentLetter: difference.newLetter,
+        };
       });
 
       return {
@@ -414,8 +408,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         const newCell: CellState = {
           solutionState: CellSolutionState.NONE,
           currentLetter: "",
-          lastEditedBy: undefined,
         };
+
         _updateCellState(sessionID, nextCellKey, boardState, newCell);
       }
 

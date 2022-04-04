@@ -81,7 +81,6 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_SQUARE,
-                userID: user.userID,
               });
             },
           },
@@ -90,7 +89,6 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_WORD,
-                userID: user.userID,
               });
             },
           },
@@ -99,7 +97,6 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_PUZZLE,
-                userID: user.userID,
               });
             },
           },
@@ -108,7 +105,6 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_SQUARE,
-                userID: user.userID,
               });
             },
           },
@@ -117,7 +113,6 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_WORD,
-                userID: user.userID,
               });
             },
           },
@@ -126,7 +121,6 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_PUZZLE,
-                userID: user.userID,
               });
             },
           },
@@ -135,7 +129,6 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.RESET_PUZZLE,
-                userID: user.userID,
               });
             },
           },

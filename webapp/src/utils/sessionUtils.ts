@@ -1,4 +1,3 @@
-import { FIRST_CELL_KEY } from "../constants";
 import { Clue, Puzzle, Solutions } from "../models/Puzzle";
 import {
   CellSelectionState,
@@ -12,8 +11,7 @@ import {
 import { OrientationType, SessionState } from "../reducers/session";
 
 export const getBoardStateFromSolutions = (
-  solutions: Solutions,
-  userID?: string
+  solutions: Solutions
 ): BoardState => {
   const newBoardState = Object.fromEntries(
     Object.entries(solutions).map(([cellKey, solution]) => {
@@ -22,9 +20,6 @@ export const getBoardStateFromSolutions = (
         solutionState: CellSolutionState.NONE,
       };
 
-      if (userID) {
-        cellState.lastEditedBy = userID;
-      }
       return [cellKey, cellState];
     })
   );
@@ -387,7 +382,6 @@ export const getSessionCompletionPercentages = (
 
   return userPercentages;
 };
-
 
 export const getBoardStateDifferences = (
   oldBoardState: BoardState,

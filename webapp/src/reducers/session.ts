@@ -25,7 +25,6 @@ import {
   checkPuzzle,
   getNextEmptyCellKey,
   isLastCellInClue,
-  getBoardStateDifferences,
 } from "../utils/sessionUtils";
 
 // #region State
@@ -116,13 +115,13 @@ export type SessionActions =
   | { type: SessionActionTypes.PENCIL_CLICKED }
   | { type: SessionActionTypes.REBUS_CLICKED }
   | { type: SessionActionTypes.AUTOCHECK_CLICKED }
-  | { type: SessionActionTypes.CHECK_SQUARE; userID: string }
-  | { type: SessionActionTypes.CHECK_WORD; userID: string }
-  | { type: SessionActionTypes.CHECK_PUZZLE; userID: string }
-  | { type: SessionActionTypes.REVEAL_SQUARE; userID: string }
-  | { type: SessionActionTypes.REVEAL_WORD; userID: string }
-  | { type: SessionActionTypes.REVEAL_PUZZLE; userID: string }
-  | { type: SessionActionTypes.RESET_PUZZLE; userID: string };
+  | { type: SessionActionTypes.CHECK_SQUARE }
+  | { type: SessionActionTypes.CHECK_WORD }
+  | { type: SessionActionTypes.CHECK_PUZZLE }
+  | { type: SessionActionTypes.REVEAL_SQUARE }
+  | { type: SessionActionTypes.REVEAL_WORD }
+  | { type: SessionActionTypes.REVEAL_PUZZLE }
+  | { type: SessionActionTypes.RESET_PUZZLE };
 
 // #endregion
 
@@ -345,20 +344,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         newBoardState[selectedCellKey] = newCell;
       }
 
-      if (session) {
-        console.log(
-          session.boardState[selectedCellKey],
-          newBoardState[selectedCellKey]
-        );
-
-        const diff = getBoardStateDifferences(
-          session.boardState,
-          newBoardState
-        );
-
-        console.log("DIFFERENCE", diff);
-      }
-
       const currentClue = getClueFromCellKeyOrientationAndPuzzle(
         selectedCellKey,
         orientation,
@@ -393,15 +378,21 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         puzzle,
         orientation
       );
-      const newCell: CellState = {
-        solutionState: CellSolutionState.NONE,
-        currentLetter: "",
-        lastEditedBy: userID,
-      };
-      if (boardState[selectedCellKey].currentLetter) {
-        _updateCellState(sessionID, selectedCellKey, boardState, newCell);
-      } else if (boardState[previousCellKey].currentLetter) {
-        _updateCellState(sessionID, previousCellKey, boardState, newCell);
+
+      const isCurrentCellEmpty =
+        boardState[selectedCellKey].currentLetter == "";
+
+      const nextCellKey = isCurrentCellEmpty
+        ? previousCellKey
+        : selectedCellKey;
+
+      if (boardState[nextCellKey].solutionState != CellSolutionState.REVEALED) {
+        const newCell: CellState = {
+          solutionState: CellSolutionState.NONE,
+          currentLetter: "",
+          lastEditedBy: userID,
+        };
+        _updateCellState(sessionID, nextCellKey, boardState, newCell);
       }
 
       if (selectedCellKey == FIRST_CELL_KEY) return newState;
@@ -561,7 +552,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.CHECK_SQUARE: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
       const currentCellValue = boardState[selectedCellKey].currentLetter;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
@@ -572,7 +562,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       const newCell: CellState = {
         ...boardState[selectedCellKey],
         solutionState,
-        lastEditedBy: userID,
       };
 
       _updateCellState(sessionID, selectedCellKey, boardState, newCell);
@@ -581,11 +570,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.CHECK_WORD: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
-      const currentCellValue = boardState[selectedCellKey].currentLetter;
-      const cellSolution = puzzle.solutions[selectedCellKey];
-
-      if (!currentCellValue || !cellSolution) return state;
 
       const currentClue = getClueFromCellKeyOrientationAndPuzzle(
         selectedCellKey,
@@ -609,7 +593,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         newBoardState[cellKey] = {
           ...newBoardState[cellKey],
           solutionState,
-          lastEditedBy: userID,
         };
       });
 
@@ -618,11 +601,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.CHECK_PUZZLE: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
-      const currentCellValue = boardState[selectedCellKey].currentLetter;
-      const cellSolution = puzzle.solutions[selectedCellKey];
-
-      if (!currentCellValue || !cellSolution) return state;
 
       const newBoardState = boardState;
       Object.keys(boardState).forEach((cellKey) => {
@@ -636,7 +614,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         newBoardState[cellKey] = {
           ...newBoardState[cellKey],
           solutionState,
-          lastEditedBy: userID,
         };
       });
 
@@ -645,7 +622,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.REVEAL_SQUARE: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
       if (!cellSolution) return state;
@@ -656,7 +632,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         currentLetter: Array.isArray(cellSolution)
           ? cellSolution.join("")
           : cellSolution,
-        lastEditedBy: userID,
       };
       _updateCellState(sessionID, selectedCellKey, boardState, newCell);
 
@@ -664,7 +639,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.REVEAL_WORD: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
       if (!cellSolution) return state;
@@ -689,7 +663,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           ...newBoardState[cellKey],
           currentLetter: cellSolution[0],
           solutionState: CellSolutionState.REVEALED,
-          lastEditedBy: userID,
         };
       });
 
@@ -698,7 +671,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.REVEAL_PUZZLE: {
       const { sessionID, boardState, puzzle } = _requireSession(session);
-      const { userID } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
 
       if (!cellSolution) return state;
@@ -718,7 +690,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           lastEditedBy:
             oldCell.solutionState == CellSolutionState.REVEALED
               ? oldCell.lastEditedBy
-              : userID,
+              : undefined,
         };
       });
 
@@ -727,11 +699,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.RESET_PUZZLE: {
       const { sessionID, puzzle } = _requireSession(session);
-      const { userID } = action;
-      const newBoardState = getBoardStateFromSolutions(
-        puzzle.solutions,
-        userID
-      );
+      const newBoardState = getBoardStateFromSolutions(puzzle.solutions);
 
       _updateBoardState(sessionID, newBoardState);
       _updateSessionStatus(sessionID, SessionStatus.STARTED);

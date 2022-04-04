@@ -25,6 +25,7 @@ import {
   checkPuzzle,
   getNextEmptyCellKey,
   isLastCellInClue,
+  getBoardStateDifferences,
 } from "../utils/sessionUtils";
 
 // #region State
@@ -84,6 +85,7 @@ export type SessionActions =
   | {
       type: SessionActionTypes.SET_SHARED_STATE;
       session: Session;
+      currentUserID: string;
     }
   | {
       type: SessionActionTypes.SET_SESSION_LOADING;
@@ -276,8 +278,14 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       };
     }
     case SessionActionTypes.SET_SHARED_STATE: {
-      const { session: nextSession } = action;
+      const oldSession = _requireSession(session);
+      const { session: nextSession, currentUserID } = action;
       const { boardState, puzzle, sessionStatus } = nextSession;
+
+      const differences = getBoardStateDifferences(
+        oldSession.boardState,
+        nextSession.boardState
+      );
 
       const percentComplete = getPercentageComplete(
         boardState,
@@ -291,9 +299,26 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         _updateSessionStatus(nextSession.sessionID, SessionStatus.COMPLETE);
       }
 
+      const newBoardState: BoardState = oldSession.boardState;
+      Object.entries(differences).forEach(([cellKey, difference]) => {
+        if (difference.editedBy && difference.editedBy != currentUserID) {
+          console.log("updating difference: ", JSON.stringify(difference));
+
+          newBoardState[cellKey] = {
+            ...nextSession.boardState[cellKey],
+            currentLetter: difference.newLetter,
+          };
+        } else {
+          console.log("ignoring difference: ", JSON.stringify(difference));
+        }
+      });
+
       return {
         ...state,
-        session: nextSession,
+        session: {
+          ...nextSession,
+          boardState: newBoardState,
+        },
         loadingMessage: undefined,
       };
     }
@@ -365,7 +390,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.BACKSPACE: {
       const { boardState, puzzle, sessionID } = _requireSession(session);
-      const { userID } = action;
 
       let newState = state;
 
@@ -390,7 +414,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         const newCell: CellState = {
           solutionState: CellSolutionState.NONE,
           currentLetter: "",
-          lastEditedBy: userID,
+          lastEditedBy: undefined,
         };
         _updateCellState(sessionID, nextCellKey, boardState, newCell);
       }

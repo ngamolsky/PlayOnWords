@@ -182,7 +182,8 @@ export const joinSessionParticipants = async (sessionID: string, user: User) => 
 //#region Hooks
 
 export const useSessionState = (
-  sessionID: string
+  sessionID: string,
+  currentUserID: string
 ): [SessionState, Dispatch<SessionActions>] => {
   const [sessionState, dispatch] = useReducer(sessionReducer, {
     loadingMessage: "Starting your session...",
@@ -232,6 +233,7 @@ export const useSessionState = (
           dispatch({
             type: SessionActionTypes.SET_SHARED_STATE,
             session: session,
+            currentUserID,
           });
         } else {
           if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {

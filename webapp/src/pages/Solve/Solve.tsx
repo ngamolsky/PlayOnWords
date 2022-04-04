@@ -35,7 +35,7 @@ const Solve: React.FC = () => {
 
   const user = useLoggedInUser();
 
-  const [sessionState, dispatch] = useSessionState(sessionID);
+  const [sessionState, dispatch] = useSessionState(sessionID, user.userID);
 
   const [endSessionModalOpen, setEndSessionModalOpen] =
     useState<boolean>(false);

@@ -389,33 +389,29 @@ export const getBoardStateDifferences = (
 ): Record<
   string,
   {
-    oldLetter: string | null;
     newLetter: string | null;
+    editedBy: string | undefined;
   }
 > => {
   const differences: Record<
     string,
     {
-      oldLetter: string | null;
       newLetter: string | null;
+      editedBy: string | undefined;
     }
   > = {};
   Object.entries(oldBoardState).forEach(([cellKey, oldCellState]) => {
     const newCellState = newBoardState[cellKey];
 
-    if (cellKey == "0,0") {
-      console.log("old Letter", oldCellState.currentLetter);
-
-      console.log("new Letter", newCellState.currentLetter);
-    }
-
     if (oldCellState.currentLetter != newCellState.currentLetter) {
       differences[cellKey] = {
-        oldLetter: oldCellState.currentLetter,
         newLetter: newCellState.currentLetter,
+        editedBy: newCellState.lastEditedBy,
       };
     }
   });
+
+  console.log("Differences!", differences);
 
   return differences;
 };

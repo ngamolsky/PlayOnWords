@@ -13,6 +13,6 @@ export const ManyUserFoundForFirebaseIDError = (
 ): XWordError => {
   return {
     code: 601,
-    message: `Foudn more than one user for firebase auth ID: ${firebaseID}`,
+    message: `Found more than one user for firebase auth ID: ${firebaseID}`,
   };
 };

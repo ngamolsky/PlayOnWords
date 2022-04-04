@@ -26,6 +26,8 @@
   "dependencies": {
     "@headlessui/react": "^1.4.3",
     "@react-firebase/auth": "^0.2.10",
+    "@sentry/react": "^6.19.3",
+    "@sentry/tracing": "^6.19.3",
     "@testing-library/jest-dom": "^5.9.0",
     "@testing-library/react": "^10.2.1",
     "@testing-library/user-event": "^12.0.2",

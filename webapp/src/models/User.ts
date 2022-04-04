@@ -1,6 +1,8 @@
 import {
+  GoogleAuthProvider,
   onAuthStateChanged,
   signInAnonymously,
+  signInWithPopup,
   signOut as firebaseSignOut,
   Unsubscribe,
 } from "firebase/auth";
@@ -56,6 +58,37 @@ export const getUserByID = async (
   return userDocument.data();
 };
 
+export const getUserByFirebaseAuthID = async (
+  firebaseAuthID: string
+): Promise<User | undefined> => {
+  const q = query(
+    collection(db, USERS_COLLECTION).withConverter(userConverter),
+    where("firebaseAuthID", "==", firebaseAuthID)
+  );
+
+  if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+    console.log(
+      "Firestore Request: getUserByFirebaseAuthID. UserID: ",
+      firebaseAuthID
+    );
+  }
+
+  const users: User[] = [];
+
+  const docs = await getDocs(q);
+  docs.forEach((doc) => {
+    users.push(doc.data());
+  });
+  if (!users) {
+    return;
+  } else if (users.length > 1) {
+    throw ManyUserFoundForFirebaseIDError(firebaseAuthID);
+  } else {
+    const user = users[0];
+    return user;
+  }
+};
+
 export const getUsersByID = async (
   userIDs: string[] | undefined
 ): Promise<User[]> => {
@@ -74,6 +107,33 @@ export const getUsersByID = async (
     );
   }
   return users;
+};
+
+export const createGoogleUser = async (username: string): Promise<User> => {
+  const provider = new GoogleAuthProvider();
+
+  const googleUser = await signInWithPopup(auth, provider);
+
+  const userID = `user.${v4()}`;
+  const user: User = {
+    userID,
+    username,
+    firebaseAuthID: googleUser.user.uid,
+    loginType: LoginType.GOOGLE,
+    createDate: Timestamp.now(),
+  };
+
+  await setDoc(doc(db, USERS_COLLECTION, userID), user);
+
+  if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+    console.log(
+      "Firestore Request: createGoogleUser. username",
+      username,
+      "userID",
+      userID
+    );
+  }
+  return user;
 };
 
 export const createAnonymousUser = async (username: string): Promise<User> => {
@@ -152,6 +212,8 @@ export const useAuth = (): [User | undefined, boolean] => {
             if (!users) {
               throw new Error(`No user found for firebase ID: ${authUser.uid}`);
             } else if (users.length > 1) {
+              console.log(users.map((user) => JSON.stringify(user)));
+
               throw ManyUserFoundForFirebaseIDError(authUser.uid);
             } else {
               const user = users[0];

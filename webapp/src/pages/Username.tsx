@@ -4,7 +4,7 @@ import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { validateUsername } from "../utils/validationUtils";
 import { useHistory } from "react-router-dom";
-import { createAnonymousUser } from "../models/User";
+import { createAnonymousUser, createGoogleUser } from "../models/User";
 import useQueryParams from "../hooks/useQueryParams";
 import { UserContext } from "../contexts/UserContext";
 import { UserExistsError } from "../errors";
@@ -33,39 +33,40 @@ const Login: React.FC = () => {
     <XWordContainer loadingMessage={loadingMessage} className="p-8">
       <h1 className="mx-auto my-8 text-3xl font-alfa">{APP_NAME}</h1>
       <Formik
-        initialValues={{ username: "" }}
-        onSubmit={async ({ username }, { setErrors }) => {
+        initialValues={{ username: "", type: "" }}
+        onSubmit={async ({ username, type }) => {
           setCreatingUser(true);
-          await createAnonymousUser(username).catch((error) => {
-            setCreatingUser(false);
-
-            const errorCode = error.code;
-            const errorMessage = error.message;
-
-            if (errorCode == UserExistsError.code) {
-              setErrors({
-                username: UserExistsError.message,
-              });
-            } else {
-              throw new Error(`(${errorCode}): ${errorMessage}`);
-            }
-          });
+          if (type == "google") {
+            await createGoogleUser(username);
+          } else {
+            await createAnonymousUser(username);
+          }
         }}
       >
-        <Form className="flex flex-col grow">
-          <img src={puzzleSVG} className="w-full" />
-          <div className="grow" />
+        {({ setFieldValue, handleSubmit }) => (
+          <Form className="flex flex-col grow">
+            <img src={puzzleSVG} className="w-full" />
+            <div className="grow" />
 
-          <InputField
-            label="Username"
-            name="username"
-            placeholder="Username"
-            validate={validateUsername}
-            required
-          />
+            <InputField
+              label="Username"
+              name="username"
+              placeholder="Username"
+              validate={validateUsername}
+              required
+            />
 
-          <Button type="submit">Start</Button>
-        </Form>
+            <Button
+              type="button"
+              onClick={() => {
+                setFieldValue("type", "anonymous");
+                handleSubmit();
+              }}
+            >
+              Start
+            </Button>
+          </Form>
+        )}
       </Formik>
     </XWordContainer>
   );

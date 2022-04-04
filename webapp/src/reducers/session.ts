@@ -25,6 +25,7 @@ import {
   checkPuzzle,
   getNextEmptyCellKey,
   isLastCellInClue,
+  getBoardStateDifferences,
 } from "../utils/sessionUtils";
 
 // #region State
@@ -344,6 +345,20 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         newBoardState[selectedCellKey] = newCell;
       }
 
+      if (session) {
+        console.log(
+          session.boardState[selectedCellKey],
+          newBoardState[selectedCellKey]
+        );
+
+        const diff = getBoardStateDifferences(
+          session.boardState,
+          newBoardState
+        );
+
+        console.log("DIFFERENCE", diff);
+      }
+
       const currentClue = getClueFromCellKeyOrientationAndPuzzle(
         selectedCellKey,
         orientation,
@@ -360,6 +375,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
             orientation
           )
         : getNextCellKey(selectedCellKey, puzzle, orientation);
+
       return _selectCell(state, nextCellKey);
     }
     case SessionActionTypes.BACKSPACE: {
@@ -371,8 +387,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       if (rebus) {
         newState = _toggleRebus(newState);
       }
-
-      if (selectedCellKey == FIRST_CELL_KEY) return newState;
 
       const previousCellKey = getPreviousCellKey(
         selectedCellKey,
@@ -389,6 +403,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       } else if (boardState[previousCellKey].currentLetter) {
         _updateCellState(sessionID, previousCellKey, boardState, newCell);
       }
+
+      if (selectedCellKey == FIRST_CELL_KEY) return newState;
 
       return _selectCell(newState, previousCellKey);
     }
@@ -460,7 +476,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       return newState;
     }
     case SessionActionTypes.PREVIOUS_CLUE: {
-
       const { puzzle } = _requireSession(session);
 
       const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(

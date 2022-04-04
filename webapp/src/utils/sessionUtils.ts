@@ -387,3 +387,41 @@ export const getSessionCompletionPercentages = (
 
   return userPercentages;
 };
+
+
+export const getBoardStateDifferences = (
+  oldBoardState: BoardState,
+  newBoardState: BoardState
+): Record<
+  string,
+  {
+    oldLetter: string | null;
+    newLetter: string | null;
+  }
+> => {
+  const differences: Record<
+    string,
+    {
+      oldLetter: string | null;
+      newLetter: string | null;
+    }
+  > = {};
+  Object.entries(oldBoardState).forEach(([cellKey, oldCellState]) => {
+    const newCellState = newBoardState[cellKey];
+
+    if (cellKey == "0,0") {
+      console.log("old Letter", oldCellState.currentLetter);
+
+      console.log("new Letter", newCellState.currentLetter);
+    }
+
+    if (oldCellState.currentLetter != newCellState.currentLetter) {
+      differences[cellKey] = {
+        oldLetter: oldCellState.currentLetter,
+        newLetter: newCellState.currentLetter,
+      };
+    }
+  });
+
+  return differences;
+};

@@ -7,7 +7,6 @@ import { useHistory } from "react-router-dom";
 import { createAnonymousUser, createGoogleUser } from "../models/User";
 import useQueryParams from "../hooks/useQueryParams";
 import { UserContext } from "../contexts/UserContext";
-import { UserExistsError } from "../errors";
 import puzzleSVG from "../images/XWordSquare.svg";
 import { APP_NAME } from "../constants";
 import Button from "../components/Button";

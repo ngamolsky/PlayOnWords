@@ -1,3 +1,4 @@
+import { diff } from "deep-object-diff";
 import { Reducer } from "react";
 import { FIRST_CELL_KEY } from "../constants";
 import {
@@ -149,10 +150,9 @@ const _updateSessionStatus = (
 const _updateCellState = (
   sessionID: string,
   cellKey: string,
-  boardState: BoardState,
   cellState: CellState
 ): void => {
-  updateCellState(sessionID, cellKey, boardState, cellState);
+  updateCellState(sessionID, cellKey, cellState);
 };
 
 export const _joinSessionParticipants = (
@@ -282,10 +282,9 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       const { session: nextSession, currentUserID } = action;
       const { boardState, puzzle, sessionStatus } = nextSession;
 
-      const differences = getBoardStateDifferences(
-        oldSession.boardState,
-        nextSession.boardState
-      );
+      const sessionDiff = diff(oldSession, nextSession);
+
+      console.log("difference!", sessionDiff);
 
       const percentComplete = getPercentageComplete(
         boardState,
@@ -300,18 +299,18 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       }
 
       const newBoardState: BoardState = oldSession.boardState;
-      Object.entries(differences).forEach(([cellKey, difference]) => {
-        newBoardState[cellKey] = {
-          ...nextSession.boardState[cellKey],
-          currentLetter: difference.newLetter,
-        };
-      });
+      // Object.entries(differences).forEach(([cellKey, difference]) => {
+      //   newBoardState[cellKey] = {
+      //     ...nextSession.boardState[cellKey],
+      //     currentLetter: difference.newLetter,
+      //   };
+      // });
 
       return {
         ...state,
         session: {
           ...nextSession,
-          boardState: newBoardState,
+          boardState: nextSession.boardState,
         },
         loadingMessage: undefined,
       };
@@ -349,7 +348,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         ? cellState.currentLetter.concat(letter)
         : letter;
 
-      const newBoardState = boardState;
+      const newBoardState = JSON.parse(JSON.stringify(boardState));
+
       if (sessionStatus != SessionStatus.COMPLETE) {
         const newCell: CellState = {
           solutionState: autocheck
@@ -359,7 +359,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           lastEditedBy: userID,
         };
 
-        _updateCellState(sessionID, selectedCellKey, boardState, newCell);
+        _updateCellState(sessionID, selectedCellKey, newCell);
         newBoardState[selectedCellKey] = newCell;
       }
 
@@ -379,7 +379,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
             orientation
           )
         : getNextCellKey(selectedCellKey, puzzle, orientation);
-
       return _selectCell(state, nextCellKey);
     }
     case SessionActionTypes.BACKSPACE: {
@@ -410,7 +409,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           currentLetter: "",
         };
 
-        _updateCellState(sessionID, nextCellKey, boardState, newCell);
+        _updateCellState(sessionID, nextCellKey, newCell);
       }
 
       if (selectedCellKey == FIRST_CELL_KEY) return newState;
@@ -582,7 +581,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         solutionState,
       };
 
-      _updateCellState(sessionID, selectedCellKey, boardState, newCell);
+      _updateCellState(sessionID, selectedCellKey, newCell);
 
       return state;
     }
@@ -651,7 +650,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           ? cellSolution.join("")
           : cellSolution,
       };
-      _updateCellState(sessionID, selectedCellKey, boardState, newCell);
+      _updateCellState(sessionID, selectedCellKey, newCell);
 
       return state;
     }

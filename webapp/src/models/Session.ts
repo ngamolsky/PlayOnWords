@@ -44,7 +44,6 @@ export type Session = {
   lastUpdatedTime: Timestamp;
 };
 
-
 export type BoardState = {
   [key: string]: CellState;
 };
@@ -90,9 +89,7 @@ export const startSession = async (
   const session: Session = {
     sessionID,
     puzzle,
-    participants: participants
-      ? [user].concat(participants)
-      : [user],
+    participants: participants ? [user].concat(participants) : [user],
     startedBy: user,
     startTime: Timestamp.now(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),
@@ -124,7 +121,10 @@ export const getSession = async (sessionID: string): Promise<Session> => {
   return session;
 };
 
-export const updateBoardState = async (sessionID: string, boardState: BoardState) => {
+export const updateBoardState = async (
+  sessionID: string,
+  boardState: BoardState
+) => {
   const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID);
   return updateDoc(sessionRef, {
     boardState,
@@ -132,6 +132,20 @@ export const updateBoardState = async (sessionID: string, boardState: BoardState
   });
 };
 
+export const updateCellState = async (
+  sessionID: string,
+  cellKey: string,
+  cellState: CellState
+) => {
+  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID);
+  const fieldPath = `boardState.${cellKey}`;
+  const fieldData: { [key: string]: Timestamp | CellState } = {};
+
+  fieldData[fieldPath] = cellState;
+  fieldData.lastUpdatedTime = Timestamp.now();
+
+  return updateDoc(sessionRef, fieldData);
+};
 
 export const updateSessionStatus = async (
   sessionID: string,
@@ -146,27 +160,13 @@ export const updateSessionStatus = async (
       lastUpdatedTime: Timestamp.now(),
     });
   } else {
-    return  updateDoc(sessionRef, {
+    return updateDoc(sessionRef, {
       sessionStatus,
       endTime: deleteField(),
       startTime: Timestamp.now(),
       lastUpdatedTime: Timestamp.now(),
     });
   }
-};
-
-export const updateCellState = async (
-  sessionID: string,
-  cellKey: string,
-  boardState: BoardState,
-  cellState: CellState
-) => {
-  const newBoardState: BoardState = {
-    ...boardState,
-    [cellKey]: cellState,
-  };
-
-  return updateBoardState(sessionID, newBoardState);
 };
 
 export const joinSessionParticipants = async (sessionID: string, user: User) => {
@@ -219,6 +219,8 @@ export const useSessionState = (
   }, []);
 
   useEffect(() => {
+    console.log("refistereing listener on state");
+
     const unsub = onSnapshot(
       doc(db, SESSIONS_COLLECTION, sessionID).withConverter(sessionConverter),
       (doc) => {

@@ -260,12 +260,15 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
   switch (action.type) {
     case SessionActionTypes.SET_ORIGINAL_STATE: {
       const { session: nextSession } = action;
+
       const firstSelectedKey = getNextEmptyCellKey(
         FIRST_CELL_KEY,
         nextSession.puzzle,
         nextSession.boardState,
         OrientationType.HORIZONTAL
       );
+
+      console.log(firstSelectedKey);
 
       return {
         ...state,

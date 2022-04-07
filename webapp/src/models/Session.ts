@@ -219,8 +219,6 @@ export const useSessionState = (
   }, []);
 
   useEffect(() => {
-    console.log("refistereing listener on state");
-
     const unsub = onSnapshot(
       doc(db, SESSIONS_COLLECTION, sessionID).withConverter(sessionConverter),
       (doc) => {
@@ -231,7 +229,7 @@ export const useSessionState = (
               "Firestore Request: useSessionState. Session updated:",
               session.sessionID
             );
-          }          
+          }
           dispatch({
             type: SessionActionTypes.SET_SHARED_STATE,
             session: session,

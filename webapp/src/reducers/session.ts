@@ -340,6 +340,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         orientation
       );
 
+      console.log(didCycle);
+
       let newState = { ...state };
       if (didCycle) {
         newState = _toggleOrientation(newState);

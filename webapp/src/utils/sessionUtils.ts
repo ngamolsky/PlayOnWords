@@ -130,12 +130,11 @@ export const getNextEmptyCellKey = (
   boardState: BoardState,
   orientation: OrientationType
 ): [string, boolean] => {
-  let nextCellKey = currentCellKey;
-  let didCycle = false;
+  let nextCellKey = getNextCellKey(currentCellKey, puzzle, orientation)[0];
+  let didCycle = getNextCellKey(currentCellKey, puzzle, orientation)[1];
   while (nextCellKey && boardState[nextCellKey].currentLetter) {
     const result = getNextCellKey(nextCellKey, puzzle, orientation);
     nextCellKey = result[0];
-
     if (result[1]) {
       didCycle = true;
     }

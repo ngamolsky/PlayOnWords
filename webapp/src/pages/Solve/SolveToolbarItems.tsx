@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import React, { Dispatch } from "react";
+import { useHistory } from "react-router-dom";
 import Dropdown from "../../components/Dropdown";
 import Help from "../../components/icons/Help";
 import Pencil from "../../components/icons/Pencil";
@@ -7,13 +8,12 @@ import Share from "../../components/icons/Share";
 import VerticalDots from "../../components/icons/VerticalDots";
 import Timer from "../../components/Timer";
 import { Session } from "../../models/Session";
-import { signOut, User } from "../../models/User";
+import { User } from "../../models/User";
 import { SessionActions, SessionActionTypes } from "../../reducers/session";
 import { secondsToTimeString } from "../../utils/timeAndDateUtils";
 
 const SolveToolbarItems = ({
   session,
-  user,
   pencilMode,
   autocheck,
   dispatch,
@@ -26,6 +26,7 @@ const SolveToolbarItems = ({
   dispatch: Dispatch<SessionActions>;
   showShareModal: (isOpen: boolean) => void;
 }) => {
+  const history = useHistory();
   return (
     <div className="relative flex flex-row h-8 space-x-2">
       <div className="my-auto">
@@ -144,7 +145,7 @@ const SolveToolbarItems = ({
           {
             node: <p className="px-4">Sign Out</p>,
             onClick: () => {
-              signOut(user);
+              history.push("/signOut");
             },
           },
         ]}

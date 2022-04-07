@@ -163,7 +163,6 @@ export const createAnonymousUser = async (username: string): Promise<User> => {
 
 export const signOut = async (user: User) => {
   // If this is an anonymous user, delete the user on logout
-
   if (user.loginType == LoginType.ANONYMOUS) {
     await deleteDoc(doc(db, USERS_COLLECTION, user.userID));
   }

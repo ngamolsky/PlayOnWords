@@ -3,7 +3,7 @@ import { XWordContainer } from "../../components/XWordContainer";
 import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../../constants";
 import { useHistory } from "react-router-dom";
 import { Puzzle, useRecentPuzzles } from "../../models/Puzzle";
-import { signOut, useLoggedInUser } from "../../models/User";
+import { useLoggedInUser } from "../../models/User";
 import Avatar from "../../components/Avatar";
 import { PuzzleCard } from "./PuzzleCard";
 import StartSessionModal from "./StartSessionModal";
@@ -34,7 +34,7 @@ const Home: React.FC = () => {
         <Avatar
           user={user}
           onClick={() => {
-            signOut(user);
+            history.push("/signOut");
           }}
         />
       }

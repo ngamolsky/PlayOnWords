@@ -6,6 +6,7 @@ import Home from "./pages/Home/Home";
 import Solve from "./pages/Solve/Solve";
 import { UserContext } from "./contexts/UserContext";
 import { useAuth } from "./models/User";
+import SignOut from "./pages/SignOut";
 
 export const App = () => {
   const [user, userLoading] = useAuth();
@@ -18,6 +19,9 @@ export const App = () => {
           </Route>
           <ProtectedRoute path="/solve/:sessionID">
             <Solve />
+          </ProtectedRoute>
+          <ProtectedRoute path="/signOut">
+            <SignOut />
           </ProtectedRoute>
           <ProtectedRoute path="/">
             <Home />

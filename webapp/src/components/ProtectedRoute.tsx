@@ -5,6 +5,7 @@ import { XWordContainer } from "./XWordContainer";
 
 export const ProtectedRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
   const path = useLocation().pathname;
+
   const [user, userLoading] = useContext(UserContext);
   if (userLoading)
     return (
@@ -15,7 +16,9 @@ export const ProtectedRoute: React.FC<RouteProps> = ({ children, ...rest }) => {
     );
   if (!user) {
     const nextUrl =
-      path !== "/" ? `/username?continueUrl=${path}` : "/username";
+      path !== "/" && path !== "/signOut"
+        ? `/username?continueUrl=${path}`
+        : "/username";
     return <Redirect to={nextUrl} />;
   }
 

@@ -7,6 +7,7 @@ import { App } from "./App";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorker from "./serviceWorker";
 import { BrowserTracing } from "@sentry/tracing";
+import { __prod__ } from "./constants";
 
 Sentry.init({
   dsn: "https://a8685f711258478ea98aa8c893908e27@o1187852.ingest.sentry.io/6307711",
@@ -16,6 +17,7 @@ Sentry.init({
   // of transactions for performance monitoring.
   // We recommend adjusting this value in production
   tracesSampleRate: 1.0,
+  environment: __prod__ ? "production" : "dev",
 });
 
 ReactDOM.render(

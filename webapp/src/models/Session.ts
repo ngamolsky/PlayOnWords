@@ -231,7 +231,7 @@ export const useSessionState = (
               "Firestore Request: useSessionState. Session updated:",
               session.sessionID
             );
-          }
+          }          
           dispatch({
             type: SessionActionTypes.SET_SHARED_STATE,
             session: session,

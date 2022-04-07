@@ -38,14 +38,16 @@ const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
       <>
         <div className="flex-col p-4 rounded-md bg-slate-200 dark:bg-slate-700">
           <table className="w-full table-fixed">
-            <tr>
-              <th className="py-2">Participants</th>
-              <th className="py-2">Percent Complete</th>
-            </tr>
+            <thead>
+              <tr>
+                <th className="py-2">Participants</th>
+                <th className="py-2">Percent Complete</th>
+              </tr>
+            </thead>
             <tbody>
               {Object.entries(sessionResults).map(
-                ([username, percentComplete]) => (
-                  <tr>
+                ([username, percentComplete], index) => (
+                  <tr key={index}>
                     <td className="py-2">{username}</td>
                     <td className="py-2">{`${(percentComplete * 100).toFixed(
                       2

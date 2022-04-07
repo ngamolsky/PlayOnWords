@@ -68,7 +68,7 @@ export const getNextCellKey = (
   currentCellKey: string,
   puzzle: Puzzle,
   orientation: OrientationType
-): string => {
+): [string, boolean] => {
   const { x: oldX, y: oldY } = getCellCoordinatesFromKey(currentCellKey);
 
   const currentClue = getClueFromCellKeyOrientationAndPuzzle(
@@ -78,12 +78,12 @@ export const getNextCellKey = (
   );
 
   if (isLastCellInClue(currentCellKey, currentClue, orientation)) {
-    const nextClue = getNextClue(puzzle, currentClue, orientation);
-    return [nextClue.x, nextClue.y].toString();
+    const [nextClue, didCycle] = getNextClue(puzzle, currentClue, orientation);
+    return [[nextClue.x, nextClue.y].toString(), didCycle];
   } else {
     const newX = orientation == OrientationType.HORIZONTAL ? oldX + 1 : oldX;
     const newY = orientation == OrientationType.HORIZONTAL ? oldY : oldY + 1;
-    return [newX, newY].toString();
+    return [[newX, newY].toString(), false];
   }
 };
 
@@ -91,7 +91,7 @@ export const getPreviousCellKey = (
   currentCellKey: string,
   puzzle: Puzzle,
   orientation: OrientationType
-): string => {
+): [string, boolean] => {
   const { x: oldX, y: oldY } = getCellCoordinatesFromKey(currentCellKey);
 
   const currentClue = getClueFromCellKeyOrientationAndPuzzle(
@@ -101,7 +101,11 @@ export const getPreviousCellKey = (
   );
 
   if (isFirstCellInClue(currentCellKey, currentClue, orientation)) {
-    const previousClue = getPreviousClue(puzzle, currentClue, orientation);
+    const [previousClue, didCycle] = getPreviousClue(
+      puzzle,
+      currentClue,
+      orientation
+    );
 
     const newX =
       orientation == OrientationType.HORIZONTAL
@@ -112,11 +116,11 @@ export const getPreviousCellKey = (
         ? previousClue.y
         : previousClue.y + previousClue.length - 1;
 
-    return [newX, newY].toString();
+    return [[newX, newY].toString(), didCycle];
   } else {
     const newX = orientation == OrientationType.HORIZONTAL ? oldX - 1 : oldX;
     const newY = orientation == OrientationType.HORIZONTAL ? oldY : oldY - 1;
-    return [newX, newY].toString();
+    return [[newX, newY].toString(), false];
   }
 };
 
@@ -125,14 +129,19 @@ export const getNextEmptyCellKey = (
   puzzle: Puzzle,
   boardState: BoardState,
   orientation: OrientationType
-): string => {
+): [string, boolean] => {
   let nextCellKey = currentCellKey;
-
+  let didCycle = false;
   while (nextCellKey && boardState[nextCellKey].currentLetter) {
-    nextCellKey = getNextCellKey(nextCellKey, puzzle, orientation);
+    const result = getNextCellKey(nextCellKey, puzzle, orientation);
+    nextCellKey = result[0];
+
+    if (result[1]) {
+      didCycle = true;
+    }
   }
 
-  return nextCellKey;
+  return [nextCellKey, didCycle];
 };
 
 export const getClueFromCellKeyOrientationAndPuzzle = (
@@ -161,25 +170,28 @@ export const getNextClue = (
   { clues }: Puzzle,
   currentClue: Clue,
   orientation: OrientationType
-): Clue => {
+): [Clue, boolean] => {
   const currentClueIndex = clues[orientation].findIndex(
     (clue) => clue == currentClue
   );
 
   const isLastClue = currentClueIndex == clues[orientation].length - 1;
   if (isLastClue)
-    return orientation == OrientationType.HORIZONTAL
-      ? clues.vertical[0]
-      : clues.horizontal[0];
+    return [
+      orientation == OrientationType.HORIZONTAL
+        ? clues.vertical[0]
+        : clues.horizontal[0],
+      true,
+    ];
 
-  return clues[orientation][currentClueIndex + 1];
+  return [clues[orientation][currentClueIndex + 1], false];
 };
 
 export const getPreviousClue = (
   { clues }: Puzzle,
   currentClue: Clue,
   orientation: OrientationType
-): Clue => {
+): [Clue, boolean] => {
   const currentClueIndex = clues[orientation].findIndex(
     (clue) => clue == currentClue
   );
@@ -187,11 +199,14 @@ export const getPreviousClue = (
   const isFirstClue = currentClueIndex == 0;
 
   if (isFirstClue)
-    return orientation == OrientationType.HORIZONTAL
-      ? clues.vertical[0]
-      : clues.horizontal[0];
+    return [
+      orientation == OrientationType.HORIZONTAL
+        ? clues.vertical[0]
+        : clues.horizontal[0],
+      true,
+    ];
 
-  return clues[orientation][currentClueIndex - 1];
+  return [clues[orientation][currentClueIndex - 1], false];
 };
 
 export const getClueNumberForCellKeyAndPuzzle = (

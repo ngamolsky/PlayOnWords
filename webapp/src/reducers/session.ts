@@ -26,6 +26,7 @@ import {
   checkPuzzle,
   getNextEmptyCellKey,
   isLastCellInClue,
+  getCellCoordinatesFromKey,
 } from "../utils/sessionUtils";
 
 // #region State
@@ -61,8 +62,10 @@ export enum SessionActionTypes {
   BACKSPACE = "BACKSPACE",
   CELL_CLICKED = "CELL_CLICKED",
   TOGGLE_ORIENTATION = "TOGGLE_ORIENTATION",
-  NEXT_CELL = "NEXT_CELL",
-  PREVIOUS_CELL = "PREVIOUS_CELL",
+  RIGHT_KEY = "RIGHT_KEY",
+  LEFT_KEY = "LEFT_KEY",
+  UP_KEY = "UP_KEY",
+  DOWN_KEY = "DOWN_KEY",
   NEXT_CLUE = "NEXT_CLUE",
   PREVIOUS_CLUE = "PREVIOUS_CLUE",
   PENCIL_CLICKED = "PENCIL_CLICKED",
@@ -112,8 +115,10 @@ export type SessionActions =
   | { type: SessionActionTypes.TOGGLE_ORIENTATION }
   | { type: SessionActionTypes.NEXT_CLUE }
   | { type: SessionActionTypes.PREVIOUS_CLUE }
-  | { type: SessionActionTypes.NEXT_CELL }
-  | { type: SessionActionTypes.PREVIOUS_CELL }
+  | { type: SessionActionTypes.RIGHT_KEY }
+  | { type: SessionActionTypes.LEFT_KEY }
+  | { type: SessionActionTypes.UP_KEY }
+  | { type: SessionActionTypes.DOWN_KEY }
   | { type: SessionActionTypes.PENCIL_CLICKED }
   | { type: SessionActionTypes.REBUS_CLICKED }
   | { type: SessionActionTypes.AUTOCHECK_CLICKED }
@@ -274,7 +279,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
             OrientationType.HORIZONTAL
           )[0]
         : FIRST_CELL_KEY;
-          
 
       return {
         ...state,
@@ -353,7 +357,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         boardState,
         orientation
       );
-
 
       let newState = { ...state };
       if (didCycle) {
@@ -550,21 +553,49 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       return newState;
     }
-    case SessionActionTypes.NEXT_CELL: {
+    case SessionActionTypes.RIGHT_KEY: {
       const { puzzle } = _requireSession(session);
-      return _selectCell(
-        state,
-        getNextCellKey(selectedCellKey, puzzle, orientation)[0]
-      );
+      if (orientation == OrientationType.VERTICAL) {
+        return _toggleOrientation(state);
+      } else {
+        return _selectCell(
+          state,
+          getNextCellKey(selectedCellKey, puzzle, orientation)[0]
+        );
+      }
     }
-    case SessionActionTypes.PREVIOUS_CELL: {
-      if (selectedCellKey == FIRST_CELL_KEY) return state;
-
+    case SessionActionTypes.LEFT_KEY: {
       const { puzzle } = _requireSession(session);
-      return _selectCell(
-        state,
-        getPreviousCellKey(selectedCellKey, puzzle, orientation)[0]
-      );
+      if (orientation == OrientationType.VERTICAL) {
+        return _toggleOrientation(state);
+      } else {
+        return _selectCell(
+          state,
+          getPreviousCellKey(selectedCellKey, puzzle, orientation)[0]
+        );
+      }
+    }
+    case SessionActionTypes.UP_KEY: {
+      const { puzzle } = _requireSession(session);
+      if (orientation == OrientationType.HORIZONTAL) {
+        return _toggleOrientation(state);
+      } else {
+        return _selectCell(
+          state,
+          getPreviousCellKey(selectedCellKey, puzzle, orientation)[0]
+        );
+      }
+    }
+    case SessionActionTypes.DOWN_KEY: {
+      const { puzzle } = _requireSession(session);
+      if (orientation == OrientationType.HORIZONTAL) {
+        return _toggleOrientation(state);
+      } else {
+        return _selectCell(
+          state,
+          getNextCellKey(selectedCellKey, puzzle, orientation)[0]
+        );
+      }
     }
     case SessionActionTypes.PENCIL_CLICKED: {
       return {

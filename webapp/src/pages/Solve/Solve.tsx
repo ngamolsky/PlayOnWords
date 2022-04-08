@@ -163,16 +163,23 @@ const Solve: React.FC = () => {
               return;
             case ACTION_KEYS.RIGHT:
               dispatch({
-                type: SessionActionTypes.NEXT_CELL,
+                type: SessionActionTypes.RIGHT_KEY,
               });
               return;
             case ACTION_KEYS.LEFT:
               dispatch({
-                type: SessionActionTypes.PREVIOUS_CELL,
+                type: SessionActionTypes.LEFT_KEY,
               });
               return;
             case ACTION_KEYS.UP:
+              dispatch({
+                type: SessionActionTypes.UP_KEY,
+              });
+              return
             case ACTION_KEYS.DOWN:
+              dispatch({
+                type: SessionActionTypes.DOWN_KEY,
+              });
               return;
             default: {
               dispatch({

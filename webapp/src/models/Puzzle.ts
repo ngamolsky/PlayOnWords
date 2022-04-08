@@ -16,6 +16,7 @@ export type Puzzle = {
   title?: string;
   clues: ClueList;
   puzzleTimestamp: Timestamp;
+  dayOfWeek: number;
   solutions: Solutions;
   nytID: string;
   collection: string;

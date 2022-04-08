@@ -71,6 +71,7 @@ export const convertPuzzleDataToPuzzle = async ({
   const puzzle: Puzzle = {
     puzzleID: `puzzle.${v4()}`,
     puzzleTimestamp: Timestamp.fromDate(date),
+    dayOfWeek: date.getDay(),
     clues,
     solutions,
     nytID,

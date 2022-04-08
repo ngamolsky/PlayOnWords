@@ -26,7 +26,6 @@ import {
   checkPuzzle,
   getNextEmptyCellKey,
   isLastCellInClue,
-  getCellCoordinatesFromKey,
 } from "../utils/sessionUtils";
 
 // #region State

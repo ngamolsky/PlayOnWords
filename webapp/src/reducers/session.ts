@@ -264,12 +264,17 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         return _selectCell(state, FIRST_CELL_KEY);
       }
 
-      const firstSelectedKey = getNextEmptyCellKey(
-        FIRST_CELL_KEY,
-        nextSession.puzzle,
-        nextSession.boardState,
-        OrientationType.HORIZONTAL
-      )[0];
+      const firstCell = nextSession.boardState[FIRST_CELL_KEY];
+
+      const firstSelectedKey = firstCell.currentLetter
+        ? getNextEmptyCellKey(
+            FIRST_CELL_KEY,
+            nextSession.puzzle,
+            nextSession.boardState,
+            OrientationType.HORIZONTAL
+          )[0]
+        : FIRST_CELL_KEY;
+          
 
       return {
         ...state,
@@ -282,23 +287,32 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       };
     }
     case SessionActionTypes.SET_SHARED_STATE: {
+      const oldSession = _requireSession(session);
       const { session: nextSession } = action;
       const { boardState, puzzle, sessionStatus } = nextSession;
 
-      if (session) {
-        const sessionDiff = diff(session, nextSession);
+      const boardStateDifference = diff(
+        oldSession.boardState,
+        nextSession.boardState
+      );
 
-        console.log("difference!", sessionDiff);
-      }
+      const newBoardState = { ...boardState };
+
+      Object.entries(boardStateDifference).forEach(([cellKey, difference]) => {
+        newBoardState[cellKey] = {
+          ...newBoardState[cellKey],
+          currentLetter: difference.currentLetter,
+        };
+      });
 
       const percentComplete = getPercentageComplete(
-        boardState,
+        newBoardState,
         puzzle.solutions
       );
       if (
         percentComplete == 100 &&
         sessionStatus !== SessionStatus.COMPLETE &&
-        checkPuzzle(boardState, puzzle.solutions)
+        checkPuzzle(newBoardState, puzzle.solutions)
       ) {
         _updateSessionStatus(nextSession.sessionID, SessionStatus.COMPLETE);
       }
@@ -307,7 +321,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         ...state,
         session: {
           ...nextSession,
-          boardState: nextSession.boardState,
+          boardState: newBoardState,
         },
         loadingMessage: undefined,
       };
@@ -340,7 +354,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         orientation
       );
 
-      console.log(didCycle);
 
       let newState = { ...state };
       if (didCycle) {

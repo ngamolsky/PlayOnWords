@@ -126,6 +126,9 @@ export const updateBoardState = async (
   boardState: BoardState
 ) => {
   const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID);
+
+  console.log("updateBoardState time updated");
+
   return updateDoc(sessionRef, {
     boardState,
     lastUpdatedTime: Timestamp.now(),
@@ -143,6 +146,8 @@ export const updateCellState = async (
 
   fieldData[fieldPath] = cellState;
   fieldData.lastUpdatedTime = Timestamp.now();
+
+  console.log(" updateCellState time updated");
 
   return updateDoc(sessionRef, fieldData);
 };

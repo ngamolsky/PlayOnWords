@@ -5,7 +5,7 @@ import Button from "../../components/Button";
 import Modal from "../../components/Modal";
 import { Puzzle } from "../../models/Puzzle";
 import { User } from "../../models/User";
-import StartSessionTabs from "./StartSessionTabs";
+import Tabs from "../../components/Tabs";
 import { PuzzleCard } from "./PuzzleCard";
 import { startSession, useRecentSessionsForUser } from "../../models/Session";
 import { SessionCard } from "./SessionCard";
@@ -28,17 +28,26 @@ const StartSessionModal = ({
 }) => {
   return (
     <Modal isOpen={modalShowing} setIsOpen={setModalShowing} className="h-full">
-      <StartSessionTabs
+      <Tabs
         tabArray={[
-          NewTab(
-            selectedPuzzle,
-            user,
-            setSessionLoading,
-            setModalShowing,
-            setSessionID
-          ),
-          InProgressTab(user, selectedPuzzle, setSessionID),
-          CompletedTab(user, selectedPuzzle, setSessionID),
+          {
+            title: "New Session",
+            content: NewTab(
+              selectedPuzzle,
+              user,
+              setSessionLoading,
+              setModalShowing,
+              setSessionID
+            ),
+          },
+          {
+            title: "In Progress",
+            content: InProgressTab(user, selectedPuzzle, setSessionID),
+          },
+          {
+            title: "Completed",
+            content: CompletedTab(user, selectedPuzzle, setSessionID),
+          },
         ]}
       />
     </Modal>

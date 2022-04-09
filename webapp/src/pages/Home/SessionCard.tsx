@@ -24,15 +24,12 @@ export const SessionCard: React.FC<SessionCardProps> = ({
       onClick={onClick}
     >
       <div className="flex flex-row">
-        <XWordIcon className="pointer-events-none w-1/5my-auto" />
+        <XWordIcon className="w-3/5 my-auto pointer-events-none" />
         <div className="flex-col px-4">
           <p className="mt-2 text-md text-ellipsis">
-            with:
-            <span className="mx-2">
-              {participants.length > 0
-                ? participants.map((user) => user.username).join(", ")
-                : "Loading..."}
-            </span>
+            {participants.length > 0
+              ? participants.map((user) => user.username).join(", ")
+              : "Loading..."}
           </p>
           <p className="text-sm opacity-50 ">
             {completed ? "Completed On: " : "Last Updated: "}

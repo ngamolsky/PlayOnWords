@@ -500,12 +500,16 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       } else {
         const nextClue = puzzle.clues[orientation][currentClueIndex + 1];
         const firstClueKey = [nextClue.x, nextClue.y].toString();
-        const newSelectedCellKey = getNextEmptyCellKey(
-          firstClueKey,
-          puzzle,
-          boardState,
-          orientation
-        )[0];
+        const firstCell = boardState[firstClueKey];
+
+        const newSelectedCellKey = firstCell.currentLetter
+          ? getNextEmptyCellKey(
+              firstClueKey,
+              puzzle,
+              boardState,
+              orientation
+            )[0]
+          : firstClueKey;
 
         newState = _selectCell(newState, newSelectedCellKey);
       }

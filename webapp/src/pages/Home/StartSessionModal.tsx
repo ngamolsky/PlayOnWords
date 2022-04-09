@@ -111,8 +111,8 @@ const InProgressTab = (
           {loadingMessage}
         </div>
       ) : (
-        <div className="h-full space-y-4">
-          <p className="mt-2 text-lg text-ellipsis">
+        <div className="flex flex-col h-full space-y-4">
+          <p className="text-lg text-ellipsis">
             {toXWordDate(puzzle.puzzleTimestamp.toDate())}
           </p>
           {sessions && sessions.length > 0 ? (
@@ -126,7 +126,7 @@ const InProgressTab = (
               />
             ))
           ) : (
-            <div className="flex w-full h-full">
+            <div className="flex grow">
               <p className="mx-auto my-auto">No Active Sessions</p>
             </div>
           )}
@@ -149,14 +149,14 @@ const CompletedTab = (
   );
 
   return (
-    <div className="h-full py-4">
+    <div className="h-full py-4 space-y-4">
       {loadingMessage ? (
         <div className="flex items-center justify-center min-w-full min-h-full grow motion-safe:animate-pulse-fast">
           {loadingMessage}
         </div>
       ) : (
-        <div className="h-full space-y-4">
-          <p className="mt-2 text-lg text-ellipsis">
+        <div className="flex flex-col h-full">
+          <p className="text-lg text-ellipsis">
             {toXWordDate(puzzle.puzzleTimestamp.toDate())}
           </p>
           {sessions && sessions.length > 0 ? (
@@ -170,7 +170,7 @@ const CompletedTab = (
               />
             ))
           ) : (
-            <div className="flex w-full h-full">
+            <div className="flex grow">
               <p className="mx-auto my-auto">No Completed Sessions</p>
             </div>
           )}

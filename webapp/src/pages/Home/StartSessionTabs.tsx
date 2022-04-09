@@ -37,7 +37,7 @@ const StartSessionTabs = ({ tabArray }: { tabArray: ReactNode[] }) => {
           Completed
         </Tab>
       </Tab.List>
-      <Tab.Panels className="h-full">
+      <Tab.Panels className="h-full overflow-auto">
         {tabArray.map((tabContent, index) => (
           <Tab.Panel key={index} className="h-full">
             {tabContent}

@@ -14,9 +14,13 @@ const LATEST_PUZZLE_DATA_BASE_URL =
   "https://www.nytimes.com/svc/crosswords/v2/puzzle/";
 
 export const XWordScraper: HttpFunction = async (_, response) => {
-  try {
-    console.log("Starting XWordScraper function");
+  console.log("Starting XWordScraper function");
 
+  await copyNYTPuzzle(_, response);
+};
+
+const copyNYTPuzzle: HttpFunction = async (_, response) => {
+  try {
     let puzzleID: number;
     if (process.env.OVERWRITE_PUZZLE_ID) {
       puzzleID = parseInt(process.env.OVERWRITE_PUZZLE_ID);

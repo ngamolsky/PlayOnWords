@@ -40,6 +40,26 @@ export const addPuzzle = async (puzzle: Puzzle): Promise<boolean> => {
   return true;
 };
 
+export const updatePuzzle = async (
+  puzzleID: string,
+  fieldName: string,
+  fieldValue: any
+): Promise<boolean> => {
+  const update: Record<string, any> = {};
+
+  update[fieldName] = fieldValue;
+  await db
+    .collection(PUZZLES_COLLECTION)
+    .withConverter(puzzleConverter)
+    .doc(puzzleID)
+    .update(update);
+
+  console.log(
+    `Update puzzle to db with id: ${puzzleID}, with fieldName: ${fieldName} and fieldValue: ${fieldValue}`
+  );
+  return true;
+};
+
 export const deletePuzzle = async (puzzleID: string): Promise<boolean> => {
   await db
     .collection(PUZZLES_COLLECTION)
@@ -94,6 +114,31 @@ export const getPuzzleByNYTPuzzleID = async (
   }
 
   return puzzle;
+};
+
+export const loadAllPuzzles = async (
+  puzzleCallback?: (puzzle: Puzzle) => Promise<void>
+): Promise<Puzzle[]> => {
+  const puzzles: Puzzle[] = [];
+  const results = (
+    await db
+      .collection("puzzles")
+      .withConverter(puzzleConverter)
+      .orderBy("puzzleTimestamp")
+      .get()
+  ).docs;
+
+  results.map(async (each) => {
+    const puzzle = each.data();
+
+    if (puzzleCallback) {
+      puzzleCallback(puzzle);
+    }
+
+    puzzles.push(puzzle);
+  });
+
+  return puzzles;
 };
 
 export const puzzleConverter = {

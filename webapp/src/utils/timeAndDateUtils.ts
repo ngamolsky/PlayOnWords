@@ -1,4 +1,4 @@
-const DAYS = [
+export const DAYS = [
   "Sunday",
   "Monday",
   "Tuesday",
@@ -28,7 +28,6 @@ export const toXWordDate = (date: Date): string => {
   } ${date.getUTCDate()}`;
 };
 
-
 export const toXWordTime = (date: Date): string => {
   return `${DAYS[date.getDay()]}, ${
     MONTHS[date.getMonth()]
@@ -36,7 +35,6 @@ export const toXWordTime = (date: Date): string => {
     date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()
   }`;
 };
-
 
 export const secondsToTimeString = (seconds: number): string => {
   const durationDate = new Date(seconds * 1000);

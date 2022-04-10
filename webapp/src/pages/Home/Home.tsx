@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { XWordContainer } from "../../components/XWordContainer";
 import { useHistory } from "react-router-dom";
 import {
   Puzzle,
+  usePuzzleByTimesamp,
   usePuzzlesByDayOfWeek,
   useRecentPuzzles,
 } from "../../models/Puzzle";
@@ -11,31 +12,33 @@ import Avatar from "../../components/Avatar";
 import { PuzzleCard } from "./PuzzleCard";
 import StartSessionModal from "./StartSessionModal";
 import Tabs from "../../components/Tabs";
-import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../../constants";
+import {
+  FIRST_PUZZLE_DATE,
+  NUM_PUZZLES_TO_SHOW_ON_HOME,
+} from "../../constants";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { DAYS } from "../../utils/timeAndDateUtils";
+import Modal from "../../components/Modal";
+import { Timestamp } from "firebase/firestore";
 
 const Home: React.FC = () => {
   const history = useHistory();
-
-  const [puzzles, puzzleLoadingMessage] = useRecentPuzzles(
-    NUM_PUZZLES_TO_SHOW_ON_HOME
-  );
 
   const [sessionLoading, setSessionLoading] = useState<boolean>(false);
   const [modalShowing, setModalShowing] = useState<boolean>(false);
   const [selectedPuzzle, setSelectedPuzzle] = useState<Puzzle>();
 
-  const user = useLoggedInUser();
+  useEffect(() => {
+    setModalShowing(!!selectedPuzzle);
+  }, [selectedPuzzle]);
 
-  const loadingMessage = sessionLoading
-    ? "Starting your session..."
-    : puzzleLoadingMessage
-    ? puzzleLoadingMessage
-    : undefined;
+  const user = useLoggedInUser();
 
   return (
     <XWordContainer
       showToolbar
-      loadingMessage={loadingMessage}
+      loadingMessage={sessionLoading ? "Loading your session..." : undefined}
       toolbarChildren={
         <Avatar
           user={user}
@@ -51,7 +54,11 @@ const Home: React.FC = () => {
           selectedPuzzle={selectedPuzzle}
           user={user}
           setSessionLoading={setSessionLoading}
-          setModalShowing={setModalShowing}
+          setModalShowing={(isOpen) => {
+            if (!isOpen) {
+              setSelectedPuzzle(undefined);
+            }
+          }}
           setSessionID={(sessionID) => {
             history.push(`/solve/${sessionID}`);
           }}
@@ -60,58 +67,16 @@ const Home: React.FC = () => {
       <Tabs
         tabArray={[
           {
-            title: "Recent Puzzles",
-            content: (
-              <div className="flex flex-col">
-                {puzzles &&
-                  puzzles.map((puzzle) => (
-                    <PuzzleCard
-                      key={puzzle.puzzleID}
-                      puzzle={puzzle}
-                      onClick={async () => {
-                        setSelectedPuzzle(puzzle);
-                        setModalShowing(true);
-                      }}
-                    />
-                  ))}
-              </div>
-            ),
+            title: "Recent",
+            content: RecentPuzzlesTab(setSelectedPuzzle),
           },
           {
-            title: "Puzzles By Day Of Week",
-            content: (
-              <div className="flex flex-col">
-                {puzzles &&
-                  puzzles.map((puzzle) => (
-                    <PuzzleCard
-                      key={puzzle.puzzleID}
-                      puzzle={puzzle}
-                      onClick={async () => {
-                        setSelectedPuzzle(puzzle);
-                        setModalShowing(true);
-                      }}
-                    />
-                  ))}
-              </div>
-            ),
+            title: "By Day Of Week",
+            content: PuzzlesByDayOfWeek(setSelectedPuzzle),
           },
           {
-            title: "Puzzles By Date",
-            content: (
-              <div className="flex flex-col">
-                {puzzles &&
-                  puzzles.map((puzzle) => (
-                    <PuzzleCard
-                      key={puzzle.puzzleID}
-                      puzzle={puzzle}
-                      onClick={async () => {
-                        setSelectedPuzzle(puzzle);
-                        setModalShowing(true);
-                      }}
-                    />
-                  ))}
-              </div>
-            ),
+            title: "By Date",
+            content: PuzzleByDate(setSelectedPuzzle),
           },
         ]}
       />
@@ -119,4 +84,112 @@ const Home: React.FC = () => {
   );
 };
 
+const RecentPuzzlesTab = (
+  setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>
+) => {
+  const [puzzles, puzzleLoadingMessage] = useRecentPuzzles(
+    NUM_PUZZLES_TO_SHOW_ON_HOME
+  );
+
+  return (
+    <XWordContainer loadingMessage={puzzleLoadingMessage}>
+      {puzzles &&
+        puzzles.map((puzzle) => (
+          <PuzzleCard
+            key={puzzle.puzzleID}
+            puzzle={puzzle}
+            onClick={async () => {
+              setSelectedPuzzle(puzzle);
+            }}
+          />
+        ))}
+    </XWordContainer>
+  );
+};
+
+const PuzzlesByDayOfWeek = (
+  setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>
+) => {
+  const [dayOfWeek, setDayOfWeek] = useState<number>();
+  const [puzzles] = usePuzzlesByDayOfWeek(dayOfWeek);
+
+  return (
+    <XWordContainer className="p-4 justify-evenly">
+      {DAYS.map((day, index) => (
+        <button
+          key={index}
+          className="p-4 text-lg text-center rounded-md dark:bg-slate-700"
+          onClick={() => {
+            setDayOfWeek(index);
+          }}
+        >
+          {day}
+        </button>
+      ))}
+      {puzzles && puzzles.length > 0 && (
+        <Modal
+          className="h-full"
+          isOpen={dayOfWeek != undefined}
+          setIsOpen={(isOpen) => {
+            if (!isOpen) {
+              setDayOfWeek(undefined);
+            }
+          }}
+        >
+          <div className="flex flex-col h-full overflow-auto grow">
+            {puzzles.map((puzzle) => (
+              <PuzzleCard
+                key={puzzle.puzzleID}
+                puzzle={puzzle}
+                onClick={async () => {
+                  setSelectedPuzzle(puzzle);
+                }}
+              />
+            ))}
+          </div>
+        </Modal>
+      )}
+    </XWordContainer>
+  );
+};
+
+const PuzzleByDate = (
+  setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>
+) => {
+  const [date, setDate] = useState<Date>();
+
+  const puzzleTimestamp = date
+    ? Timestamp.fromMillis(
+        date.getTime() - date.getTimezoneOffset() * 60 * 1000
+      )
+    : undefined;
+
+  const [puzzle] = usePuzzleByTimesamp(puzzleTimestamp);
+
+  return (
+    <XWordContainer>
+      <DatePicker
+        placeholderText="Click here to pick a date"
+        className="w-full p-4 grow dark:bg-slate-600 bg-slate-100"
+        selected={date}
+        onChange={(date) => {
+          if (date) {
+            setDate(date);
+          }
+        }}
+        minDate={FIRST_PUZZLE_DATE}
+        maxDate={new Date()}
+      />
+      {puzzle && (
+        <PuzzleCard
+          key={puzzle.puzzleID}
+          puzzle={puzzle}
+          onClick={() => {
+            setSelectedPuzzle(puzzle);
+          }}
+        />
+      )}
+    </XWordContainer>
+  );
+};
 export default Home;

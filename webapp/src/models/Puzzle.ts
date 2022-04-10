@@ -10,7 +10,7 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../config/firebase";
-import { PUZZLES_COLLECTION } from "../constants";
+import { NUM_PUZZLES_TO_SHOW_ON_HOME, PUZZLES_COLLECTION } from "../constants";
 
 export type Puzzle = {
   puzzleID: string;
@@ -38,8 +38,8 @@ export type Clue = {
 
 export type Solutions = Record<string, string | null | string[]>;
 
-export const usePuzzleByDate = (
-  date: Date
+export const usePuzzleByTimesamp = (
+  timestamp: Timestamp | undefined
 ): [Puzzle | undefined, string | undefined] => {
   const [puzzleState, setPuzzleState] = useState<{
     puzzle?: Puzzle;
@@ -49,38 +49,40 @@ export const usePuzzleByDate = (
   });
 
   useEffect(() => {
-    const q = query(
-      collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
-      where("puzzleTimestamp", "==", Timestamp.fromDate(date))
-    );
+    if (timestamp) {
+      const q = query(
+        collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
+        where("puzzleTimestamp", "==", timestamp)
+      );
 
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      const puzzles: Puzzle[] = [];
-      querySnapshot.forEach((doc) => {
-        puzzles.push(doc.data());
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        const puzzles: Puzzle[] = [];
+        querySnapshot.forEach((doc) => {
+          puzzles.push(doc.data());
+        });
+
+        if (puzzles.length !== 1) {
+          throw new Error(
+            `Found more than one puzzle for date: ${JSON.stringify(
+              timestamp.toDate()
+            )}, puzzles ${puzzles.map((puzzle) => puzzle.puzzleID)}`
+          );
+        }
+
+        setPuzzleState({
+          puzzle: puzzles[0],
+          loadingMessage: undefined,
+        });
       });
-
-      if (puzzles.length !== 1) {
-        throw new Error(
-          `Found more than one puzzle for date: ${JSON.stringify(
-            date
-          )}, puzzles ${puzzles.map((puzzle) => puzzle.puzzleID)}`
-        );
-      }
-
-      setPuzzleState({
-        puzzle: puzzles[0],
-        loadingMessage: undefined,
-      });
-    });
-    return unsub;
-  }, [date]);
+      return unsub;
+    }
+  }, [timestamp]);
 
   return [puzzleState.puzzle, puzzleState.loadingMessage];
 };
 
 export const usePuzzlesByDayOfWeek = (
-  dayOfWeek: number
+  dayOfWeek: number | undefined
 ): [Puzzle[] | undefined, string | undefined] => {
   const [puzzleState, setPuzzleState] = useState<{
     puzzles: Puzzle[];
@@ -91,24 +93,26 @@ export const usePuzzlesByDayOfWeek = (
   });
 
   useEffect(() => {
-    const q = query(
-      collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
-      where("dayOfWeek", "==", dayOfWeek),
-      orderBy("puzzleTimestamp", "desc")
-    );
+    if (dayOfWeek != undefined) {
+      const q = query(
+        collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
+        where("dayOfWeek", "==", dayOfWeek),
+        orderBy("puzzleTimestamp", "desc")
+      );
 
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      const puzzles: Puzzle[] = [];
-      querySnapshot.forEach((doc) => {
-        puzzles.push(doc.data());
-      });
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        const puzzles: Puzzle[] = [];
+        querySnapshot.forEach((doc) => {
+          puzzles.push(doc.data());
+        });
 
-      setPuzzleState({
-        puzzles,
-        loadingMessage: undefined,
+        setPuzzleState({
+          puzzles,
+          loadingMessage: undefined,
+        });
       });
-    });
-    return unsub;
+      return unsub;
+    }
   }, [dayOfWeek]);
 
   return [puzzleState.puzzles, puzzleState.loadingMessage];
@@ -129,7 +133,7 @@ export const useRecentPuzzles = (
     const q = query(
       collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
       orderBy("puzzleTimestamp", "desc"),
-      limit(numPuzzles)
+      limit(NUM_PUZZLES_TO_SHOW_ON_HOME)
     );
 
     const unsub = onSnapshot(q, (querySnapshot) => {

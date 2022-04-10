@@ -149,13 +149,13 @@ const CompletedTab = (
   );
 
   return (
-    <div className="h-full py-4 space-y-4">
+    <div className="h-full py-4 ">
       {loadingMessage ? (
         <div className="flex items-center justify-center min-w-full min-h-full grow motion-safe:animate-pulse-fast">
           {loadingMessage}
         </div>
       ) : (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full space-y-4">
           <p className="text-lg text-ellipsis">
             {toXWordDate(puzzle.puzzleTimestamp.toDate())}
           </p>

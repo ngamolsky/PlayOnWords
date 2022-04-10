@@ -21,6 +21,8 @@ const Modal = ({
         as="div"
         className="fixed inset-0 z-10 p-8"
         onClose={() => {
+          console.log("Closing modal");
+          
           setIsOpen(false);
         }}
       >

@@ -16,7 +16,7 @@ export enum PuzzleCardAction {
 
 export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
   return (
-    <div
+    <button
       className="m-4 mx-auto p-4 w-4/5 text-left 
                 dark:bg-slate-900 rounded-lg
                 active:scale-[1.01] outline-none select-none cursor-pointer"
@@ -27,6 +27,6 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
         {toXWordDate(puzzle.puzzleTimestamp.toDate())}
       </p>
       <p className="ml-1 opacity-50">New York Times</p>
-    </div>
+    </button>
   );
 };

@@ -9,8 +9,8 @@ const Tabs = ({
   return (
     <Tab.Group>
       <Tab.List
-        className={`w-full rounded-md 
-           bg-slate-600/20 flex justify-around outline-none`}
+        className={`w-full 
+           flex justify-around outline-none`}
         tabIndex={0}
       >
         {tabArray.map((tab, index) => (
@@ -18,17 +18,19 @@ const Tabs = ({
             key={index}
             className={({ selected }) =>
               `${
-                selected ? "bg-slate-600/70" : "bg-slate-600/20"
-              } grow justify-around p-4 rounded-l-md`
+                selected
+                  ? "dark:bg-slate-600 bg-slate-300"
+                  : "dark:bg-slate-700 bg-slate-200"
+              } grow justify-around p-4 outline-none`
             }
           >
             {tab.title}
           </Tab>
         ))}
       </Tab.List>
-      <Tab.Panels className="h-full">
+      <Tab.Panels className="flex flex-col h-full overflow-auto grow">
         {tabArray.map((tab, index) => (
-          <Tab.Panel key={index} className="h-full">
+          <Tab.Panel key={index} className="flex flex-col h-full grow">
             {tab.content}
           </Tab.Panel>
         ))}

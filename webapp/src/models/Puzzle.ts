@@ -52,7 +52,8 @@ export const usePuzzleByTimesamp = (
     if (timestamp) {
       const q = query(
         collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
-        where("puzzleTimestamp", "==", timestamp)
+        where("puzzleTimestamp", "==", timestamp),
+        limit(NUM_PUZZLES_TO_SHOW_ON_HOME)
       );
 
       const unsub = onSnapshot(q, (querySnapshot) => {

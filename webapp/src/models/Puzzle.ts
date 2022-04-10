@@ -98,7 +98,8 @@ export const usePuzzlesByDayOfWeek = (
       const q = query(
         collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
         where("dayOfWeek", "==", dayOfWeek),
-        orderBy("puzzleTimestamp", "desc")
+        orderBy("puzzleTimestamp", "desc"),
+        limit(NUM_PUZZLES_TO_SHOW_ON_HOME)
       );
 
       const unsub = onSnapshot(q, (querySnapshot) => {

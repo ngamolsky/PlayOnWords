@@ -38,8 +38,8 @@ export type Clue = {
 
 export type Solutions = Record<string, string | null | string[]>;
 
-export const usePuzzleByTimesamp = (
-  timestamp: Timestamp | undefined
+export const usePuzzleByDate = (
+  date: Date | undefined
 ): [Puzzle | undefined, string | undefined] => {
   const [puzzleState, setPuzzleState] = useState<{
     puzzle?: Puzzle;
@@ -49,10 +49,16 @@ export const usePuzzleByTimesamp = (
   });
 
   useEffect(() => {
-    if (timestamp) {
+    if (date) {
+      const puzzleTimestamp = date
+        ? Timestamp.fromMillis(
+            date.getTime() - date.getTimezoneOffset() * 60 * 1000
+          )
+        : undefined;
+
       const q = query(
         collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
-        where("puzzleTimestamp", "==", timestamp),
+        where("puzzleTimestamp", "==", puzzleTimestamp),
         limit(NUM_PUZZLES_TO_SHOW_ON_HOME)
       );
 
@@ -65,7 +71,7 @@ export const usePuzzleByTimesamp = (
         if (puzzles.length !== 1) {
           throw new Error(
             `Found more than one puzzle for date: ${JSON.stringify(
-              timestamp.toDate()
+              date
             )}, puzzles ${puzzles.map((puzzle) => puzzle.puzzleID)}`
           );
         }
@@ -77,7 +83,7 @@ export const usePuzzleByTimesamp = (
       });
       return unsub;
     }
-  }, [timestamp]);
+  }, [date]);
 
   return [puzzleState.puzzle, puzzleState.loadingMessage];
 };

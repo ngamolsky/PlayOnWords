@@ -3,7 +3,7 @@ import { XWordContainer } from "../../components/XWordContainer";
 import { useHistory } from "react-router-dom";
 import {
   Puzzle,
-  usePuzzleByTimesamp,
+  usePuzzleByDate,
   usePuzzlesByDayOfWeek,
   useRecentPuzzles,
 } from "../../models/Puzzle";
@@ -17,10 +17,9 @@ import {
   NUM_PUZZLES_TO_SHOW_ON_HOME,
 } from "../../constants";
 import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { DAYS } from "../../utils/timeAndDateUtils";
 import Modal from "../../components/Modal";
-import { Timestamp } from "firebase/firestore";
+import "react-datepicker/dist/react-datepicker.css";
 
 const Home: React.FC = () => {
   const history = useHistory();
@@ -157,14 +156,7 @@ const PuzzleByDate = (
   setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>
 ) => {
   const [date, setDate] = useState<Date>();
-
-  const puzzleTimestamp = date
-    ? Timestamp.fromMillis(
-        date.getTime() - date.getTimezoneOffset() * 60 * 1000
-      )
-    : undefined;
-
-  const [puzzle] = usePuzzleByTimesamp(puzzleTimestamp);
+  const [puzzle] = usePuzzleByDate(date);
 
   return (
     <XWordContainer>

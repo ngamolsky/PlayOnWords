@@ -13,6 +13,7 @@ import { ClueSelector } from "../../components/mobile/ClueSelector";
 import {
   getClueFromCellKeyOrientationAndPuzzle,
   getCombinedBoardState,
+  getPercentageComplete,
   isUserInSession,
 } from "../../utils/sessionUtils";
 import { useLoggedInUser } from "../../models/User";
@@ -65,10 +66,13 @@ const Solve: React.FC = () => {
   }, [user, session]);
 
   useEffect(() => {
-    if (session?.sessionStatus == SessionStatus.COMPLETE) {
+    if (
+      session &&
+      getPercentageComplete(session.boardState, session.puzzle.solutions) == 100
+    ) {
       setEndSessionModalOpen(true);
     }
-  }, [session?.sessionStatus]);
+  }, [session]);
 
   if (!session) {
     return <XWordContainer loadingMessage={loadingMessage} showToolbar />;

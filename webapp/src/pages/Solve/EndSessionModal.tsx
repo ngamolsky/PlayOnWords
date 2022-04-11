@@ -18,7 +18,7 @@ const EndSessionModal: React.FC<EndSessionModalProps> = ({
 }) => {
   const isCorrect = checkPuzzle(session.boardState, session.puzzle.solutions);
 
-  return isCorrect ? (
+  return session.endTime && isCorrect ? (
     <SessionCompleteModal session={session} setIsOpen={setIsOpen} />
   ) : (
     <IncorrectModal setIsOpen={setIsOpen} />

@@ -129,7 +129,11 @@ export const getNextEmptyCellKey = (
   puzzle: Puzzle,
   boardState: BoardState,
   orientation: OrientationType
-): [string, boolean] => {
+): [string | null, boolean] => {
+  if (getPercentageComplete(boardState, puzzle.solutions) == 100) {
+    return [null, false];
+  }
+
   let nextCellKey = getNextCellKey(currentCellKey, puzzle, orientation)[0];
   let didCycle = getNextCellKey(currentCellKey, puzzle, orientation)[1];
   while (nextCellKey && boardState[nextCellKey].currentLetter) {

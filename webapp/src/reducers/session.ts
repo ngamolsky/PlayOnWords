@@ -26,6 +26,8 @@ import {
   checkPuzzle,
   getNextEmptyCellKey,
   isLastCellInClue,
+  getNextClue,
+  getPreviousClue,
 } from "../utils/sessionUtils";
 
 // #region State
@@ -270,14 +272,16 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       const firstCell = nextSession.boardState[FIRST_CELL_KEY];
 
-      const firstSelectedKey = firstCell.currentLetter
-        ? getNextEmptyCellKey(
-            FIRST_CELL_KEY,
-            nextSession.puzzle,
-            nextSession.boardState,
-            OrientationType.HORIZONTAL
-          )[0]
-        : FIRST_CELL_KEY;
+      const emptyCellKey = getNextEmptyCellKey(
+        FIRST_CELL_KEY,
+        nextSession.puzzle,
+        nextSession.boardState,
+        OrientationType.HORIZONTAL
+      )[0];
+      const firstSelectedKey =
+        !firstCell.currentLetter || !emptyCellKey
+          ? FIRST_CELL_KEY
+          : emptyCellKey;
 
       return {
         ...state,
@@ -290,44 +294,53 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       };
     }
     case SessionActionTypes.SET_SHARED_STATE: {
-      const oldSession = _requireSession(session);
       const { session: nextSession } = action;
       const { boardState, puzzle, sessionStatus } = nextSession;
 
-      const boardStateDifference = diff(
-        oldSession.boardState,
-        nextSession.boardState
-      );
+      if (session) {
+        const oldSession = { ...session };
+        const boardStateDifference = diff(
+          oldSession.boardState,
+          nextSession.boardState
+        );
 
-      const newBoardState = { ...boardState };
+        const newBoardState = { ...boardState };
 
-      Object.entries(boardStateDifference).forEach(([cellKey, difference]) => {
-        newBoardState[cellKey] = {
-          ...newBoardState[cellKey],
-          currentLetter: difference.currentLetter,
+        Object.entries(boardStateDifference).forEach(
+          ([cellKey, difference]) => {
+            newBoardState[cellKey] = {
+              ...newBoardState[cellKey],
+              currentLetter: difference.currentLetter,
+            };
+          }
+        );
+
+        const percentComplete = getPercentageComplete(
+          newBoardState,
+          puzzle.solutions
+        );
+        if (
+          percentComplete == 100 &&
+          sessionStatus !== SessionStatus.COMPLETE &&
+          checkPuzzle(newBoardState, puzzle.solutions)
+        ) {
+          _updateSessionStatus(nextSession.sessionID, SessionStatus.COMPLETE);
+        }
+
+        return {
+          ...state,
+          session: {
+            ...nextSession,
+            boardState: newBoardState,
+          },
+          loadingMessage: undefined,
         };
-      });
-
-      const percentComplete = getPercentageComplete(
-        newBoardState,
-        puzzle.solutions
-      );
-      if (
-        percentComplete == 100 &&
-        sessionStatus !== SessionStatus.COMPLETE &&
-        checkPuzzle(newBoardState, puzzle.solutions)
-      ) {
-        _updateSessionStatus(nextSession.sessionID, SessionStatus.COMPLETE);
+      } else {
+        return {
+          ...state,
+          session: nextSession,
+        };
       }
-
-      return {
-        ...state,
-        session: {
-          ...nextSession,
-          boardState: newBoardState,
-        },
-        loadingMessage: undefined,
-      };
     }
     case SessionActionTypes.SET_SESSION_LOADING: {
       const { sessionLoading } = action;
@@ -378,6 +391,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       const newBoardState = { ...boardState };
 
+      console.log("LETTER PRESSED before update", sessionStatus);
+
       if (sessionStatus != SessionStatus.COMPLETE) {
         const newCell: CellState = {
           solutionState: autocheck
@@ -391,23 +406,31 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         newBoardState[selectedCellKey] = newCell;
       }
 
+      console.log("LETTER PRESSED after update", sessionStatus);
+
       const currentCellFull = !!newBoardState[selectedCellKey].currentLetter;
       const currentClue = getClueFromCellKeyOrientationAndPuzzle(
         selectedCellKey,
         newOrientation,
         puzzle
       );
+
+      const nextEmptyCellKey = getNextEmptyCellKey(
+        selectedCellKey,
+        puzzle,
+        newBoardState,
+        newOrientation
+      )[0];
+
       const nextCellKey = rebus
         ? selectedCellKey
-        : currentCellFull &&
-          !isLastCellInClue(selectedCellKey, currentClue, newOrientation)
+        : (currentCellFull &&
+            !isLastCellInClue(selectedCellKey, currentClue, newOrientation)) ||
+          !nextEmptyCellKey
         ? getNextCellKey(selectedCellKey, puzzle, newOrientation)[0]
-        : getNextEmptyCellKey(
-            selectedCellKey,
-            puzzle,
-            newBoardState,
-            newOrientation
-          )[0];
+        : nextEmptyCellKey;
+
+      console.log(nextCellKey);
 
       return _selectCell(newState, nextCellKey);
     }
@@ -472,7 +495,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     }
     case SessionActionTypes.NEXT_CLUE: {
       const newSession = _requireSession(session);
-      const { boardState, puzzle } = newSession;
+      const { puzzle } = newSession;
 
       const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
         selectedCellKey,
@@ -480,41 +503,19 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         puzzle
       );
 
-      const currentClueIndex = puzzle.clues[orientation].findIndex(
-        (clue) => clue == currentSelectedClue
+      let newState = { ...state };
+
+      const [nextClue, didCycle] = getNextClue(
+        puzzle,
+        currentSelectedClue,
+        orientation
       );
 
-      const isLastClue =
-        currentClueIndex == puzzle.clues[orientation].length - 1;
-
-      let newState = { ...state };
-      if (isLastClue) {
-        const firstSelectedKey = getNextEmptyCellKey(
-          FIRST_CELL_KEY,
-          newSession.puzzle,
-          newSession.boardState,
-          OrientationType.HORIZONTAL
-        )[0];
+      if (didCycle) {
         newState = _toggleOrientation(newState);
-        newState = _selectCell(newState, firstSelectedKey);
-      } else {
-        const nextClue = puzzle.clues[orientation][currentClueIndex + 1];
-        const firstClueKey = [nextClue.x, nextClue.y].toString();
-        const firstCell = boardState[firstClueKey];
-
-        const newSelectedCellKey = firstCell.currentLetter
-          ? getNextEmptyCellKey(
-              firstClueKey,
-              puzzle,
-              boardState,
-              orientation
-            )[0]
-          : firstClueKey;
-
-        newState = _selectCell(newState, newSelectedCellKey);
       }
 
-      return newState;
+      return _selectCell(newState, [nextClue.x, nextClue.y].toString());
     }
     case SessionActionTypes.PREVIOUS_CLUE: {
       const { puzzle } = _requireSession(session);
@@ -525,36 +526,19 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         puzzle
       );
 
-      const currentClueIndex = puzzle.clues[orientation].findIndex(
-        (clue) => clue == currentSelectedClue
+      let newState = { ...state };
+
+      const [nextClue, didCycle] = getPreviousClue(
+        puzzle,
+        currentSelectedClue,
+        orientation
       );
 
-      const isFirstClue = currentClueIndex == 0;
-      let newState: SessionState = state;
-      if (isFirstClue) {
+      if (didCycle) {
         newState = _toggleOrientation(newState);
-
-        const lastClue =
-          puzzle.clues[newState.localState.orientation][
-            puzzle.clues[newState.localState.orientation].length - 1
-          ];
-        const newSelectedCellKey = getCellKeysForClueAndOrientation(
-          lastClue,
-          orientation
-        )[0];
-
-        newState = _selectCell(newState, newSelectedCellKey);
-      } else {
-        const nextClue = puzzle.clues[orientation][currentClueIndex - 1];
-        const newSelectedCellKey = getCellKeysForClueAndOrientation(
-          nextClue,
-          orientation
-        )[0];
-
-        newState = _selectCell(newState, newSelectedCellKey);
       }
 
-      return newState;
+      return _selectCell(newState, [nextClue.x, nextClue.y].toString());
     }
     case SessionActionTypes.RIGHT_KEY: {
       const { puzzle } = _requireSession(session);
@@ -613,6 +597,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       let newState = state;
       if (rebus) {
         const session = _requireSession(state.session);
+
         const nextCellKey = getNextEmptyCellKey(
           selectedCellKey,
           session.puzzle,
@@ -620,7 +605,10 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           orientation
         )[0];
 
-        newState = _selectCell(state, nextCellKey);
+        newState = _selectCell(
+          state,
+          nextCellKey ? nextCellKey : selectedCellKey
+        );
       }
 
       return _toggleRebus(newState);

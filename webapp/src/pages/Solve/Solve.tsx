@@ -2,11 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { XWordContainer } from "../../components/XWordContainer";
-import {
-  CellSolutionState,
-  SessionStatus,
-  useSessionState,
-} from "../../models/Session";
+import { CellSolutionState, useSessionState } from "../../models/Session";
 import { XBoard } from "../../components/XBoard/XBoard";
 import { ACTION_KEYS, Keyboard } from "../../components/mobile/Keyboard";
 import { ClueSelector } from "../../components/mobile/ClueSelector";

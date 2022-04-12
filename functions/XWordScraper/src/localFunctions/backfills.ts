@@ -15,9 +15,9 @@ export const backfillPuzzleDayOfWeek = async (): Promise<Puzzle[]> => {
 export const backfillPuzzlesUsingNewAPI = async (): Promise<string[]> => {
   const nytPuzzles = await getRecentNYTPuzzles(365);
   const puzzledIDs: string[] = [];
-  nytPuzzles.forEach(async (nytPuzzle) => {
+  for (const nytPuzzle of nytPuzzles) {
     const puzzleID = await copyNYTPuzzle(nytPuzzle.puzzle_id);
     puzzledIDs.push(puzzleID);
-  });
+  }
   return puzzledIDs;
 };

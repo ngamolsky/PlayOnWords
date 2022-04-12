@@ -26,6 +26,8 @@ import {
   getNextClue,
   getPreviousClue,
   isPuzzleComplete,
+  getCellCoordinatesFromKey,
+  getSizeFromCellKeys,
 } from "../utils/sessionUtils";
 
 // #region State
@@ -514,34 +516,51 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         puzzle
       );
 
-      const { previousClue } = getPreviousClue(
+      const { previousClue, didLoopPuzzle } = getPreviousClue(
         puzzle,
         currentSelectedClue,
         orientation
       );
 
-      const { nextEmptyCellKey, didLoopPuzzle } = getNextEmptyCellKey(
-        [previousClue.x, previousClue.y].toString(),
-        puzzle,
-        boardState,
-        orientation
-      );
       let newState = { ...state };
       if (didLoopPuzzle) {
         newState = _toggleOrientation(newState);
       }
 
-      return _selectCell(newState, nextEmptyCellKey);
+      const firstCellKeyInClue = [previousClue.x, previousClue.y].toString();
+      const isCellFull = !!boardState[firstCellKeyInClue].currentLetter;
+      const { nextEmptyCellKey } = getNextEmptyCellKey(
+        firstCellKeyInClue,
+        puzzle,
+        boardState,
+        newState.localState.orientation
+      );
+
+      return _selectCell(
+        newState,
+        isCellFull ? nextEmptyCellKey : firstCellKeyInClue
+      );
     }
     case SessionActionTypes.RIGHT_KEY: {
       const { puzzle } = _requireSession(session);
       if (orientation == OrientationType.VERTICAL) {
         return _toggleOrientation(state);
       } else {
-        return _selectCell(
-          state,
-          getNextCellKey(selectedCellKey, puzzle, orientation).nextCellKey
-        );
+        const { x, y } = getCellCoordinatesFromKey(selectedCellKey);
+        let nextCellKey = [x + 1, y].toString();
+
+        const isLastCellInRow =
+          getCellCoordinatesFromKey(selectedCellKey).x ==
+          getSizeFromCellKeys(Object.keys(puzzle.solutions)).width - 1;
+
+        if (isLastCellInRow) return state;
+
+        while (!puzzle.solutions[nextCellKey]) {
+          const { x: newX } = getCellCoordinatesFromKey(nextCellKey);
+          nextCellKey = [newX + 1, y].toString();
+        }
+
+        return _selectCell(state, nextCellKey);
       }
     }
     case SessionActionTypes.LEFT_KEY: {
@@ -549,23 +568,20 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       if (orientation == OrientationType.VERTICAL) {
         return _toggleOrientation(state);
       } else {
-        return _selectCell(
-          state,
-          getPreviousCellKey(selectedCellKey, puzzle, orientation)
-            .previousCellKey
-        );
-      }
-    }
-    case SessionActionTypes.UP_KEY: {
-      const { puzzle } = _requireSession(session);
-      if (orientation == OrientationType.HORIZONTAL) {
-        return _toggleOrientation(state);
-      } else {
-        return _selectCell(
-          state,
-          getPreviousCellKey(selectedCellKey, puzzle, orientation)
-            .previousCellKey
-        );
+        const { x, y } = getCellCoordinatesFromKey(selectedCellKey);
+        let previousCellKey = [x - 1, y].toString();
+
+        const isFirstCellInRow =
+          getCellCoordinatesFromKey(selectedCellKey).x == 0;
+
+        if (isFirstCellInRow) return state;
+
+        while (!puzzle.solutions[previousCellKey]) {
+          const { x: newX } = getCellCoordinatesFromKey(previousCellKey);
+          previousCellKey = [newX - 1, y].toString();
+        }
+
+        return _selectCell(state, previousCellKey);
       }
     }
     case SessionActionTypes.DOWN_KEY: {
@@ -573,10 +589,40 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       if (orientation == OrientationType.HORIZONTAL) {
         return _toggleOrientation(state);
       } else {
-        return _selectCell(
-          state,
-          getNextCellKey(selectedCellKey, puzzle, orientation).nextCellKey
-        );
+        const { x, y } = getCellCoordinatesFromKey(selectedCellKey);
+        let nextCellKey = [x, y + 1].toString();
+        const isLastCellInRow =
+          getCellCoordinatesFromKey(selectedCellKey).y ==
+          getSizeFromCellKeys(Object.keys(puzzle.solutions)).height - 1;
+
+        if (isLastCellInRow) return state;
+
+        while (!puzzle.solutions[nextCellKey]) {
+          const { y: newY } = getCellCoordinatesFromKey(nextCellKey);
+          nextCellKey = [x, newY + 1].toString();
+        }
+
+        return _selectCell(state, nextCellKey);
+      }
+    }
+    case SessionActionTypes.UP_KEY: {
+      const { puzzle } = _requireSession(session);
+      if (orientation == OrientationType.HORIZONTAL) {
+        return _toggleOrientation(state);
+      } else {
+        const { x, y } = getCellCoordinatesFromKey(selectedCellKey);
+        let previousCellKey = [x, y - 1].toString();
+        const isFirstCellInRow =
+          getCellCoordinatesFromKey(selectedCellKey).y == 0;
+
+        if (isFirstCellInRow) return state;
+
+        while (!puzzle.solutions[previousCellKey]) {
+          const { y: newY } = getCellCoordinatesFromKey(previousCellKey);
+          previousCellKey = [x, newY - 1].toString();
+        }
+
+        return _selectCell(state, previousCellKey);
       }
     }
     case SessionActionTypes.PENCIL_CLICKED: {
@@ -619,7 +665,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       if (!currentCellValue || !cellSolution) return state;
 
       const solutionState = _checkCell(cellSolution, currentCellValue);
-
 
       const newCell: CellState = {
         ...boardState[selectedCellKey],

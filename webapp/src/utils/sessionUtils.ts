@@ -127,12 +127,18 @@ export const getPreviousCellKey = (
       orientation
     );
 
+    const newOrientation = didLoopPuzzle
+      ? orientation == OrientationType.HORIZONTAL
+        ? OrientationType.VERTICAL
+        : OrientationType.HORIZONTAL
+      : orientation;
+
     const newX =
-      orientation == OrientationType.HORIZONTAL
+      newOrientation == OrientationType.HORIZONTAL
         ? previousClue.x + previousClue.length - 1
         : previousClue.x;
     const newY =
-      orientation == OrientationType.HORIZONTAL
+      newOrientation == OrientationType.HORIZONTAL
         ? previousClue.y
         : previousClue.y + previousClue.length - 1;
 
@@ -290,8 +296,8 @@ export const getPreviousClue = (
     return {
       previousClue:
         orientation == OrientationType.HORIZONTAL
-          ? clues.vertical[0]
-          : clues.horizontal[0],
+          ? clues.vertical[clues.vertical.length - 1]
+          : clues.horizontal[clues.horizontal.length - 1],
       didLoopPuzzle: true,
     };
 
@@ -391,11 +397,7 @@ export const getCombinedBoardState = (
       .concat(verticalClues)
       .filter((clue): clue is Clue => !!clue);
 
-    console.log(allClues, horizontalClues);
-
     allClues.forEach((clue) => {
-      console.log(getCellKeysForClueAndOrientation(clue, orientation));
-
       relatedCellKeys.push(
         ...getCellKeysForClueAndOrientation(clue, orientation)
       );

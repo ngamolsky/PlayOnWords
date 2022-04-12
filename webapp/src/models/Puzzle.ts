@@ -67,7 +67,6 @@ export const usePuzzleByDate = (
             date.getTime() - date.getTimezoneOffset() * 60 * 1000
           )
         : undefined;
-      console.log("usePuzzleByDate");
 
       const q = query(
         collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
@@ -114,8 +113,6 @@ export const usePuzzlesByDayOfWeek = (
 
   useEffect(() => {
     if (dayOfWeek != undefined) {
-      console.log("usePuzzlesByDayOfWeek");
-
       const q = query(
         collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
         where("dayOfWeek", "==", dayOfWeek),
@@ -163,7 +160,6 @@ export const useRecentPuzzles = (
       const puzzles: Puzzle[] = [];
       querySnapshot.forEach((doc) => {
         puzzles.push(doc.data());
-        console.log(doc.data().puzzleID);
       });
 
       setPuzzleState({

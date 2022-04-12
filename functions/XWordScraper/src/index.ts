@@ -15,18 +15,22 @@ const LATEST_PUZZLE_DATA_BASE_URL =
 
 export const XWordScraper: HttpFunction = async (_, response) => {
   console.log("Starting XWordScraper function");
-  let nytPuzzleID: number;
+  let nytPuzzleID: string;
   if (process.env.OVERWRITE_PUZZLE_ID) {
-    nytPuzzleID = parseInt(process.env.OVERWRITE_PUZZLE_ID);
+    nytPuzzleID = process.env.OVERWRITE_PUZZLE_ID;
+    console.log(
+      "Overwrite latest puzzle ID: ",
+      process.env.OVERWRITE_PUZZLE_ID
+    );
   } else {
     console.log("Loading latest puzzle metadata");
     const latestPuzzleMetadata = (await getRecentNYTPuzzles(2))[0];
 
     console.log(latestPuzzleMetadata);
-    nytPuzzleID = latestPuzzleMetadata.puzzle_id;
+    nytPuzzleID = latestPuzzleMetadata.puzzle_id.toString();
   }
 
-  const puzzleID = await copyNYTPuzzle(nytPuzzleID.toString());
+  const puzzleID = await copyNYTPuzzle(nytPuzzleID);
 
   response.send(puzzleID);
 };
@@ -39,10 +43,6 @@ export const copyNYTPuzzle = async (nytPuzzleID: string): Promise<string> => {
       process.env.REPLACE_EXISTING_PUZZLE === "true";
 
     console.log("Replace existing puzzle: ", replacePuzzleIfExists);
-    console.log(
-      "Overwrite latest puzzle ID: ",
-      process.env.OVERWRITE_PUZZLE_ID
-    );
 
     if (replacePuzzleIfExists && existingPuzzle) {
       console.log("Deleting existing puzzle", existingPuzzle.puzzleID);
@@ -107,10 +107,6 @@ export const loadPuzzleFromNYTPuzzle = async (latestPuzzleID: any) => {
   });
   return puzzle;
 };
-
-process.once("SIGUSR2", function () {
-  process.kill(process.pid, "SIGUSR2");
-});
 
 process.on("SIGINT", function () {
   process.kill(process.pid, "SIGINT");

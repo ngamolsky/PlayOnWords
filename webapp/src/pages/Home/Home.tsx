@@ -67,15 +67,17 @@ const Home: React.FC = () => {
         tabArray={[
           {
             title: "Recent",
-            content: RecentPuzzlesTab(setSelectedPuzzle),
+            content: <RecentPuzzlesTab setSelectedPuzzle={setSelectedPuzzle} />,
           },
           {
             title: "By Day Of Week",
-            content: PuzzlesByDayOfWeek(setSelectedPuzzle),
+            content: (
+              <PuzzlesByDayOfWeek setSelectedPuzzle={setSelectedPuzzle} />
+            ),
           },
           {
             title: "By Date",
-            content: PuzzleByDate(setSelectedPuzzle),
+            content: <PuzzleByDate setSelectedPuzzle={setSelectedPuzzle} />,
           },
         ]}
       />
@@ -83,9 +85,9 @@ const Home: React.FC = () => {
   );
 };
 
-const RecentPuzzlesTab = (
-  setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>
-) => {
+const RecentPuzzlesTab: React.FC<{
+  setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>;
+}> = ({ setSelectedPuzzle }) => {
   const [puzzles, puzzleLoadingMessage] = useRecentPuzzles(
     NUM_PUZZLES_TO_SHOW_ON_HOME
   );
@@ -106,9 +108,9 @@ const RecentPuzzlesTab = (
   );
 };
 
-const PuzzlesByDayOfWeek = (
-  setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>
-) => {
+const PuzzlesByDayOfWeek: React.FC<{
+  setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>;
+}> = ({ setSelectedPuzzle }) => {
   const [dayOfWeek, setDayOfWeek] = useState<number>();
   const [puzzles] = usePuzzlesByDayOfWeek(dayOfWeek);
 
@@ -152,9 +154,9 @@ const PuzzlesByDayOfWeek = (
   );
 };
 
-const PuzzleByDate = (
-  setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>
-) => {
+const PuzzleByDate: React.FC<{
+  setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>;
+}> = ({ setSelectedPuzzle }) => {
   const [date, setDate] = useState<Date>();
   const [puzzle] = usePuzzleByDate(date);
 

@@ -411,7 +411,10 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       _updateCellState(sessionID, selectedCellKey, newCell);
       newBoardState[selectedCellKey] = newCell;
 
-      return _selectCell(newState, nextSelectedCellKey);
+      return _selectCell(
+        newState,
+        rebus ? selectedCellKey : nextSelectedCellKey
+      );
     }
     case SessionActionTypes.BACKSPACE: {
       const { boardState, puzzle, sessionID } = _requireSession(session);
@@ -617,14 +620,13 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       const solutionState = _checkCell(cellSolution, currentCellValue);
 
-      console.log(boardState[selectedCellKey]);
 
       const newCell: CellState = {
         ...boardState[selectedCellKey],
         solutionState,
       };
 
-      _updateCellState(sessionID, selectedCellKey, newCell);
+      _updateCellState(sessionID, selectedCellKey, newCell, "lastEditedBy");
 
       return state;
     }
@@ -649,6 +651,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         if (!cellSolution || !cellLetter) return;
 
         const solutionState = _checkCell(cellSolution, cellLetter);
+        delete newBoardState[cellKey].lastEditedBy;
 
         newBoardState[cellKey] = {
           ...newBoardState[cellKey],
@@ -670,6 +673,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         if (!cellSolution || !cellLetter) return;
 
         const solutionState = _checkCell(cellSolution, cellLetter);
+        delete newBoardState[cellKey].lastEditedBy;
 
         newBoardState[cellKey] = {
           ...newBoardState[cellKey],
@@ -690,10 +694,10 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         ...boardState[selectedCellKey],
         solutionState: CellSolutionState.REVEALED,
         currentLetter: Array.isArray(cellSolution)
-          ? cellSolution.join("")
+          ? cellSolution[0]
           : cellSolution,
       };
-      _updateCellState(sessionID, selectedCellKey, newCell);
+      _updateCellState(sessionID, selectedCellKey, newCell, "lastEditedBy");
 
       return state;
     }
@@ -718,6 +722,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         const cellSolution = puzzle.solutions[cellKey];
 
         if (!cellSolution) return;
+        delete newBoardState[cellKey].lastEditedBy;
 
         newBoardState[cellKey] = {
           ...newBoardState[cellKey],
@@ -740,6 +745,7 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         const cellSolution = puzzle.solutions[cellKey];
 
         if (!cellSolution) return;
+        delete newBoardState[cellKey].lastEditedBy;
 
         newBoardState[cellKey] = {
           ...newBoardState[cellKey],

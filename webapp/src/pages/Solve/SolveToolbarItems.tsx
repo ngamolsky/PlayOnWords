@@ -40,7 +40,7 @@ const SolveToolbarItems = ({
       </div>
       <div
         className={classNames(
-          "h-8 w-8 rounded-md p-1 active:dark:bg-slate-600 active:bg-slate-300 cursor-pointer"
+          "h-8 w-8 rounded-md p-1 active:dark:bg-slate-600 active:bg-slate-300 cursor-pointer outline-none"
         )}
         onClick={() => {
           showShareModal(true);
@@ -49,9 +49,12 @@ const SolveToolbarItems = ({
         <Share />
       </div>
       <div
-        className={classNames("h-8 w-8 rounded-md p-1 cursor-pointer", {
-          "dark:bg-slate-600 bg-slate-300": pencilMode,
-        })}
+        className={classNames(
+          "h-8 w-8 rounded-md p-1 cursor-pointer outline-none",
+          {
+            "dark:bg-slate-600 bg-slate-300": pencilMode,
+          }
+        )}
         onClick={() => {
           dispatch({
             type: SessionActionTypes.PENCIL_CLICKED,
@@ -64,7 +67,7 @@ const SolveToolbarItems = ({
       <Dropdown
         selectedItemIndex={autocheck ? 0 : undefined}
         buttonContent={
-          <div className="w-8 h-8 p-1 rounded-md active:bg-slate-300 active:dark:bg-slate-600">
+          <div className="w-8 h-8 p-1 rounded-md outline-none active:bg-slate-300 active:dark:bg-slate-600">
             <Help />
           </div>
         }
@@ -137,7 +140,7 @@ const SolveToolbarItems = ({
       />
       <Dropdown
         buttonContent={
-          <div className="w-8 h-8 p-1 rounded-md active:bg-slate-300">
+          <div className="w-8 h-8 p-1 rounded-md outline-none active:bg-slate-300">
             <VerticalDots />
           </div>
         }

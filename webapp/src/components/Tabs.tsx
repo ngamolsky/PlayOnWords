@@ -29,11 +29,13 @@ const Tabs = ({
         ))}
       </Tab.List>
       <Tab.Panels className="flex flex-col h-full overflow-auto grow">
-        {tabArray.map((tab, index) => (
-          <Tab.Panel key={index} className="flex flex-col h-full grow">
-            {tab.content}
-          </Tab.Panel>
-        ))}
+        {tabArray.map((tab, index) => {
+          return (
+            <Tab.Panel key={index} className="flex flex-col h-full grow">
+              {tab.content}
+            </Tab.Panel>
+          );
+        })}
       </Tab.Panels>
     </Tab.Group>
   );

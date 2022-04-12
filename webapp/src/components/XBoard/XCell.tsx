@@ -58,7 +58,7 @@ export const XCell = ({
         <path
           d={`m ${cellSize * x} ${cellSize * y} l ${cellSize} ${cellSize}`}
           strokeLinecap="butt"
-          className="stroke-red-500 stroke-[.4]"
+          className="stroke-red-500 stroke-[.4] pointer-events-none"
         />
       )}
       {specialCellType === SpecialCellType.CIRCLE && (

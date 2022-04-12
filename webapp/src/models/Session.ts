@@ -143,13 +143,20 @@ export const updateBoardState = async (
 export const updateCellState = async (
   sessionID: string,
   cellKey: string,
-  cellState: CellState
+  cellState: CellState,
+  deleteFieldName?: keyof CellState
 ) => {
   const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID);
-  const fieldPath = `boardState.${cellKey}`;
-  const fieldData: { [key: string]: Timestamp | CellState } = {};
+  const fieldPath: keyof BoardState = `boardState.${cellKey}`;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fieldData: { [key: string]: any } = {};
 
   fieldData[fieldPath] = cellState;
+
+  if (deleteFieldName) {
+    fieldData[fieldPath][deleteFieldName] = deleteField();
+  }
   fieldData.lastUpdatedTime = Timestamp.now();
 
   return updateDoc(sessionRef, fieldData);

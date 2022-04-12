@@ -1,4 +1,4 @@
-import { Puzzle } from "./Puzzle";
+import { Puzzle, SpecialCellType } from "./Puzzle";
 import {
   collection,
   deleteField,
@@ -13,7 +13,7 @@ import {
   Timestamp,
   updateDoc,
   where,
-  arrayUnion
+  arrayUnion,
 } from "firebase/firestore";
 import { useState, useEffect, Dispatch, useReducer } from "react";
 import { db } from "../config/firebase";
@@ -22,7 +22,12 @@ import {
   STARTING_ORIENTATION,
   FIRST_CELL_KEY,
 } from "../constants";
-import { SessionActions, SessionActionTypes, SessionState, sessionReducer } from "../reducers/session";
+import {
+  SessionActions,
+  SessionActionTypes,
+  SessionState,
+  sessionReducer,
+} from "../reducers/session";
 import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
 import { getBoardStateFromSolutions } from "../utils/sessionUtils";
 import { User } from "./User";
@@ -66,10 +71,12 @@ export enum CellSelectionState {
   SELECTED_CELL = "selected_cell",
   UNSELECTED = "unselected",
   UNSELECTABLE = "unselectable",
+  RELATED_CLUE_SELECTED = "related_clue_selected",
 }
 
 export type CombinedCellState = CellState & {
   cellSelectionState: CellSelectionState;
+  specialCellType?: SpecialCellType;
 };
 
 export type CombinedBoardState = {
@@ -170,7 +177,10 @@ export const updateSessionStatus = async (
   }
 };
 
-export const joinSessionParticipants = async (sessionID: string, user: User) => {
+export const joinSessionParticipants = async (
+  sessionID: string,
+  user: User
+) => {
   const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID).withConverter(
     sessionConverter
   );
@@ -293,7 +303,7 @@ export const useRecentSessionsForUser = (
       orderBy("lastUpdatedTime", "desc"),
       limit(numSessions)
     );
-      
+
     const unsub = onSnapshot(q, (querySnapshot) => {
       const sessions: Session[] = [];
       querySnapshot.forEach((doc) => {

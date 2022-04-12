@@ -275,7 +275,7 @@ export const getCombinedBoardState = (
 
   const {
     boardState,
-    puzzle: { solutions },
+    puzzle: { solutions, specialCells, clues },
   } = session;
 
   const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
@@ -283,6 +283,35 @@ export const getCombinedBoardState = (
     orientation,
     session.puzzle
   );
+
+  const relatedCellKeys: string[] = [];
+
+  if (currentSelectedClue.relatedClueNumbers) {
+    const horizontalClues =
+      currentSelectedClue.relatedClueNumbers.horizontal.map((clueNumber) => {
+        return clues.horizontal.find((clue) => clue.number == clueNumber);
+      });
+
+    const verticalClues = currentSelectedClue.relatedClueNumbers.vertical.map(
+      (clueNumber) => {
+        return clues.vertical.find((clue) => clue.number == clueNumber);
+      }
+    );
+
+    const allClues = horizontalClues
+      .concat(verticalClues)
+      .filter((clue): clue is Clue => !!clue);
+
+    console.log(allClues, horizontalClues);
+
+    allClues.forEach((clue) => {
+      console.log(getCellKeysForClueAndOrientation(clue, orientation));
+
+      relatedCellKeys.push(
+        ...getCellKeysForClueAndOrientation(clue, orientation)
+      );
+    });
+  }
 
   const activeCellKeys = getCellKeysForClueAndOrientation(
     currentSelectedClue,
@@ -301,8 +330,14 @@ export const getCombinedBoardState = (
           ? CellSelectionState.SELECTED_CELL
           : activeCellKeys.includes(cellKey)
           ? CellSelectionState.SELECTED_WORD
+          : relatedCellKeys.includes(cellKey)
+          ? CellSelectionState.RELATED_CLUE_SELECTED
           : CellSelectionState.UNSELECTED,
     };
+
+    if (specialCells && specialCells[cellKey]) {
+      cellState.specialCellType = specialCells[cellKey];
+    }
 
     combinedBoardState[cellKey] = cellState;
   });

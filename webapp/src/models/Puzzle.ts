@@ -21,6 +21,7 @@ export type Puzzle = {
   solutions: Solutions;
   nytID: string;
   collection: string;
+  specialCells?: SpecialCells;
 };
 
 export type ClueList = {
@@ -34,10 +35,20 @@ export type Clue = {
   y: number;
   hint: string;
   length: number;
+  relatedClueNumbers?: {
+    horizontal: number[];
+    vertical: number[];
+  };
 };
 
-export type Solutions = Record<string, string | null | string[]>;
+export type Solutions = Record<string, string | string[] | null>;
 
+export enum SpecialCellType {
+  SHADED = "SHADED",
+  CIRCLE = "CIRCLE",
+}
+
+export type SpecialCells = Record<string, SpecialCellType>;
 export const usePuzzleByDate = (
   date: Date | undefined
 ): [Puzzle | undefined, string | undefined] => {

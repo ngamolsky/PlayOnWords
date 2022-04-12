@@ -4,7 +4,6 @@ import { FIRST_CELL_KEY } from "../constants";
 import {
   BoardState,
   Session,
-  CellSelectionState,
   CellSolutionState,
   SessionStatus,
   updateBoardState,
@@ -20,7 +19,6 @@ import {
   getPreviousCellKey,
   getBoardStateFromSolutions,
   getCellKeysForClueAndOrientation,
-  getCombinedBoardState,
   getClueFromCellKeyOrientationAndPuzzle,
   getPercentageComplete,
   checkPuzzle,
@@ -469,18 +467,14 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       return _selectCell(newState, previousCellKey);
     }
     case SessionActionTypes.CELL_CLICKED: {
-      _requireSession(session);
+      const { puzzle } = _requireSession(session);
       const { cellKey } = action;
-      const combinedBoardState = getCombinedBoardState(state);
       let newState = state;
       if (rebus) {
         newState = _toggleRebus(newState);
       }
 
-      if (
-        combinedBoardState[cellKey].cellSelectionState ==
-        CellSelectionState.UNSELECTABLE
-      ) {
+      if (puzzle.solutions[cellKey] == null) {
         return newState;
       }
 
@@ -624,6 +618,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       if (!currentCellValue || !cellSolution) return state;
 
       const solutionState = _checkCell(cellSolution, currentCellValue);
+
+      console.log(boardState[selectedCellKey]);
 
       const newCell: CellState = {
         ...boardState[selectedCellKey],

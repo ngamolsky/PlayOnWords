@@ -11,7 +11,7 @@ import { convertPuzzleDataToPuzzle } from "./puzzleParser";
 const LATEST_PUZZLE_URL =
   "https://nyt-games-prd.appspot.com/svc/crosswords/v3/36569100/puzzles.json?publish_type=daily&sort_order=desc&sort_by=print_date&limit=2";
 const LATEST_PUZZLE_DATA_BASE_URL =
-  "https://www.nytimes.com/svc/crosswords/v2/puzzle/";
+  "https://www.nytimes.com/svc/crosswords/v6/puzzle/";
 
 export const XWordScraper: HttpFunction = async (_, response) => {
   console.log("Starting XWordScraper function");
@@ -54,11 +54,13 @@ const copyNYTPuzzle: HttpFunction = async (_, response) => {
     }
 
     const puzzle: Puzzle = await loadPuzzleFromNYTPuzzle(puzzleID);
+
     await addPuzzle(puzzle);
 
     response.send(puzzle.puzzleID);
   } catch (err) {
     console.error(err);
+
     response.send(`${err}`);
   }
 };
@@ -70,16 +72,15 @@ export async function loadPuzzleFromNYTPuzzle(latestPuzzleID: any) {
         Cookie: process.env.NYT_COOKIE,
       },
     })
-  ).data.results[0];
+  ).data;
 
-  const puzzleMetadata = puzzleResults.puzzle_meta;
-  const puzzleData = puzzleResults.puzzle_data;
-  const latestPuzzleTitle = puzzleMetadata.title;
-  const latestPuzzleDate = new Date(Date.parse(puzzleMetadata.printDate));
-  const latestPuzzleWidth = puzzleMetadata.width;
-  const latestPuzzleHeight = puzzleMetadata.height;
+  const puzzleBody = puzzleResults.body[0];
 
-  console.log("Latest Puzzle Metadata: ", puzzleMetadata);
+  const latestPuzzleTitle = puzzleResults.title;
+  const latestPuzzleDate = new Date(Date.parse(puzzleResults.publicationDate));
+  const latestPuzzleWidth = puzzleBody.dimensions.width;
+  const latestPuzzleHeight = puzzleBody.dimensions.height;
+
   console.log("NYT Puzzle ID: ", latestPuzzleID);
   console.log("Date: ", latestPuzzleDate);
   if (latestPuzzleTitle) {
@@ -91,7 +92,7 @@ export async function loadPuzzleFromNYTPuzzle(latestPuzzleID: any) {
   console.log(`Loaded latest puzzle data for puzzle ID: ${latestPuzzleID}`);
 
   const puzzle: Puzzle = await convertPuzzleDataToPuzzle({
-    ...puzzleData,
+    ...puzzleBody,
     title: latestPuzzleTitle,
     date: latestPuzzleDate,
     nytID: latestPuzzleID,
@@ -100,3 +101,8 @@ export async function loadPuzzleFromNYTPuzzle(latestPuzzleID: any) {
   });
   return puzzle;
 }
+
+process.on("uncaughtException", (error) => {
+  console.log("uncaughtException", error);
+  process.exit();
+});

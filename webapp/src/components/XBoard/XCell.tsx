@@ -1,4 +1,5 @@
 import React from "react";
+import { SpecialCellType } from "../../models/Puzzle";
 import {
   CellSelectionState,
   CellSolutionState,
@@ -22,7 +23,8 @@ export const XCell = ({
   onCellClicked,
 }: XCellProps) => {
   const { x, y } = getCellCoordinatesFromKey(cellKey);
-  const { solutionState, currentLetter, cellSelectionState } = cellState;
+  const { solutionState, currentLetter, cellSelectionState, specialCellType } =
+    cellState;
 
   return (
     <g>
@@ -46,15 +48,26 @@ export const XCell = ({
             ? "fill-blue-300"
             : cellSelectionState == CellSelectionState.UNSELECTABLE
             ? "fill-black"
+            : specialCellType == SpecialCellType.SHADED ||
+              cellSelectionState == CellSelectionState.RELATED_CLUE_SELECTED
+            ? "fill-slate-300"
             : "fill-white"
         }
       />
       {solutionState === CellSolutionState.WRONG && (
         <path
           d={`m ${cellSize * x} ${cellSize * y} l ${cellSize} ${cellSize}`}
-          strokeWidth={0.4}
           strokeLinecap="butt"
           className="stroke-red-500 stroke-[.4]"
+        />
+      )}
+      {specialCellType === SpecialCellType.CIRCLE && (
+        <circle
+          r={cellSize * 0.45}
+          cx={cellSize * x + cellSize / 2}
+          cy={cellSize * y + cellSize / 2}
+          strokeLinecap="butt"
+          className="stroke-slate-400 stroke-[.2] fill-transparent pointer-events-none"
         />
       )}
       <text

@@ -1,3 +1,4 @@
+import { copyNYTPuzzle, getRecentNYTPuzzles } from "..";
 import { loadAllPuzzles, Puzzle, updatePuzzle } from "../models/Puzzle";
 
 export const backfillPuzzleDayOfWeek = async (): Promise<Puzzle[]> => {
@@ -9,4 +10,14 @@ export const backfillPuzzleDayOfWeek = async (): Promise<Puzzle[]> => {
     );
   });
   return puzzles;
+};
+
+export const backfillPuzzlesUsingNewAPI = async (): Promise<string[]> => {
+  const nytPuzzles = await getRecentNYTPuzzles(365);
+  const puzzledIDs: string[] = [];
+  nytPuzzles.forEach(async (nytPuzzle) => {
+    const puzzleID = await copyNYTPuzzle(nytPuzzle.puzzle_id);
+    puzzledIDs.push(puzzleID);
+  });
+  return puzzledIDs;
 };

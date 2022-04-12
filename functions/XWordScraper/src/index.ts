@@ -9,31 +9,31 @@ import {
 import { convertPuzzleDataToPuzzle } from "./puzzleParser";
 
 const LATEST_PUZZLE_URL =
-  "https://nyt-games-prd.appspot.com/svc/crosswords/v3/36569100/puzzles.json?publish_type=daily&sort_order=desc&sort_by=print_date&limit=2";
+  "https://nyt-games-prd.appspot.com/svc/crosswords/v3/36569100/puzzles.json?publish_type=daily&sort_order=desc&sort_by=print_date";
 const LATEST_PUZZLE_DATA_BASE_URL =
   "https://www.nytimes.com/svc/crosswords/v6/puzzle/";
 
 export const XWordScraper: HttpFunction = async (_, response) => {
   console.log("Starting XWordScraper function");
+  let nytPuzzleID: number;
+  if (process.env.OVERWRITE_PUZZLE_ID) {
+    nytPuzzleID = parseInt(process.env.OVERWRITE_PUZZLE_ID);
+  } else {
+    console.log("Loading latest puzzle metadata");
+    const latestPuzzleMetadata = (await getRecentNYTPuzzles(2))[0];
 
-  await copyNYTPuzzle(_, response);
+    console.log(latestPuzzleMetadata);
+    nytPuzzleID = latestPuzzleMetadata.puzzle_id;
+  }
+
+  const puzzleID = await copyNYTPuzzle(nytPuzzleID.toString());
+
+  response.send(puzzleID);
 };
 
-const copyNYTPuzzle: HttpFunction = async (_, response) => {
+export const copyNYTPuzzle = async (nytPuzzleID: string): Promise<string> => {
   try {
-    let puzzleID: number;
-    if (process.env.OVERWRITE_PUZZLE_ID) {
-      puzzleID = parseInt(process.env.OVERWRITE_PUZZLE_ID);
-    } else {
-      console.log("Loading latest puzzle metadata");
-      const latestPuzzleMetadata = (await axios.get(LATEST_PUZZLE_URL)).data
-        .results[0];
-
-      console.log(latestPuzzleMetadata);
-      puzzleID = latestPuzzleMetadata.puzzle_id;
-    }
-
-    const existingPuzzle = await getPuzzleByNYTPuzzleID(puzzleID);
+    const existingPuzzle = await getPuzzleByNYTPuzzleID(nytPuzzleID);
 
     const replacePuzzleIfExists =
       process.env.REPLACE_EXISTING_PUZZLE === "true";
@@ -53,19 +53,25 @@ const copyNYTPuzzle: HttpFunction = async (_, response) => {
       );
     }
 
-    const puzzle: Puzzle = await loadPuzzleFromNYTPuzzle(puzzleID);
+    const puzzle: Puzzle = await loadPuzzleFromNYTPuzzle(nytPuzzleID);
 
     await addPuzzle(puzzle);
 
-    response.send(puzzle.puzzleID);
+    return puzzle.puzzleID;
   } catch (err) {
     console.error(err);
-
-    response.send(`${err}`);
+    return err as string;
   }
 };
 
-export async function loadPuzzleFromNYTPuzzle(latestPuzzleID: any) {
+export const getRecentNYTPuzzles = async (limit: number): Promise<any[]> => {
+  const latestPuzzleMetadata = await axios.get(
+    `${LATEST_PUZZLE_URL}&limit=${limit}`
+  );
+  return latestPuzzleMetadata.data.results;
+};
+
+export const loadPuzzleFromNYTPuzzle = async (latestPuzzleID: any) => {
   const puzzleResults = (
     await axios.get(`${LATEST_PUZZLE_DATA_BASE_URL}/${latestPuzzleID}.json`, {
       headers: {
@@ -100,9 +106,16 @@ export async function loadPuzzleFromNYTPuzzle(latestPuzzleID: any) {
     height: latestPuzzleHeight,
   });
   return puzzle;
-}
+};
 
-process.on("uncaughtException", (error) => {
-  console.log("uncaughtException", error);
-  process.exit();
+process.once("SIGUSR2", function () {
+  process.kill(process.pid, "SIGUSR2");
+});
+
+process.on("SIGINT", function () {
+  process.kill(process.pid, "SIGINT");
+});
+
+process.on("uncaughtException", function () {
+  process.kill(process.pid, "SIGINT");
 });

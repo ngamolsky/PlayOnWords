@@ -99,7 +99,7 @@ export const getPuzzleByDate = async (date: Date): Promise<Puzzle | null> => {
 };
 
 export const getPuzzleByNYTPuzzleID = async (
-  nytID: number
+  nytID: string
 ): Promise<Puzzle | null> => {
   let puzzle = null;
   const results = (

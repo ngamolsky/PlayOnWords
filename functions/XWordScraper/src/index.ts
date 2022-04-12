@@ -53,7 +53,7 @@ export const copyNYTPuzzle = async (nytPuzzleID: string): Promise<string> => {
       );
     }
 
-    const puzzle: Puzzle = await loadPuzzleFromNYTPuzzle(nytPuzzleID);
+    const puzzle = await loadPuzzleFromNYTPuzzle(nytPuzzleID);
 
     await addPuzzle(puzzle);
 

@@ -13,7 +13,7 @@ export const USERS_COLLECTION = "users";
 export const NUM_PUZZLES_TO_SHOW_ON_HOME = 10;
 
 export const BASE_URL = __prod__
-  ? "https://xword.gamolsky.net"
+  ? "https://playonwords.gamolsky.net"
   : "http://localhost:3000";
 
 export const FIRST_CELL_KEY = "0,0";

@@ -101,6 +101,7 @@ export const usePuzzlesBySearch = (
 
   useEffect(() => {
     const whereConstraints = [];
+    
     if (dayOfWeek != null)
       whereConstraints.push(where("dayOfWeek", "==", dayOfWeek));
     if (date != null)
@@ -109,25 +110,28 @@ export const usePuzzlesBySearch = (
       );
     if (title != null) whereConstraints.push(where("title", "==", title));
 
-    const q = query(
-      collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
-      ...whereConstraints,
-      orderBy("puzzleTimestamp", "desc"),
-      limit(NUM_PUZZLES_TO_SHOW_ON_HOME)
-    );
+    if (whereConstraints.length > 0) {
+      const q = query(
+        collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
+        ...whereConstraints,
+        orderBy("puzzleTimestamp", "desc"),
+        limit(NUM_PUZZLES_TO_SHOW_ON_HOME)
+      );
 
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      const puzzles: Puzzle[] = [];
-      querySnapshot.forEach((doc) => {
-        puzzles.push(doc.data());
-      });
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        const puzzles: Puzzle[] = [];
+        querySnapshot.forEach((doc) => {
+          puzzles.push(doc.data());
+        });
 
-      setPuzzleState({
-        puzzles,
-        loadingMessage: undefined,
+        setPuzzleState({
+          puzzles,
+          loadingMessage: undefined,
+        });
       });
-    });
-    return unsub;
+      return unsub;
+    }
+   
   }, [dayOfWeek, date, title]);
 
   return [puzzleState.puzzles, puzzleState.loadingMessage];

@@ -30,9 +30,9 @@ export const NYTSync: HttpFunction = async (_, response) => {
     nytPuzzleID = latestPuzzleMetadata.puzzle_id.toString();
   }
 
-  const puzzleID = await copyNYTPuzzle(nytPuzzleID);
+  const puzzleIDs = await copyNYTPuzzle(nytPuzzleID);
 
-  response.send(puzzleID);
+  response.send(puzzleIDs);
 };
 
 export const copyNYTPuzzle = async (nytPuzzleID: string): Promise<string> => {

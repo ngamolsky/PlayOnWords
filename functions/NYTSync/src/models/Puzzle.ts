@@ -130,9 +130,8 @@ export const getPuzzleByNYTPuzzleID = async (
 };
 
 export const loadAllPuzzles = async (
-  puzzleCallback?: (puzzle: Puzzle) => Promise<void>
-): Promise<Puzzle[]> => {
-  const puzzles: Puzzle[] = [];
+  puzzleCallback: (puzzle: Puzzle) => Promise<string>
+): Promise<string[]> => {
   const results = (
     await db
       .collection("puzzles")
@@ -141,17 +140,14 @@ export const loadAllPuzzles = async (
       .get()
   ).docs;
 
-  results.map(async (each) => {
+  const promises = results.map((each) => {
     const puzzle = each.data();
-
-    if (puzzleCallback) {
-      puzzleCallback(puzzle);
-    }
-
-    puzzles.push(puzzle);
+    return puzzleCallback(puzzle);
   });
 
-  return puzzles;
+  const updatedPuzzleIDs = await Promise.all(promises);
+
+  return updatedPuzzleIDs;
 };
 
 export const puzzleConverter = {

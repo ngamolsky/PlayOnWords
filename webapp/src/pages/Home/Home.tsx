@@ -118,7 +118,7 @@ const PuzzlesBySearch: React.FC<{
         <Listbox
           value={dayOfWeek && DAYS[dayOfWeek]}
           onChange={(dayOfWeekStr) => {
-            console.log(dayOfWeekStr);
+            setDayOfWeek(DAYS.indexOf(dayOfWeekStr as string));
           }}
         >
           <Listbox.Button className={"bg-slate-300 dark:bg-slate-900 py-2"}>
@@ -132,29 +132,16 @@ const PuzzlesBySearch: React.FC<{
             ))}
           </Listbox.Options>
         </Listbox>
-        {puzzles && puzzles.length > 0 && (
-          <Modal
-            className="h-full"
-            isOpen={dayOfWeek != undefined}
-            setIsOpen={(isOpen) => {
-              if (!isOpen) {
-                setDayOfWeek(undefined);
-              }
-            }}
-          >
-            <div className="flex flex-col h-full overflow-auto grow">
-              {puzzles.map((puzzle) => (
-                <PuzzleCard
-                  key={puzzle.puzzleID}
-                  puzzle={puzzle}
-                  onClick={async () => {
-                    setSelectedPuzzle(puzzle);
-                  }}
-                />
-              ))}
-            </div>
-          </Modal>
-        )}
+        {puzzles &&
+          puzzles.map((puzzle) => (
+            <PuzzleCard
+              key={puzzle.puzzleID}
+              puzzle={puzzle}
+              onClick={async () => {
+                setSelectedPuzzle(puzzle);
+              }}
+            />
+          ))}
       </div>
     </XWordContainer>
   );

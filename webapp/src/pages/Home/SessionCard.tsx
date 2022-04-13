@@ -18,13 +18,13 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   return (
     <div
       className={classNames(
-        "w-full text-left p-4 dark:bg-slate-900 rounded-lg active:scale-[1.01] outline-none select-none",
+        "w-full text-left p-4 dark:bg-slate-900 rounded-lg active:scale-[1.01] outline-none select-none bg-slate-200",
         { "border-2 border-yellow-300": completed }
       )}
       onClick={onClick}
     >
       <div className="flex flex-row">
-        <XWordIcon className="w-3/5 my-auto pointer-events-none" />
+        <XWordIcon className="w-2/5 my-auto pointer-events-none" />
         <div className="flex-col px-4">
           <p className="mt-2 text-md text-ellipsis">
             {participants.length > 0

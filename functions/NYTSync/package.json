@@ -3,8 +3,8 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
-    "start": "concurrently \"tsc -w\" \"nodemon --watch ./build/ --exec node -r yamlenv/config node_modules/@google-cloud/functions-framework --source=build/ --target=XWordScraper\" ",
-    "deploy": "yarn build && gcloud functions deploy XWordScraper --runtime=nodejs16 --trigger-http"
+    "start": "concurrently \"tsc -w\" \"nodemon --watch ./build/ --exec node -r yamlenv/config node_modules/@google-cloud/functions-framework --source=build/ --target=NYTSync\" ",
+    "deploy": "yarn build && gcloud functions deploy NYTSync --runtime=nodejs16 --trigger-http"
   },
   "main": "build/index.js",
   "dependencies": {

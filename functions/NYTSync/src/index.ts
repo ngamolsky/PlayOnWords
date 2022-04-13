@@ -1,4 +1,4 @@
-import { HttpFunction } from "@google-cloud/functions-framework/build/src/functions";
+import { HttpFunction } from "@google-cloud/functions-framework";
 import axios from "axios";
 import {
   addPuzzle,
@@ -13,8 +13,8 @@ const LATEST_PUZZLE_URL =
 const LATEST_PUZZLE_DATA_BASE_URL =
   "https://www.nytimes.com/svc/crosswords/v6/puzzle/";
 
-export const XWordScraper: HttpFunction = async (_, response) => {
-  console.log("Starting XWordScraper function");
+export const NYTSync: HttpFunction = async (_, response) => {
+  console.log("Starting NYTSync function");
   let nytPuzzleID: string;
   if (process.env.OVERWRITE_PUZZLE_ID) {
     nytPuzzleID = process.env.OVERWRITE_PUZZLE_ID;
@@ -107,11 +107,3 @@ export const loadPuzzleFromNYTPuzzle = async (latestPuzzleID: any) => {
   });
   return puzzle;
 };
-
-process.on("SIGINT", function () {
-  process.kill(process.pid, "SIGINT");
-});
-
-process.on("uncaughtException", function () {
-  process.kill(process.pid, "SIGINT");
-});

@@ -3,8 +3,7 @@ import { XWordContainer } from "../../components/XWordContainer";
 import { useHistory } from "react-router-dom";
 import {
   Puzzle,
-  usePuzzleByDate,
-  usePuzzlesByDayOfWeek,
+  usePuzzlesBySearch,
   useRecentPuzzles,
 } from "../../models/Puzzle";
 import { useLoggedInUser } from "../../models/User";
@@ -20,6 +19,7 @@ import DatePicker from "react-datepicker";
 import { DAYS } from "../../utils/timeAndDateUtils";
 import Modal from "../../components/Modal";
 import "react-datepicker/dist/react-datepicker.css";
+import { Listbox } from "@headlessui/react";
 
 const Home: React.FC = () => {
   const history = useHistory();
@@ -70,14 +70,8 @@ const Home: React.FC = () => {
             content: <RecentPuzzlesTab setSelectedPuzzle={setSelectedPuzzle} />,
           },
           {
-            title: "By Day Of Week",
-            content: (
-              <PuzzlesByDayOfWeek setSelectedPuzzle={setSelectedPuzzle} />
-            ),
-          },
-          {
-            title: "By Date",
-            content: <PuzzleByDate setSelectedPuzzle={setSelectedPuzzle} />,
+            title: "Search",
+            content: <PuzzlesBySearch setSelectedPuzzle={setSelectedPuzzle} />,
           },
         ]}
       />
@@ -110,26 +104,34 @@ const RecentPuzzlesTab: React.FC<{
   );
 };
 
-const PuzzlesByDayOfWeek: React.FC<{
+const PuzzlesBySearch: React.FC<{
   setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>;
 }> = ({ setSelectedPuzzle }) => {
   const [dayOfWeek, setDayOfWeek] = useState<number>();
-  const [puzzles] = usePuzzlesByDayOfWeek(dayOfWeek);
+  const [date, setDate] = useState<Date>();
+
+  const [puzzles] = usePuzzlesBySearch(dayOfWeek, date);
 
   return (
     <XWordContainer className="p-4">
-      <div className="flex flex-col w-full h-full max-w-md mx-auto justify-evenly grow">
-        {DAYS.map((day, index) => (
-          <button
-            key={index}
-            className="w-full p-4 text-lg text-center rounded-md dark:bg-slate-700 bg-slate-200"
-            onClick={() => {
-              setDayOfWeek(index);
-            }}
-          >
-            {day}
-          </button>
-        ))}
+      <div className="flex flex-col w-full h-full max-w-md mx-auto grow">
+        <Listbox
+          value={dayOfWeek && DAYS[dayOfWeek]}
+          onChange={(dayOfWeekStr) => {
+            console.log(dayOfWeekStr);
+          }}
+        >
+          <Listbox.Button className={"bg-slate-300 dark:bg-slate-900 py-2"}>
+            {dayOfWeek ? DAYS[dayOfWeek] : DAYS[0]}
+          </Listbox.Button>
+          <Listbox.Options>
+            {DAYS.map((day, index) => (
+              <Listbox.Option key={index} value={day}>
+                {day}
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
+        </Listbox>
         {puzzles && puzzles.length > 0 && (
           <Modal
             className="h-full"
@@ -158,36 +160,4 @@ const PuzzlesByDayOfWeek: React.FC<{
   );
 };
 
-const PuzzleByDate: React.FC<{
-  setSelectedPuzzle: React.Dispatch<React.SetStateAction<Puzzle | undefined>>;
-}> = ({ setSelectedPuzzle }) => {
-  const [date, setDate] = useState<Date>();
-  const [puzzle] = usePuzzleByDate(date);
-
-  return (
-    <XWordContainer>
-      <DatePicker
-        placeholderText="Click here to pick a date"
-        className="w-full p-4 grow dark:bg-slate-600 bg-slate-100"
-        selected={date}
-        onChange={(date) => {
-          if (date) {
-            setDate(date);
-          }
-        }}
-        minDate={FIRST_PUZZLE_DATE}
-        maxDate={new Date()}
-      />
-      {puzzle && (
-        <PuzzleCard
-          key={puzzle.puzzleID}
-          puzzle={puzzle}
-          onClick={() => {
-            setSelectedPuzzle(puzzle);
-          }}
-        />
-      )}
-    </XWordContainer>
-  );
-};
 export default Home;

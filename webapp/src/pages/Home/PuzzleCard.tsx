@@ -2,8 +2,10 @@ import React from "react";
 import { toXWordDate } from "../../utils/timeAndDateUtils";
 import { Puzzle } from "../../models/Puzzle";
 import XWordIcon from "../../images/XWordIcon";
+import classNames from "classnames";
 
 interface PuzzleCardProps {
+  className?: string;
   puzzle: Puzzle;
   onClick?: () => void;
 }
@@ -14,12 +16,17 @@ export enum PuzzleCardAction {
   END_GAME = "end_game",
 }
 
-export const PuzzleCard: React.FC<PuzzleCardProps> = ({ puzzle, onClick }) => {
+export const PuzzleCard: React.FC<PuzzleCardProps> = ({
+  puzzle,
+  onClick,
+  className,
+}) => {
   return (
     <button
-      className="m-4 mx-auto p-4 w-4/5 text-left 
-                dark:bg-slate-900 rounded-lg
-                active:scale-[1.01] outline-none select-none cursor-pointer"
+      className={classNames(
+        "m-4 mx-auto p-4 w-full text-left dark:bg-slate-900 rounded-lg bg-slate-300 active:scale-[1.01] outline-none select-none cursor-pointer",
+        className
+      )}
       onClick={onClick}
     >
       <XWordIcon className="w-full pointer-events-none" />

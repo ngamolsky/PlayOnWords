@@ -83,6 +83,7 @@ const Solve: React.FC = () => {
 
   return (
     <XWordContainer
+      className="max-w-md mx-auto"
       showToolbar
       toolbarChildren={
         <SolveToolbarItems
@@ -175,7 +176,7 @@ const Solve: React.FC = () => {
               dispatch({
                 type: SessionActionTypes.UP_KEY,
               });
-              return
+              return;
             case ACTION_KEYS.DOWN:
               dispatch({
                 type: SessionActionTypes.DOWN_KEY,

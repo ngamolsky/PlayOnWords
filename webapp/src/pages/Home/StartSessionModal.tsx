@@ -67,6 +67,7 @@ const NewTab = (
         Start a Session for the puzzle:
       </p>
       <PuzzleCard
+        className="w-4/5"
         puzzle={selectedPuzzle}
         onClick={async () => {
           setSessionLoading(true);

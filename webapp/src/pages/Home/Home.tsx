@@ -94,16 +94,18 @@ const RecentPuzzlesTab: React.FC<{
 
   return (
     <XWordContainer loadingMessage={puzzleLoadingMessage}>
-      {puzzles &&
-        puzzles.map((puzzle) => (
-          <PuzzleCard
-            key={puzzle.puzzleID}
-            puzzle={puzzle}
-            onClick={async () => {
-              setSelectedPuzzle(puzzle);
-            }}
-          />
-        ))}
+      <div className="flex flex-col justify-center max-w-md mx-auto">
+        {puzzles &&
+          puzzles.map((puzzle) => (
+            <PuzzleCard
+              key={puzzle.puzzleID}
+              puzzle={puzzle}
+              onClick={async () => {
+                setSelectedPuzzle(puzzle);
+              }}
+            />
+          ))}
+      </div>
     </XWordContainer>
   );
 };
@@ -115,41 +117,43 @@ const PuzzlesByDayOfWeek: React.FC<{
   const [puzzles] = usePuzzlesByDayOfWeek(dayOfWeek);
 
   return (
-    <XWordContainer className="p-4 justify-evenly">
-      {DAYS.map((day, index) => (
-        <button
-          key={index}
-          className="p-4 text-lg text-center rounded-md dark:bg-slate-700"
-          onClick={() => {
-            setDayOfWeek(index);
-          }}
-        >
-          {day}
-        </button>
-      ))}
-      {puzzles && puzzles.length > 0 && (
-        <Modal
-          className="h-full"
-          isOpen={dayOfWeek != undefined}
-          setIsOpen={(isOpen) => {
-            if (!isOpen) {
-              setDayOfWeek(undefined);
-            }
-          }}
-        >
-          <div className="flex flex-col h-full overflow-auto grow">
-            {puzzles.map((puzzle) => (
-              <PuzzleCard
-                key={puzzle.puzzleID}
-                puzzle={puzzle}
-                onClick={async () => {
-                  setSelectedPuzzle(puzzle);
-                }}
-              />
-            ))}
-          </div>
-        </Modal>
-      )}
+    <XWordContainer className="p-4">
+      <div className="flex flex-col w-full h-full max-w-md mx-auto justify-evenly grow">
+        {DAYS.map((day, index) => (
+          <button
+            key={index}
+            className="w-full p-4 text-lg text-center rounded-md dark:bg-slate-700 bg-slate-200"
+            onClick={() => {
+              setDayOfWeek(index);
+            }}
+          >
+            {day}
+          </button>
+        ))}
+        {puzzles && puzzles.length > 0 && (
+          <Modal
+            className="h-full"
+            isOpen={dayOfWeek != undefined}
+            setIsOpen={(isOpen) => {
+              if (!isOpen) {
+                setDayOfWeek(undefined);
+              }
+            }}
+          >
+            <div className="flex flex-col h-full overflow-auto grow">
+              {puzzles.map((puzzle) => (
+                <PuzzleCard
+                  key={puzzle.puzzleID}
+                  puzzle={puzzle}
+                  onClick={async () => {
+                    setSelectedPuzzle(puzzle);
+                  }}
+                />
+              ))}
+            </div>
+          </Modal>
+        )}
+      </div>
     </XWordContainer>
   );
 };

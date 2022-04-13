@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React from "react";
 import { Puzzle } from "../../models/Puzzle";
 import { CombinedBoardState } from "../../models/Session";
@@ -8,6 +9,7 @@ import {
 import { XCell } from "./XCell";
 
 type XBoardProps = {
+  className?: string;
   boardState: CombinedBoardState;
   puzzle: Puzzle;
   onCellClicked: (cellKey: string) => void;
@@ -16,13 +18,19 @@ type XBoardProps = {
 const XBOARD_WIDTH = 100;
 const XBOARD_BORDER_WIDTH = 1;
 
-export const XBoard = ({ boardState, puzzle, onCellClicked }: XBoardProps) => {
+export const XBoard = ({
+  boardState,
+  puzzle,
+  onCellClicked,
+  className,
+}: XBoardProps) => {
   const boardStateKeys = Object.keys(boardState);
   const { width, height } = getSizeFromCellKeys(boardStateKeys);
   const xBoardHeight = (height * XBOARD_WIDTH) / width;
 
   return (
     <svg
+      className={classNames(className)}
       viewBox={`0 0 ${XBOARD_WIDTH + XBOARD_BORDER_WIDTH} ${
         xBoardHeight + XBOARD_BORDER_WIDTH
       }`}

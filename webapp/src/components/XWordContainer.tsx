@@ -26,7 +26,7 @@ export const XWordContainer: React.FC<XWordContainerProps> = ({
       ) : (
         <div
           className={classNames(
-            "flex flex-col w-full h-full max-w-md mx-auto grow",
+            "flex flex-col w-full h-full mx-auto grow",
             className
           )}
         >

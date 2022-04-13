@@ -29,7 +29,10 @@ const Login: React.FC = () => {
   }, [user, continueUrl, history]);
 
   return (
-    <XWordContainer loadingMessage={loadingMessage} className="p-8">
+    <XWordContainer
+      loadingMessage={loadingMessage}
+      className="max-w-md p-8 mx-auto"
+    >
       <h1 className="mx-auto my-8 text-3xl font-alfa">{APP_NAME}</h1>
       <Formik
         initialValues={{ username: "", type: "" }}

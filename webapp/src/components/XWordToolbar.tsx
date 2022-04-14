@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import React, { ReactNode } from "react";
+import React, { Fragment, ReactNode } from "react";
 import { APP_NAME } from "../constants";
+import { Transition } from "@headlessui/react";
 
 export const XWordToolbar: React.FC<{ belowToolbarContent?: ReactNode }> = ({
   children,
@@ -17,9 +18,20 @@ export const XWordToolbar: React.FC<{ belowToolbarContent?: ReactNode }> = ({
           </Link>
           <div className="flex justify-end flex-1 mx-4 my-auto">{children}</div>
         </div>
-        {belowToolbarContent && (
-          <div className="w-full">{belowToolbarContent}</div>
-        )}
+        <Transition
+          as={Fragment}
+          show={!!belowToolbarContent}
+          enter="transition ease-out duration-100"
+          enterFrom="transform opacity-0 scale-y-50 origin-top"
+          enterTo="transform opacity-100 scale-y-100 origin-top"
+          leave="transition ease-in duration-75"
+          leaveFrom="transform opacity-100 scale-y-100 origin-top"
+          leaveTo="transform opacity-0 scale-y-50 origin-top"
+        >
+          <div className="flex w-full p-2 bg-slate-700">
+            {belowToolbarContent}
+          </div>
+        </Transition>
       </div>
     </header>
   );

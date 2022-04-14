@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { MutableRefObject, ReactNode } from "react";
 import classNames from "classnames";
 
 const IconButton = ({
@@ -7,15 +7,18 @@ const IconButton = ({
   className,
   disabled,
   selected,
+  ref,
 }: {
   children?: ReactNode;
   onClick?: () => void;
   className?: string;
   disabled?: boolean;
   selected?: boolean;
+  ref?: MutableRefObject<HTMLButtonElement>;
 }) => {
   return (
     <button
+      ref={ref}
       className={classNames(
         "p-1",
         className,

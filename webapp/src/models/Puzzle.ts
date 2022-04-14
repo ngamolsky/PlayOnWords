@@ -51,41 +51,6 @@ export enum SpecialCellType {
 export type SpecialCells = Record<string, SpecialCellType>;
 
 
-export const useRecentPuzzles = (
-  numPuzzles: number
-): [Puzzle[] | undefined, string | undefined] => {
-  const [puzzleState, setPuzzleState] = useState<{
-    puzzles: Puzzle[];
-    loadingMessage?: string;
-  }>({
-    puzzles: [],
-    loadingMessage: "Loading recent puzzles...",
-  });
-
-  useEffect(() => {
-    const q = query(
-      collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
-      orderBy("puzzleTimestamp", "desc"),
-      limit(NUM_PUZZLES_TO_SHOW_ON_HOME)
-    );
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      const puzzles: Puzzle[] = [];
-      querySnapshot.forEach((doc) => {
-        puzzles.push(doc.data());
-      });
-
-      setPuzzleState({
-        puzzles,
-        loadingMessage: undefined,
-      });
-    });
-    return unsub;
-  }, [numPuzzles]);
-
-  return [puzzleState.puzzles, puzzleState.loadingMessage];
-};
-
 export const usePuzzlesBySearch = (
   dayOfWeek?: number,
   date?: Date,
@@ -96,24 +61,28 @@ export const usePuzzlesBySearch = (
     loadingMessage?: string;
   }>({
     puzzles: [],
-    loadingMessage: "Loading puzzles by day of week...",
+    loadingMessage: "Loading puzzles...",
   });
 
   useEffect(() => {
     const whereConstraints = [];
-    
+    const orderConstraints = [orderBy("puzzleTimestamp", "desc")];
     if (dayOfWeek != null)
       whereConstraints.push(where("dayOfWeek", "==", dayOfWeek));
-    if (date != null)
+    if (date != null) {
       whereConstraints.push(
         where("puzzleTimestamp", "==", Timestamp.fromDate(date))
       );
+
+      orderConstraints.pop();
+    }
+
     if (title != null) whereConstraints.push(where("title", "==", title));
 
     const q = query(
       collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
       ...whereConstraints,
-      orderBy("puzzleTimestamp", "desc"),
+      ...orderConstraints,
       limit(NUM_PUZZLES_TO_SHOW_ON_HOME)
     );
 
@@ -129,7 +98,6 @@ export const usePuzzlesBySearch = (
       });
     });
     return unsub;
-   
   }, [dayOfWeek, date, title]);
 
   return [puzzleState.puzzles, puzzleState.loadingMessage];

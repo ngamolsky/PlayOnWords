@@ -6,12 +6,9 @@ import { useLoggedInUser } from "../../models/User";
 import Avatar from "../../components/Avatar";
 import { PuzzleCard } from "./PuzzleCard";
 import StartSessionModal from "./StartSessionModal";
-import { DAYS } from "../../utils/timeAndDateUtils";
-import "react-datepicker/dist/react-datepicker.css";
-import { Listbox, Transition } from "@headlessui/react";
-import { SelectorIcon } from "@heroicons/react/solid";
 import { AdjustmentsIcon } from "@heroicons/react/outline";
 import IconButton from "../../components/IconButton";
+import PuzzleSearchToolbar from "./PuzzleSearchToolbar";
 
 const Home: React.FC = () => {
   const history = useHistory();
@@ -22,10 +19,9 @@ const Home: React.FC = () => {
 
   const [selectedPuzzle, setSelectedPuzzle] = useState<Puzzle>();
   const [dayOfWeek, setDayOfWeek] = useState<number>();
+  const [date, setDate] = useState<Date>();
 
-  console.log(dayOfWeek);
-
-  const [puzzles, puzzleLoadingMessage] = usePuzzlesBySearch(dayOfWeek);
+  const [puzzles, puzzleLoadingMessage] = usePuzzlesBySearch(dayOfWeek, date);
 
   useEffect(() => {
     setModalShowing(!!selectedPuzzle);
@@ -64,46 +60,19 @@ const Home: React.FC = () => {
         </>
       }
       belowToolbarContent={
-        <Transition
-          show={isFilterShowing}
-          enter="transition ease-out duration-100"
-          enterFrom="transform opacity-0 scale-y-50 origin-top"
-          enterTo="transform opacity-100 scale-y-100 origin-top"
-          leave="transition ease-in duration-75"
-          leaveFrom="transform opacity-100 scale-y-100 origin-top"
-          leaveTo="transform opacity-0 scale-y-50 origin-top"
-        >
-          <Listbox
-            value={dayOfWeek && DAYS[dayOfWeek]}
-            onChange={(dayOfWeekStr) => {
-              setDayOfWeek(
-                dayOfWeekStr ? DAYS.indexOf(dayOfWeekStr as string) : undefined
-              );
-            }}
-          >
-            <Listbox.Button
-              className={"bg-slate-300 dark:bg-slate-600 py-2 flex"}
-            >
-              <span className="mx-2 grow">
-                {dayOfWeek ? DAYS[dayOfWeek] : "Any Weekday"}
-              </span>
-              <span className="my-auto">
-                <SelectorIcon
-                  className="w-5 h-5 text-gray-400"
-                  aria-hidden="true"
-                />
-              </span>
-            </Listbox.Button>
-            <Listbox.Options className="absolute px-4 py-1 mt-1 space-y-2 overflow-auto rounded-md shadow-lg dark:bg-slate-800 ring-1">
-              <Listbox.Option value={undefined}>{"Any Weekday"}</Listbox.Option>
-              {DAYS.map((day, index) => (
-                <Listbox.Option key={index} value={day}>
-                  {day}
-                </Listbox.Option>
-              ))}
-            </Listbox.Options>
-          </Listbox>
-        </Transition>
+        isFilterShowing && (
+          <PuzzleSearchToolbar
+            setDayOfWeek={setDayOfWeek}
+            dayOfWeek={dayOfWeek}
+            setDate={setDate}
+            date={date}
+            mostRecentPuzzleDate={
+              puzzles && puzzles.length > 0
+                ? puzzles[0].puzzleTimestamp.toDate()
+                : undefined
+            }
+          />
+        )
       }
     >
       {selectedPuzzle && (

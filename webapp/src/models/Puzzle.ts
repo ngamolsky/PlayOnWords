@@ -110,27 +110,25 @@ export const usePuzzlesBySearch = (
       );
     if (title != null) whereConstraints.push(where("title", "==", title));
 
-    if (whereConstraints.length > 0) {
-      const q = query(
-        collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
-        ...whereConstraints,
-        orderBy("puzzleTimestamp", "desc"),
-        limit(NUM_PUZZLES_TO_SHOW_ON_HOME)
-      );
+    const q = query(
+      collection(db, PUZZLES_COLLECTION).withConverter(puzzleConverter),
+      ...whereConstraints,
+      orderBy("puzzleTimestamp", "desc"),
+      limit(NUM_PUZZLES_TO_SHOW_ON_HOME)
+    );
 
-      const unsub = onSnapshot(q, (querySnapshot) => {
-        const puzzles: Puzzle[] = [];
-        querySnapshot.forEach((doc) => {
-          puzzles.push(doc.data());
-        });
-
-        setPuzzleState({
-          puzzles,
-          loadingMessage: undefined,
-        });
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      const puzzles: Puzzle[] = [];
+      querySnapshot.forEach((doc) => {
+        puzzles.push(doc.data());
       });
-      return unsub;
-    }
+
+      setPuzzleState({
+        puzzles,
+        loadingMessage: undefined,
+      });
+    });
+    return unsub;
    
   }, [dayOfWeek, date, title]);
 

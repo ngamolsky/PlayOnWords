@@ -11,7 +11,7 @@ const Avatar: React.FC<AvatarProps> = ({ user, onClick }) => {
   return (
     <Dropdown
       buttonContent={
-        <div className="flex items-center justify-center w-8 h-8 p-5 rounded-full outline-none aspect-square dark:bg-slate-600 bg-slate-200 active:bg-slate-200 active:bg-opacity-95 dark:active:bg-slate-500 dark:active:bg-opacity-95">
+        <div className="flex items-center justify-center w-8 h-8 rounded-full outline-none aspect-square dark:bg-slate-600 bg-slate-200 active:bg-slate-200 active:bg-opacity-95 dark:active:bg-slate-500 dark:active:bg-opacity-95">
           {user.username[0].toUpperCase()}
         </div>
       }

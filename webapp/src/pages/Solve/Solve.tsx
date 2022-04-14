@@ -85,7 +85,7 @@ const Solve: React.FC = () => {
     <XWordContainer
       className="max-w-md mx-auto"
       showToolbar
-      toolbarChildren={
+      toolbarContent={
         <SolveToolbarItems
           session={session}
           user={user}

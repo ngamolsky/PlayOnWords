@@ -30,7 +30,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       >
         <Menu.Items
           className={classNames(
-            "absolute grid grid-cols-1 bg-white divide-y rounded-md shadow-lg outline-none right-2 dark:bg-slate-800"
+            "absolute grid grid-cols-1 bg-white divide-y rounded-md shadow-lg outline-none right-2 dark:bg-slate-800 ring-white ring-1"
           )}
         >
           {items.map((item, index) => {

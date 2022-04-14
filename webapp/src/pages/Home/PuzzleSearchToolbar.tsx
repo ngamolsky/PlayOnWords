@@ -97,7 +97,7 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
           </Listbox.Options>
         </Transition>
       </Listbox>
-      <IconButton
+      {/* <IconButton
         className="h-full ml-2 rounded-md dark:bg-slate-800 active:dark:bg-slate-700"
         onClick={() => {
           setIsCalendarOpen(!isCalendarOpen);
@@ -122,7 +122,7 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
             }
           }}
         />
-      )}
+      )} */}
     </>
   );
 };

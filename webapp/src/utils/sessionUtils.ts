@@ -178,18 +178,28 @@ export const getNextEmptyCellKey = (
     orientation
   );
 
+  let hasLoopedPuzzle = false;
+  let currentOrientation = orientation;
   while (nextCellKey && boardState[nextCellKey].currentLetter) {
     ({ nextCellKey, didChangeClues, didLoopPuzzle } = getNextCellKey(
       nextCellKey,
       puzzle,
-      orientation
+      currentOrientation
     ));
+
+    if (didLoopPuzzle) {
+      hasLoopedPuzzle = true;
+      currentOrientation =
+        orientation == OrientationType.HORIZONTAL
+          ? OrientationType.VERTICAL
+          : OrientationType.HORIZONTAL;
+    }
   }
 
   return {
     nextEmptyCellKey: nextCellKey,
     didChangeClues,
-    didLoopPuzzle,
+    didLoopPuzzle: hasLoopedPuzzle,
   };
 };
 

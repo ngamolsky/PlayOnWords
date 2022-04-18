@@ -15,7 +15,7 @@ export const XWordToolbar: React.FC<{
         <div className="z-10 flex w-full h-12 p-1 shadow-sm shadow-black dark:shadow-white ">
           {homeMode == "icon" ? (
             <Link to="/" className="my-auto ">
-              <IconButton className="w-8 h-8 mr-4 rounded-full">
+              <IconButton className="w-8 h-8 ml-2 rounded-full">
                 <XIcon />
               </IconButton>
             </Link>

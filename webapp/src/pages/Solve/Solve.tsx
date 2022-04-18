@@ -85,6 +85,7 @@ const Solve: React.FC = () => {
     <XWordContainer
       className="max-w-md mx-auto"
       showToolbar
+      homeMode="icon"
       toolbarContent={
         <SolveToolbarItems
           session={session}
@@ -115,86 +116,88 @@ const Solve: React.FC = () => {
           dispatch({ type: SessionActionTypes.CELL_CLICKED, cellKey });
         }}
       />
-      <div className="flex-grow" />
-      <ClueSelector
-        clue={currentSelectedClue}
-        onNextClue={() => {
-          dispatch({
-            type: SessionActionTypes.NEXT_CLUE,
-          });
-        }}
-        onPreviousClue={() => {
-          dispatch({
-            type: SessionActionTypes.PREVIOUS_CLUE,
-          });
-        }}
-        onCluePressed={() => {
-          dispatch({
-            type: SessionActionTypes.TOGGLE_ORIENTATION,
-          });
-        }}
-      />
-      <Keyboard
-        rebus={rebus}
-        pencilMode={pencilMode}
-        onKeyPress={(key, newPencilMode) => {
-          switch (key) {
-            case ACTION_KEYS.TAB:
-              dispatch({
-                type: SessionActionTypes.TOGGLE_ORIENTATION,
-              });
 
-              return;
-            case ACTION_KEYS.BACKSPACE:
-              dispatch({
-                type: SessionActionTypes.BACKSPACE,
-                userID: user.userID,
-              });
+      <div className="flex flex-col justify-end grow">
+        <ClueSelector
+          clue={currentSelectedClue}
+          onNextClue={() => {
+            dispatch({
+              type: SessionActionTypes.NEXT_CLUE,
+            });
+          }}
+          onPreviousClue={() => {
+            dispatch({
+              type: SessionActionTypes.PREVIOUS_CLUE,
+            });
+          }}
+          onCluePressed={() => {
+            dispatch({
+              type: SessionActionTypes.TOGGLE_ORIENTATION,
+            });
+          }}
+        />
+        <Keyboard
+          rebus={rebus}
+          pencilMode={pencilMode}
+          onKeyPress={(key, newPencilMode) => {
+            switch (key) {
+              case ACTION_KEYS.TAB:
+                dispatch({
+                  type: SessionActionTypes.TOGGLE_ORIENTATION,
+                });
 
-              return;
-            case ACTION_KEYS.REBUS:
-              dispatch({
-                type: SessionActionTypes.REBUS_CLICKED,
-              });
-              return;
-            case ACTION_KEYS.ENTER:
-              dispatch({
-                type: SessionActionTypes.NEXT_CLUE,
-              });
-              return;
-            case ACTION_KEYS.RIGHT:
-              dispatch({
-                type: SessionActionTypes.RIGHT_KEY,
-              });
-              return;
-            case ACTION_KEYS.LEFT:
-              dispatch({
-                type: SessionActionTypes.LEFT_KEY,
-              });
-              return;
-            case ACTION_KEYS.UP:
-              dispatch({
-                type: SessionActionTypes.UP_KEY,
-              });
-              return;
-            case ACTION_KEYS.DOWN:
-              dispatch({
-                type: SessionActionTypes.DOWN_KEY,
-              });
-              return;
-            default: {
-              dispatch({
-                type: SessionActionTypes.LETTER_PRESSED,
-                userID: user.userID,
-                letter: key,
-                solutionState: newPencilMode
-                  ? CellSolutionState.PENCIL
-                  : CellSolutionState.NONE,
-              });
+                return;
+              case ACTION_KEYS.BACKSPACE:
+                dispatch({
+                  type: SessionActionTypes.BACKSPACE,
+                  userID: user.userID,
+                });
+
+                return;
+              case ACTION_KEYS.REBUS:
+                dispatch({
+                  type: SessionActionTypes.REBUS_CLICKED,
+                });
+                return;
+              case ACTION_KEYS.ENTER:
+                dispatch({
+                  type: SessionActionTypes.NEXT_CLUE,
+                });
+                return;
+              case ACTION_KEYS.RIGHT:
+                dispatch({
+                  type: SessionActionTypes.RIGHT_KEY,
+                });
+                return;
+              case ACTION_KEYS.LEFT:
+                dispatch({
+                  type: SessionActionTypes.LEFT_KEY,
+                });
+                return;
+              case ACTION_KEYS.UP:
+                dispatch({
+                  type: SessionActionTypes.UP_KEY,
+                });
+                return;
+              case ACTION_KEYS.DOWN:
+                dispatch({
+                  type: SessionActionTypes.DOWN_KEY,
+                });
+                return;
+              default: {
+                dispatch({
+                  type: SessionActionTypes.LETTER_PRESSED,
+                  userID: user.userID,
+                  letter: key,
+                  solutionState: newPencilMode
+                    ? CellSolutionState.PENCIL
+                    : CellSolutionState.NONE,
+                });
+              }
             }
-          }
-        }}
-      />
+          }}
+        />
+      </div>
     </XWordContainer>
   );
 };

@@ -8,6 +8,7 @@ type XWordContainerProps = {
   toolbarContent?: ReactNode;
   belowToolbarContent?: ReactNode;
   className?: string;
+  homeMode?: "icon" | "text";
 };
 
 export const XWordContainer: React.FC<XWordContainerProps> = ({
@@ -17,11 +18,15 @@ export const XWordContainer: React.FC<XWordContainerProps> = ({
   showToolbar,
   belowToolbarContent,
   className,
+  homeMode,
 }) => {
   return (
     <div className="flex flex-col min-h-full dark:bg-slate-800 dark:text-white grow">
       {showToolbar && (
-        <XWordToolbar belowToolbarContent={belowToolbarContent}>
+        <XWordToolbar
+          belowToolbarContent={belowToolbarContent}
+          homeMode={homeMode}
+        >
           {toolbarContent}
         </XWordToolbar>
       )}

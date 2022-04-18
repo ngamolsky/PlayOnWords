@@ -20,7 +20,7 @@ const IconButton = ({
     <button
       ref={ref}
       className={classNames(
-        "p-1",
+        "p-1 active:dark:bg-slate-600",
         className,
         {
           "opacity-50": disabled,

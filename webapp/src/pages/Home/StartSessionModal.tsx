@@ -62,7 +62,7 @@ const NewTab = (
   setSessionID: (sessionID: string) => void
 ) => {
   return (
-    <div className="flex flex-col justify-between h-full space-y-4">
+    <div className="flex flex-col justify-between h-full p-4 space-y-4">
       <p className="w-full mx-auto mt-4 text-lg">
         Start a Session for the puzzle:
       </p>
@@ -106,7 +106,7 @@ const InProgressTab = (
   const [sessions, loadingMessage] = useRecentSessionsForUser(5, user, puzzle);
 
   return (
-    <div className="h-full py-4">
+    <div className="h-full p-4">
       {loadingMessage ? (
         <div className="flex items-center justify-center min-w-full min-h-full grow motion-safe:animate-pulse-fast">
           {loadingMessage}
@@ -150,7 +150,7 @@ const CompletedTab = (
   );
 
   return (
-    <div className="h-full py-4 ">
+    <div className="h-full p-4">
       {loadingMessage ? (
         <div className="flex items-center justify-center min-w-full min-h-full grow motion-safe:animate-pulse-fast">
           {loadingMessage}

@@ -33,6 +33,7 @@ const ShareModal = ({
       isOpen={modalShowing}
       setIsOpen={setModalShowing}
       title="Invite Users"
+      className="p-4"
     >
       <p>Invite Users to this session with the following URL:</p>
       <div className="flex p-4 mt-2 overflow-auto rounded-md bg-slate-200 dark:bg-slate-700">

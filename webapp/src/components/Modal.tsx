@@ -47,7 +47,7 @@ const Modal = ({
         >
           <div
             className={classNames(
-              "flex flex-col w-full max-w-lg overflow-hidden text-left transition-all transform bg-white shadow-xl dark:bg-slate-800 dark:text-white outline-none p-4 mx-auto rounded-lg",
+              "flex flex-col w-full max-w-lg overflow-hidden text-left transition-all transform bg-white shadow-xl dark:bg-slate-800 dark:text-white outline-none mx-auto rounded-lg",
               className
             )}
           >

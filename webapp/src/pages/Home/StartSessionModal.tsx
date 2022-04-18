@@ -64,9 +64,7 @@ const NewTab = (
 ) => {
   return (
     <div className="flex flex-col justify-between h-full p-4 space-y-4">
-      <p className="w-full mx-auto mt-4 text-lg">
-        Start a Session for the puzzle:
-      </p>
+      <p className="w-full mx-auto text-lg">Start a Session for the puzzle:</p>
       <PuzzleCard
         className="w-4/5"
         puzzle={selectedPuzzle}

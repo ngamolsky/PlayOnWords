@@ -1,8 +1,6 @@
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
 import React from "react";
 import { Clue } from "../../models/Puzzle";
-import ChevronLeft from "../icons/ChevronLeft";
-import ChevronRight from "../icons/ChevronRight";
-
 type ClueSelectorProps = {
   clue: Clue;
   onNextClue: () => void;
@@ -17,25 +15,23 @@ export const ClueSelector: React.FC<ClueSelectorProps> = ({
   onCluePressed,
 }) => {
   return (
-    <div className="flex flex-row max-h-16">
-      <div
+    <div className="flex h-16">
+      <ChevronLeftIcon
         onClick={onPreviousClue}
-        className="flex p-2 py-4 dark:bg-slate-700 dark:text-white active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300"
-      >
-        <ChevronLeft />
+        className="w-8 dark:bg-slate-700 active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300 shrink-0"
+      />
+      <div className="flex h-full grow dark:bg-slate-700 dark:text-white active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300">
+        <p
+          className="self-center text-sm text-left select-none "
+          onClick={onCluePressed}
+        >
+          {clue.hint}
+        </p>
       </div>
-      <div
-        className="flex p-2 text-left select-none grow dark:bg-slate-700 dark:text-white active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300"
-        onClick={onCluePressed}
-      >
-        <p className="self-center text-sm">{clue.hint}</p>
-      </div>
-      <div
+      <ChevronRightIcon
         onClick={onNextClue}
-        className="flex justify-center p-2 py-4 dark:bg-slate-700 dark:text-white active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300"
-      >
-        <ChevronRight />
-      </div>
+        className="w-8 dark:bg-slate-700 active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300 shrink-0"
+      />
     </div>
   );
 };

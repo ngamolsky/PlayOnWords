@@ -1,11 +1,13 @@
-import { SupportIcon } from "@heroicons/react/outline";
+import {
+  PencilIcon,
+  ShareIcon,
+  SupportIcon,
+  DotsVerticalIcon,
+} from "@heroicons/react/outline";
 import classNames from "classnames";
 import React, { Dispatch } from "react";
 import { useHistory } from "react-router-dom";
 import Dropdown from "../../components/Dropdown";
-import Pencil from "../../components/icons/Pencil";
-import Share from "../../components/icons/Share";
-import VerticalDots from "../../components/icons/VerticalDots";
 import Timer from "../../components/Timer";
 import { Session } from "../../models/Session";
 import { User } from "../../models/User";
@@ -38,19 +40,17 @@ const SolveToolbarItems = ({
           <Timer sessionStartDate={session.startTime.toDate()} />
         )}
       </div>
-      <div
+      <ShareIcon
         className={classNames(
-          "h-8 w-8 rounded-md p-1 active:dark:bg-slate-600 active:bg-slate-300 cursor-pointer outline-none"
+          "h-8 w-8 rounded-md p-1 active:dark:bg-slate-600 active:bg-slate-300 cursor-pointer outline-none stroke-1"
         )}
         onClick={() => {
           showShareModal(true);
         }}
-      >
-        <Share />
-      </div>
-      <div
+      />
+      <PencilIcon
         className={classNames(
-          "h-8 w-8 rounded-md p-1 cursor-pointer outline-none",
+          "h-8 w-8 rounded-md p-1 cursor-pointer outline-none stroke-1",
           {
             "dark:bg-slate-600 bg-slate-300": pencilMode,
           }
@@ -60,10 +60,7 @@ const SolveToolbarItems = ({
             type: SessionActionTypes.PENCIL_CLICKED,
           });
         }}
-      >
-        <Pencil />
-      </div>
-
+      />
       <Dropdown
         selectedItemIndex={autocheck ? 0 : undefined}
         buttonContent={
@@ -138,9 +135,7 @@ const SolveToolbarItems = ({
       />
       <Dropdown
         buttonContent={
-          <div className="w-8 h-8 p-1 rounded-md outline-none active:bg-slate-300">
-            <VerticalDots />
-          </div>
+          <DotsVerticalIcon className="w-8 h-8 p-1 rounded-md outline-none stroke-1 active:bg-slate-300" />
         }
         items={[
           {

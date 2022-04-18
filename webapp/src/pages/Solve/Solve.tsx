@@ -71,7 +71,13 @@ const Solve: React.FC = () => {
   }, [session]);
 
   if (!session) {
-    return <XWordContainer loadingMessage={loadingMessage} showToolbar />;
+    if (loadingMessage) {
+      return <XWordContainer loadingMessage={loadingMessage} showToolbar />;
+    } else {
+      return (
+        <XWordContainer loadingMessage={"No session found."} showToolbar />
+      );
+    }
   }
 
   const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(

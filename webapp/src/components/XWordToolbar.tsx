@@ -24,7 +24,7 @@ export const XWordToolbar: React.FC<{
               {APP_NAME}
             </p>
           )}
-          <div className="flex justify-end flex-1 mx-4 my-auto">{children}</div>
+          <div className="flex justify-end flex-1 mx-2 my-auto">{children}</div>
         </div>
         <Transition
           as={Fragment}

@@ -4,8 +4,8 @@ import Modal from "../../components/Modal";
 import { User } from "../../models/User";
 import { Session } from "../../models/Session";
 import { BASE_URL } from "../../constants";
-import CopyToClipboard from "../../components/icons/CopyToClipboard";
 import { Transition } from "@headlessui/react";
+import { ClipboardCopyIcon } from "@heroicons/react/outline";
 
 const ShareModal = ({
   modalShowing,
@@ -45,7 +45,7 @@ const ShareModal = ({
           }}
           tabIndex={0}
         >
-          <CopyToClipboard />
+          <ClipboardCopyIcon />
         </div>
         <p className="my-auto ml-3 font-mono whitespace-nowrap">{shareURL}</p>
       </div>

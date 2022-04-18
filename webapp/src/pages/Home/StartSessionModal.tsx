@@ -32,7 +32,7 @@ const StartSessionModal = ({
       <Tabs
         tabArray={[
           {
-            title: "New Session",
+            title: "New",
             content: NewTab(
               selectedPuzzle,
               user,

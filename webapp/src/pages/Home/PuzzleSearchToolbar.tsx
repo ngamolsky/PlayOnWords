@@ -1,13 +1,9 @@
 import { Listbox, Transition } from "@headlessui/react";
-import { CalendarIcon } from "@heroicons/react/outline";
 import { SelectorIcon, CheckIcon } from "@heroicons/react/solid";
 import classNames from "classnames";
-import React, { Fragment, useState } from "react";
-import DatePicker from "react-datepicker";
-import IconButton from "../../components/IconButton";
+import React, { Fragment } from "react";
 import { DAYS } from "../../utils/timeAndDateUtils";
 import "react-datepicker/dist/react-datepicker.css";
-import { FIRST_PUZZLE_DATE } from "../../constants";
 
 type PuzzleSearchToolbarProps = {
   dayOfWeek?: number;
@@ -20,11 +16,8 @@ type PuzzleSearchToolbarProps = {
 const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
   dayOfWeek,
   setDayOfWeek,
-  date,
-  setDate,
   mostRecentPuzzleDate,
 }) => {
-  const [isCalendarOpen, setIsCalendarOpen] = useState<boolean>(false);
 
   const maxPuzzleDate: Date = mostRecentPuzzleDate
     ? new Date(mostRecentPuzzleDate)
@@ -45,7 +38,7 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
       >
         <Listbox.Button
           className={
-            "bg-white dark:bg-slate-800 p-2 flex rounded-md outline-none w-40"
+            "bg-white dark:bg-slate-800 p-2 flex rounded-md outline-none w-40 dark:ring-white ring-1 ring-slate-300 text-left"
           }
         >
           <span className="mx-2 grow">
@@ -97,32 +90,6 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
           </Listbox.Options>
         </Transition>
       </Listbox>
-      {/* <IconButton
-        className="h-full ml-2 rounded-md dark:bg-slate-800 active:dark:bg-slate-700"
-        onClick={() => {
-          setIsCalendarOpen(!isCalendarOpen);
-        }}
-      >
-        <CalendarIcon className="h-8 p-1 stroke-white" />
-      </IconButton>
-      {isCalendarOpen && (
-        <DatePicker
-          inline
-          minDate={FIRST_PUZZLE_DATE}
-          maxDate={maxPuzzleDate}
-          selected={date}
-          onChange={(date) => {
-            if (date) {
-              date.setUTCHours(0);
-
-              console.log(date);
-
-              setDate(date);
-              setIsCalendarOpen(false);
-            }
-          }}
-        />
-      )} */}
     </>
   );
 };

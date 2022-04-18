@@ -18,7 +18,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 }) => {
   return (
     <Menu as="div" className="inline-block text-center outline-none">
-      <Menu.Button className={"outline-none"}>{buttonContent}</Menu.Button>
+      <Menu.Button className="outline-none">{buttonContent}</Menu.Button>
       <Transition
         as={Fragment}
         enter="transition ease-out duration-100"

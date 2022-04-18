@@ -50,9 +50,9 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({
         {toXWordDate(puzzle.puzzleTimestamp.toDate())}
       </p>
       <div className="flex justify-between">
-        <p className="ml-1 opacity-50">New York Times</p>
+        <p className="ml-1 text-slate-500">New York Times</p>
         {hasCompletedPuzzle && (
-          <BadgeCheckIcon className="h-6 my-auto fill-teal-400" />
+          <BadgeCheckIcon className="h-6 my-auto dark:fill-teal-400 fill-teal-600" />
         )}
       </div>
     </button>

@@ -14,6 +14,7 @@ import {
   updateDoc,
   where,
   arrayUnion,
+  deleteDoc,
 } from "firebase/firestore";
 import { useState, useEffect, Dispatch, useReducer } from "react";
 import { db } from "../config/firebase";
@@ -109,6 +110,19 @@ export const startSession = async (
   }
 
   await setDoc(sessionRef, session);
+};
+
+
+export const deleteSession = async (sessionID: string): Promise<void> => {
+  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID).withConverter(
+    sessionConverter
+  );
+
+  if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+    console.log("Deleting Session:", sessionID);
+  }
+
+  await deleteDoc(sessionRef);
 };
 
 export const getSession = async (sessionID: string): Promise<Session> => {

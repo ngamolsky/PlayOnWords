@@ -45,7 +45,7 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
       >
         <Listbox.Button
           className={
-            "bg-slate-300 dark:bg-slate-800 p-2 flex rounded-md outline-none w-40"
+            "bg-white dark:bg-slate-800 p-2 flex rounded-md outline-none w-40"
           }
         >
           <span className="mx-2 grow">
@@ -64,13 +64,13 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <Listbox.Options className="absolute w-40 overflow-auto divide-y rounded-md shadow-lg outline-none cursor-pointer dark:divide-slate-500 dark:bg-slate-800 ring-1 dark:ring-white ">
+          <Listbox.Options className="absolute w-40 overflow-auto bg-white divide-y rounded-md shadow-lg outline-none cursor-pointer dark:divide-slate-500 dark:bg-slate-800 ring-1 dark:ring-white ring-slate-200">
             {["Any Day"].concat(DAYS).map((day, index) => (
               <Listbox.Option
                 key={index}
                 value={day}
                 className={({ active }) =>
-                  `w-full p-3 ${active ? "dark:bg-slate-700" : ""}`
+                  `w-full p-3 ${active ? "dark:bg-slate-700 bg-slate-200" : ""}`
                 }
               >
                 {({ selected }) => {

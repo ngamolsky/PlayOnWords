@@ -10,7 +10,7 @@ const IconButton = ({
   ref,
 }: {
   children?: ReactNode;
-  onClick?: () => void;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   className?: string;
   disabled?: boolean;
   selected?: boolean;

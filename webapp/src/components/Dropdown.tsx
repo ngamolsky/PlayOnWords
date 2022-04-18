@@ -17,8 +17,8 @@ const Dropdown: React.FC<DropdownProps> = ({
   selectedItemIndex,
 }) => {
   return (
-    <Menu as="div" className="inline-block text-center">
-      <Menu.Button>{buttonContent}</Menu.Button>
+    <Menu as="div" className="inline-block text-center outline-none">
+      <Menu.Button className={"outline-none"}>{buttonContent}</Menu.Button>
       <Transition
         as={Fragment}
         enter="transition ease-out duration-100"
@@ -30,7 +30,7 @@ const Dropdown: React.FC<DropdownProps> = ({
       >
         <Menu.Items
           className={classNames(
-            "absolute grid grid-cols-1 bg-white divide-y rounded-md shadow-lg outline-none right-2 dark:bg-slate-800 ring-white ring-1"
+            "absolute grid grid-cols-1 bg-white divide-y rounded-md shadow-lg outline-none right-2 dark:bg-slate-800 dark:ring-white ring-1 ring-slate-200"
           )}
         >
           {items.map((item, index) => {

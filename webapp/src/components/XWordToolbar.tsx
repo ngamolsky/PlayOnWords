@@ -36,7 +36,7 @@ export const XWordToolbar: React.FC<{
           leaveFrom="transform opacity-100 scale-y-100 origin-top"
           leaveTo="transform opacity-0 scale-y-50 origin-top"
         >
-          <div className="flex w-full p-2 bg-slate-700">
+          <div className="flex w-full p-2 dark:bg-slate-700 bg-slate-300">
             {belowToolbarContent}
           </div>
         </Transition>

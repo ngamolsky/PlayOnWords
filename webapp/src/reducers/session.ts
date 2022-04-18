@@ -359,12 +359,13 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       return state;
     }
     case SessionActionTypes.LETTER_PRESSED: {
-      const { boardState, sessionID, puzzle } = _requireSession(session);
+      const { boardState, sessionID, puzzle, sessionStatus } =
+        _requireSession(session);
       const { letter, userID, solutionState } = action;
       const cellSolution = puzzle.solutions[selectedCellKey];
       const cellState = boardState[selectedCellKey];
 
-      if (!cellSolution || isPuzzleComplete(boardState, puzzle.solutions))
+      if (!cellSolution || sessionStatus == SessionStatus.COMPLETE)
         return state;
 
       const isCellFull = !!cellState.currentLetter;
@@ -488,12 +489,17 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         orientation
       );
 
-      console.log(nextClue, didLoopPuzzle);
+   
 
       let newState = { ...state };
       if (didLoopPuzzle) {
         newState = _toggleOrientation(newState);
       }
+
+      if (isPuzzleComplete(boardState, puzzle.solutions)) {
+        return _selectCell(newState, [nextClue.x, nextClue.y].toString());
+      }
+
 
       const firstCellKeyInClue = [nextClue.x, nextClue.y].toString();
       const isCellFull = !!boardState[firstCellKeyInClue].currentLetter;
@@ -507,7 +513,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         newState.localState.orientation
       );
 
-      console.log(didLoopPuzzleFromFindingEmptyCell);
 
       if (didLoopPuzzleFromFindingEmptyCell) {
         newState = _toggleOrientation(newState);

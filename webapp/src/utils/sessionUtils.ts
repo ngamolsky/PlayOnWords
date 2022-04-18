@@ -1,3 +1,4 @@
+import { FIRST_CELL_KEY } from "../constants";
 import { Clue, Puzzle, Solutions } from "../models/Puzzle";
 import {
   CellSelectionState,
@@ -169,7 +170,11 @@ export const getNextEmptyCellKey = (
   didLoopPuzzle: boolean;
 } => {
   if (isPuzzleComplete(boardState, puzzle.solutions)) {
-    throw new Error("Tried to get next empty cell on complete puzzle");
+    return {
+      nextEmptyCellKey: FIRST_CELL_KEY,
+      didChangeClues: false,
+      didLoopPuzzle: false,
+    };
   }
 
   let { nextCellKey, didChangeClues, didLoopPuzzle } = getNextCellKey(

@@ -34,9 +34,14 @@ const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
     );
 
   return (
-    <Modal isOpen title={"Puzzle Complete!"} setIsOpen={setIsOpen}>
+    <Modal
+      isOpen
+      title={"Puzzle Complete!"}
+      setIsOpen={setIsOpen}
+      className="p-4"
+    >
       <>
-        <div className="flex-col p-4 rounded-md bg-slate-200 dark:bg-slate-700">
+        <div className="flex-col p-4 rounded-md bg-slate-200 dark:bg-slate-700 ">
           <table className="w-full table-fixed">
             <thead>
               <tr>
@@ -74,7 +79,7 @@ const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
         </div>
         <div className="flex flex-row justify-end mt-2 space-y-2">
           <button
-            className="p-2 rounded-md bg-slate-200 dark:bg-slate-700"
+            className="p-2 rounded-md outline-none bg-slate-200 dark:bg-slate-700"
             onClick={() => {
               setIsOpen(false);
             }}
@@ -92,9 +97,14 @@ const IncorrectModal = ({
 }: {
   setIsOpen: (isOpen: boolean) => void;
 }) => (
-  <Modal isOpen={true} title={"Almost There!"} setIsOpen={setIsOpen}>
+  <Modal
+    isOpen={true}
+    title={"Almost There!"}
+    setIsOpen={setIsOpen}
+    className="p-4"
+  >
     <button
-      className="p-2 rounded-md bg-slate-200 dark:bg-slate-700"
+      className="p-2 rounded-md outline-none bg-slate-200 dark:bg-slate-700"
       onClick={() => {
         setIsOpen(false);
       }}

@@ -3,6 +3,7 @@ import { toXWordTime } from "../../utils/timeAndDateUtils";
 import { Session, SessionStatus } from "../../models/Session";
 import classNames from "classnames";
 import XWordIcon from "../../images/XWordIcon";
+import { getPercentageComplete } from "../../utils/sessionUtils";
 
 interface SessionCardProps {
   session: Session;
@@ -13,8 +14,11 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   session,
   onClick,
 }) => {
-  const { sessionStatus, participants } = session;
+  const { sessionStatus, participants, boardState, puzzle } = session;
   const completed = sessionStatus == SessionStatus.COMPLETE;
+
+  const percentComplete = getPercentageComplete(boardState, puzzle.solutions);
+
   return (
     <div
       className={classNames(
@@ -36,6 +40,9 @@ export const SessionCard: React.FC<SessionCardProps> = ({
           </p>
           <p className="text-sm opacity-50">
             {toXWordTime(session.lastUpdatedTime.toDate())}
+          </p>
+          <p className="text-sm opacity-50">
+            Percent complete: {percentComplete}%
           </p>
         </div>
       </div>

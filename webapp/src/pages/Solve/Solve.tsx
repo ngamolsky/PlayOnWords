@@ -139,7 +139,7 @@ const Solve: React.FC = () => {
         <Keyboard
           rebus={rebus}
           pencilMode={pencilMode}
-          onKeyPress={(key, newPencilMode) => {
+          onKeyPress={(key, shiftModified, newPencilMode) => {
             switch (key) {
               case ACTION_KEYS.TAB:
                 dispatch({
@@ -160,9 +160,16 @@ const Solve: React.FC = () => {
                 });
                 return;
               case ACTION_KEYS.ENTER:
-                dispatch({
-                  type: SessionActionTypes.NEXT_CLUE,
-                });
+                if (shiftModified) {
+                  dispatch({
+                    type: SessionActionTypes.PREVIOUS_CLUE,
+                  });
+                } else {
+                  dispatch({
+                    type: SessionActionTypes.NEXT_CLUE,
+                  });
+                }
+
                 return;
               case ACTION_KEYS.RIGHT:
                 dispatch({

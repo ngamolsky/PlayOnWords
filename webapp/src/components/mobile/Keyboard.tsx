@@ -3,7 +3,11 @@ import React, { useEffect } from "react";
 import classNames from "classnames";
 
 type KeyboardProps = {
-  onKeyPress: (key: string, pencilMode: boolean) => void;
+  onKeyPress: (
+    key: string,
+    isShiftModified: boolean,
+    pencilMode: boolean
+  ) => void;
   rebus: boolean;
   pencilMode: boolean;
   className?: string;
@@ -43,7 +47,7 @@ export const Keyboard = ({
         !e.metaKey
       ) {
         e.preventDefault();
-        onKeyPress(e.key.toUpperCase(), pencilMode);
+        onKeyPress(e.key.toUpperCase(), e.shiftKey, pencilMode);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -90,7 +94,7 @@ export const Keyboard = ({
                     }
                   )}
                   onClick={() => {
-                    onKeyPress(character, pencilMode);
+                    onKeyPress(character, false, pencilMode);
                   }}
                 >
                   <p className="my-auto text-lg">

@@ -1,8 +1,8 @@
+import { SupportIcon } from "@heroicons/react/outline";
 import classNames from "classnames";
 import React, { Dispatch } from "react";
 import { useHistory } from "react-router-dom";
 import Dropdown from "../../components/Dropdown";
-import Help from "../../components/icons/Help";
 import Pencil from "../../components/icons/Pencil";
 import Share from "../../components/icons/Share";
 import VerticalDots from "../../components/icons/VerticalDots";
@@ -67,13 +67,11 @@ const SolveToolbarItems = ({
       <Dropdown
         selectedItemIndex={autocheck ? 0 : undefined}
         buttonContent={
-          <div className="w-8 h-8 p-1 rounded-md outline-none active:bg-slate-300 active:dark:bg-slate-600">
-            <Help />
-          </div>
+          <SupportIcon className="w-8 h-8 p-1 rounded-md outline-none stroke-1 active:bg-slate-300 active:dark:bg-slate-600" />
         }
         items={[
           {
-            node: <p>Autocheck</p>,
+            node: <p className="cursor-pointer select-none">Autocheck</p>,
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.AUTOCHECK_CLICKED,
@@ -81,7 +79,7 @@ const SolveToolbarItems = ({
             },
           },
           {
-            node: <p>Check Square</p>,
+            node: <p className="cursor-pointer select-none">Check Square</p>,
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_SQUARE,
@@ -89,7 +87,7 @@ const SolveToolbarItems = ({
             },
           },
           {
-            node: <p>Check Word</p>,
+            node: <p className="cursor-pointer select-none">Check Word</p>,
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_WORD,
@@ -97,7 +95,7 @@ const SolveToolbarItems = ({
             },
           },
           {
-            node: <p>Check Puzzle</p>,
+            node: <p className="cursor-pointer select-none">Check Puzzle</p>,
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.CHECK_PUZZLE,
@@ -105,7 +103,7 @@ const SolveToolbarItems = ({
             },
           },
           {
-            node: <p>Reveal Square</p>,
+            node: <p className="cursor-pointer select-none">Reveal Square</p>,
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_SQUARE,
@@ -113,7 +111,7 @@ const SolveToolbarItems = ({
             },
           },
           {
-            node: <p>Reveal Word</p>,
+            node: <p className="cursor-pointer select-none">Reveal Word</p>,
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_WORD,
@@ -121,7 +119,7 @@ const SolveToolbarItems = ({
             },
           },
           {
-            node: <p>Reveal Puzzle</p>,
+            node: <p className="cursor-pointer select-none">Reveal Puzzle</p>,
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_PUZZLE,
@@ -129,7 +127,7 @@ const SolveToolbarItems = ({
             },
           },
           {
-            node: <p>Reset Puzzle</p>,
+            node: <p className="cursor-pointer select-none">Reset Puzzle</p>,
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.RESET_PUZZLE,

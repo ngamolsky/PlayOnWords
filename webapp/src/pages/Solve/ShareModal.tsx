@@ -61,7 +61,7 @@ const ShareModal = ({
         <Modal
           isOpen={showCopied}
           setIsOpen={setShowCopied}
-          className="mt-20 w-fit"
+          className="p-4 mt-20 w-fit"
         >
           Copied!
         </Modal>

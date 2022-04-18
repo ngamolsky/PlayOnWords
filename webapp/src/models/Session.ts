@@ -286,7 +286,7 @@ export const useSessionActions = (): Dispatch<SessionActions> => {
 export const useRecentSessionsForUser = (
   numSessions: number,
   participant: User,
-  puzzle: Puzzle,
+  puzzle?: Puzzle,
   completed?: boolean
 ): [Session[] | undefined, string | undefined] => {
   const [sessionsState, setSessionsState] = useState<{
@@ -298,38 +298,40 @@ export const useRecentSessionsForUser = (
   });
 
   useEffect(() => {
-    const q = query(
-      collection(db, SESSIONS_COLLECTION).withConverter(sessionConverter),
-      where("participants", "array-contains", participant),
-      where(
-        "sessionStatus",
-        "==",
-        completed ? SessionStatus.COMPLETE : SessionStatus.STARTED
-      ),
-      where("puzzle.puzzleID", "==", puzzle.puzzleID),
-      orderBy("lastUpdatedTime", "desc"),
-      limit(numSessions)
-    );
+    if (puzzle) {
+      const q = query(
+        collection(db, SESSIONS_COLLECTION).withConverter(sessionConverter),
+        where("participants", "array-contains", participant),
+        where(
+          "sessionStatus",
+          "==",
+          completed ? SessionStatus.COMPLETE : SessionStatus.STARTED
+        ),
+        where("puzzle.puzzleID", "==", puzzle.puzzleID),
+        orderBy("lastUpdatedTime", "desc"),
+        limit(numSessions)
+      );
 
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      const sessions: Session[] = [];
-      querySnapshot.forEach((doc) => {
-        sessions.push(doc.data());
+      const unsub = onSnapshot(q, (querySnapshot) => {
+        const sessions: Session[] = [];
+        querySnapshot.forEach((doc) => {
+          sessions.push(doc.data());
+        });
+
+        if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+          console.log(
+            "Firestore Request: useRecentSessionsForUser. Sessions updated:",
+            JSON.stringify(sessions.map((session) => session.sessionID))
+          );
+        }
+
+        setSessionsState({
+          sessions,
+          loadingMessage: undefined,
+        });
       });
-
-      if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
-        console.log(
-          "Firestore Request: useRecentSessionsForUser. Sessions updated:",
-          JSON.stringify(sessions.map((session) => session.sessionID))
-        );
-      }
-
-      setSessionsState({
-        sessions,
-        loadingMessage: undefined,
-      });
-    });
-    return unsub;
+      return unsub;
+    }
   }, [numSessions]);
 
   return [sessionsState.sessions, sessionsState.loadingMessage];

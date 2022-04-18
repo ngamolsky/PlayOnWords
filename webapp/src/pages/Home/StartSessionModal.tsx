@@ -10,6 +10,7 @@ import { PuzzleCard } from "./PuzzleCard";
 import { startSession, useRecentSessionsForUser } from "../../models/Session";
 import { SessionCard } from "./SessionCard";
 import { toXWordDate } from "../../utils/timeAndDateUtils";
+import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../../constants";
 
 const StartSessionModal = ({
   modalShowing,
@@ -103,7 +104,11 @@ const InProgressTab = (
   puzzle: Puzzle,
   setSessionID: (sessionID: string) => void
 ) => {
-  const [sessions, loadingMessage] = useRecentSessionsForUser(5, user, puzzle);
+  const [sessions, loadingMessage] = useRecentSessionsForUser(
+    NUM_PUZZLES_TO_SHOW_ON_HOME,
+    user,
+    puzzle
+  );
 
   return (
     <div className="h-full p-4">
@@ -143,7 +148,7 @@ const CompletedTab = (
   setSessionID: (sessionID: string) => void
 ) => {
   const [sessions, loadingMessage] = useRecentSessionsForUser(
-    5,
+    NUM_PUZZLES_TO_SHOW_ON_HOME,
     user,
     puzzle,
     true

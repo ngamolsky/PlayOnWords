@@ -10,6 +10,7 @@ import { AdjustmentsIcon } from "@heroicons/react/outline";
 import IconButton from "../../components/IconButton";
 import PuzzleSearchToolbar from "./PuzzleSearchToolbar";
 
+
 const Home: React.FC = () => {
   const history = useHistory();
 
@@ -21,13 +22,12 @@ const Home: React.FC = () => {
   const [dayOfWeek, setDayOfWeek] = useState<number>();
   const [date, setDate] = useState<Date>();
 
+  const user = useLoggedInUser();
   const [puzzles, puzzleLoadingMessage] = usePuzzlesBySearch(dayOfWeek, date);
 
   useEffect(() => {
     setModalShowing(!!selectedPuzzle);
   }, [selectedPuzzle]);
-
-  const user = useLoggedInUser();
 
   return (
     <XWordContainer
@@ -93,15 +93,17 @@ const Home: React.FC = () => {
       )}
       <div className="flex flex-col justify-center max-w-md mx-auto">
         {puzzles &&
-          puzzles.map((puzzle) => (
-            <PuzzleCard
-              key={puzzle.puzzleID}
-              puzzle={puzzle}
-              onClick={async () => {
-                setSelectedPuzzle(puzzle);
-              }}
-            />
-          ))}
+          puzzles.map((puzzle) => {
+            return (
+              <PuzzleCard
+                key={puzzle.puzzleID}
+                puzzle={puzzle}
+                onClick={async () => {
+                  setSelectedPuzzle(puzzle);
+                }}
+              />
+            );
+          })}
       </div>
     </XWordContainer>
   );

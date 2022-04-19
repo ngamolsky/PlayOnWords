@@ -79,6 +79,7 @@ export enum SessionActionTypes {
   REVEAL_PUZZLE = "REVEAL_PUZZLE",
   REVEAL_WORD = "REVEAL_WORD",
   REVEAL_SQUARE = "REVEAL_SQUARE",
+  REVEAL_MOST_SQUARES = "REVEAL_MOST_SQUARES",
   RESET_PUZZLE = "RESET_PUZZLE",
 }
 
@@ -129,6 +130,7 @@ export type SessionActions =
   | { type: SessionActionTypes.CHECK_PUZZLE }
   | { type: SessionActionTypes.REVEAL_SQUARE }
   | { type: SessionActionTypes.REVEAL_WORD }
+  | { type: SessionActionTypes.REVEAL_MOST_SQUARES }
   | { type: SessionActionTypes.REVEAL_PUZZLE }
   | { type: SessionActionTypes.RESET_PUZZLE };
 
@@ -277,12 +279,11 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
 
       const firstCell = boardState[firstCellKey];
 
-      console.log(firstCellKey);
-
       const firstSelectedKey = firstCell.currentLetter
         ? getNextEmptyCellKey(firstCellKey, puzzle, boardState, orientation)
             .nextEmptyCellKey
         : firstCellKey;
+
       return {
         ...state,
         localState: {
@@ -424,8 +425,12 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       );
     }
     case SessionActionTypes.BACKSPACE: {
-      const { boardState, puzzle, sessionID } = _requireSession(session);
+      const { boardState, puzzle, sessionID, sessionStatus } =
+        _requireSession(session);
 
+      if (sessionStatus == SessionStatus.COMPLETE) {
+        return state;
+      }
       let newState = { ...state };
       if (rebus) {
         newState = _toggleRebus(newState);
@@ -795,6 +800,33 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
           currentLetter: cellSolution[0],
           solutionState: CellSolutionState.REVEALED,
         };
+      });
+
+      _updateBoardState(sessionID, newBoardState);
+      return state;
+    }
+    case SessionActionTypes.REVEAL_MOST_SQUARES: {
+      const percentToReveal = 98;
+      const { sessionID, boardState, puzzle } = _requireSession(session);
+      const cellSolution = puzzle.solutions[selectedCellKey];
+
+      if (!cellSolution) return state;
+
+      const newBoardState = boardState;
+      Object.keys(boardState).forEach((cellKey) => {
+        const cellSolution = puzzle.solutions[cellKey];
+
+        if (!cellSolution) return;
+
+        if (Math.random() < percentToReveal / 100) {
+          delete newBoardState[cellKey].lastEditedBy;
+
+          newBoardState[cellKey] = {
+            ...newBoardState[cellKey],
+            currentLetter: cellSolution[0],
+            solutionState: CellSolutionState.REVEALED,
+          };
+        }
       });
 
       _updateBoardState(sessionID, newBoardState);

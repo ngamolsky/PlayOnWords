@@ -9,6 +9,7 @@ import { ClipboardCopyIcon } from "@heroicons/react/outline";
 import {
   getPercentageComplete,
   getSessionCompletionPercentages,
+  getSessionRevealedPercentage,
 } from "../../utils/sessionUtils";
 
 const ShareModal = ({
@@ -71,6 +72,12 @@ const ShareModal = ({
                 </tr>
               )
             )}
+            <tr key={"revealed"} className="text-red-600 dark:text-red-400">
+              <td className="py-2">Revealed</td>
+              <td className="py-2">{`${getSessionRevealedPercentage(
+                session
+              ).toFixed(2)}%`}</td>
+            </tr>
             <tr key={"total"} className="font-bold">
               <td className="py-2">Total</td>
               <td className="py-2">{`${getPercentageComplete(

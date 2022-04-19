@@ -1,6 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react";
 import classNames from "classnames";
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 
 const Modal = ({
   isOpen,
@@ -15,6 +15,18 @@ const Modal = ({
   children?: React.ReactNode;
   className?: string;
 }) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isOpen) {
+        e.stopPropagation();
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog

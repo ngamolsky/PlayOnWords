@@ -1,13 +1,15 @@
 import {
   PencilIcon,
-  ShareIcon,
   SupportIcon,
   DotsVerticalIcon,
+  InformationCircleIcon,
+  UserGroupIcon,
 } from "@heroicons/react/outline";
 import classNames from "classnames";
-import React, { Dispatch } from "react";
+import React, { Dispatch, useState } from "react";
 import { useHistory } from "react-router-dom";
 import Dropdown from "../../components/Dropdown";
+import Modal from "../../components/Modal";
 import Timer from "../../components/Timer";
 import { Session } from "../../models/Session";
 import { User } from "../../models/User";
@@ -29,6 +31,9 @@ const SolveToolbarItems = ({
   showShareModal: (isOpen: boolean) => void;
 }) => {
   const history = useHistory();
+  const [isTitleModalShowing, setIsTitleModalShowing] =
+    useState<boolean>(false);
+
   return (
     <div className="relative flex flex-row h-8 space-x-2">
       <div className="my-auto">
@@ -40,7 +45,23 @@ const SolveToolbarItems = ({
           <Timer sessionStartDate={session.startTime.toDate()} />
         )}
       </div>
-      <ShareIcon
+      {session.puzzle.title && (
+        <InformationCircleIcon
+          className="w-8 h-8 p-1 rounded-md outline-none cursor-pointer stroke-1 active:dark:bg-slate-600 active:bg-slate-300"
+          onClick={() => {
+            setIsTitleModalShowing(!isTitleModalShowing);
+          }}
+        />
+      )}
+      {isTitleModalShowing && (
+        <Modal isOpen={isTitleModalShowing} setIsOpen={setIsTitleModalShowing}>
+          <p className="p-4">
+            <span className="font-bold text-center">Title: </span>
+            {session.puzzle.title}
+          </p>
+        </Modal>
+      )}
+      <UserGroupIcon
         className={classNames(
           "h-8 w-8 rounded-md p-1 active:dark:bg-slate-600 active:bg-slate-300 cursor-pointer outline-none stroke-1"
         )}
@@ -112,6 +133,16 @@ const SolveToolbarItems = ({
             onClick: () => {
               dispatch({
                 type: SessionActionTypes.REVEAL_WORD,
+              });
+            },
+          },
+          {
+            node: (
+              <p className="cursor-pointer select-none">Reveal Most Squares</p>
+            ),
+            onClick: () => {
+              dispatch({
+                type: SessionActionTypes.REVEAL_MOST_SQUARES,
               });
             },
           },

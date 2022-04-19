@@ -4,6 +4,7 @@ import { Session } from "../../models/Session";
 import {
   checkPuzzle,
   getSessionCompletionPercentages,
+  getSessionRevealedPercentage,
 } from "../../utils/sessionUtils";
 import { secondsToTimeString } from "../../utils/timeAndDateUtils";
 
@@ -60,6 +61,12 @@ const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
                   </tr>
                 )
               )}
+              <tr key={"revealed"} className="text-red-600 dark:text-red-400">
+                <td className="py-2">Revealed</td>
+                <td className="py-2">{`${getSessionRevealedPercentage(
+                  session
+                ).toFixed(2)}%`}</td>
+              </tr>
             </tbody>
           </table>
         </div>

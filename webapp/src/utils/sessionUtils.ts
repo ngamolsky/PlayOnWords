@@ -404,7 +404,6 @@ export const getCombinedBoardState = (
   );
 
   const relatedCellKeys: string[] = [];
-  console.log(currentSelectedClue, selectedCellKey);
 
   if (currentSelectedClue.relatedClueNumbers) {
     const horizontalClues =
@@ -559,6 +558,20 @@ export const getSessionCompletionPercentages = (
   return userPercentages;
 };
 
+export const getSessionRevealedPercentage = (session: Session): number => {
+  const { puzzle } = session;
+
+  const totalSelectableCellCount = Object.values(puzzle.solutions).filter(
+    (each) => !!each
+  ).length;
+
+  const revealed = Object.values(session.boardState).filter(
+    (each) => each.solutionState == CellSolutionState.REVEALED
+  ).length;
+
+  return (100 * revealed) / totalSelectableCellCount;
+};
+
 export const getBoardStateDifferences = (
   oldBoardState: BoardState,
   newBoardState: BoardState
@@ -587,7 +600,24 @@ export const getBoardStateDifferences = (
     }
   });
 
-  console.log("Differences!", differences);
-
   return differences;
 };
+
+export const getMostlyFinishedBoardState = (
+  boardState: BoardState,
+  puzzle: Puzzle
+): BoardState => {
+  const approxPercentComplete = 95;
+  const newBoardState = { ...boardState };
+  Object.keys(boardState).forEach((cellKey) => {
+    if (Math.random() < approxPercentComplete / 100) {
+      const cellSolution = puzzle.solutions[cellKey];
+      newBoardState[cellKey].currentLetter = Array.isArray(cellSolution)
+        ? cellSolution[0]
+        : (puzzle.solutions[cellKey] as string | null);
+    }
+  });
+
+  return newBoardState;
+};
+

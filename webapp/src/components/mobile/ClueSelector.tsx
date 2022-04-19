@@ -20,11 +20,11 @@ export const ClueSelector: React.FC<ClueSelectorProps> = ({
         onClick={onPreviousClue}
         className="w-8 dark:bg-slate-700 active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300 shrink-0"
       />
-      <div className="flex h-full grow dark:bg-slate-700 dark:text-white active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300">
-        <p
-          className="self-center text-sm text-left select-none "
-          onClick={onCluePressed}
-        >
+      <div
+        className="flex h-full grow dark:bg-slate-700 dark:text-white active:dark:bg-slate-800 active:bg-slate-200 bg-slate-300"
+        onClick={onCluePressed}
+      >
+        <p className="self-center text-sm text-left select-none ">
           {clue.hint}
         </p>
       </div>

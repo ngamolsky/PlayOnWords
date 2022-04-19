@@ -28,7 +28,7 @@ const EndSessionModal: React.FC<EndSessionModalProps> = ({
 
 const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
   const sessionResults = getSessionCompletionPercentages(session);
-
+  const sessionPercentRevealed = getSessionRevealedPercentage(session);
   if (!session.endTime)
     throw new Error(
       "Tried to show SessionCompleteModal without session end time"
@@ -61,12 +61,14 @@ const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
                   </tr>
                 )
               )}
-              <tr key={"revealed"} className="text-red-600 dark:text-red-400">
-                <td className="py-2">Revealed</td>
-                <td className="py-2">{`${getSessionRevealedPercentage(
-                  session
-                ).toFixed(2)}%`}</td>
-              </tr>
+              {sessionPercentRevealed > 0 && (
+                <tr key={"revealed"} className="text-red-600 dark:text-red-400">
+                  <td className="py-2">Revealed</td>
+                  <td className="py-2">{`${sessionPercentRevealed.toFixed(
+                    2
+                  )}%`}</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

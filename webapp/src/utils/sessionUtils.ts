@@ -65,6 +65,15 @@ export const isFirstCellInClue = (
     : y == currentClue.y;
 };
 
+export const getFirstSelectableCellKey = (puzzle: Puzzle): string => {
+  const sortedKeys = getSortedCellKeyArray(Object.keys(puzzle.solutions));
+  for (const cellKey of sortedKeys) {
+    if (puzzle.solutions[cellKey]) return cellKey;
+  }
+  throw new Error(`No Selectable Key found for puzzle ${puzzle.puzzleID}`);
+};
+
+
 export const getNextCellKey = (
   currentCellKey: string,
   puzzle: Puzzle,
@@ -395,6 +404,7 @@ export const getCombinedBoardState = (
   );
 
   const relatedCellKeys: string[] = [];
+  console.log(currentSelectedClue, selectedCellKey);
 
   if (currentSelectedClue.relatedClueNumbers) {
     const horizontalClues =

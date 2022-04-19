@@ -28,6 +28,7 @@ import {
   getCellCoordinatesFromKey,
   getSizeFromCellKeys,
   getPreviousEmptyCellKey,
+  getFirstSelectableCellKey,
 } from "../utils/sessionUtils";
 
 // #region State
@@ -268,17 +269,20 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       const { session: nextSession } = action;
       const { boardState, puzzle } = nextSession;
 
+      const firstCellKey = getFirstSelectableCellKey(puzzle);
+
       if (isPuzzleComplete(boardState, nextSession.puzzle.solutions)) {
-        return _selectCell(state, FIRST_CELL_KEY);
+        return _selectCell(state, firstCellKey);
       }
 
-      const firstCell = boardState[FIRST_CELL_KEY];
+      const firstCell = boardState[firstCellKey];
+
+      console.log(firstCellKey);
 
       const firstSelectedKey = firstCell.currentLetter
-        ? getNextEmptyCellKey(FIRST_CELL_KEY, puzzle, boardState, orientation)
+        ? getNextEmptyCellKey(firstCellKey, puzzle, boardState, orientation)
             .nextEmptyCellKey
-        : FIRST_CELL_KEY;
-
+        : firstCellKey;
       return {
         ...state,
         localState: {
@@ -489,8 +493,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         orientation
       );
 
-   
-
       let newState = { ...state };
       if (didLoopPuzzle) {
         newState = _toggleOrientation(newState);
@@ -499,7 +501,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       if (isPuzzleComplete(boardState, puzzle.solutions)) {
         return _selectCell(newState, [nextClue.x, nextClue.y].toString());
       }
-
 
       const firstCellKeyInClue = [nextClue.x, nextClue.y].toString();
       const isCellFull = !!boardState[firstCellKeyInClue].currentLetter;
@@ -512,7 +513,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         boardState,
         newState.localState.orientation
       );
-
 
       if (didLoopPuzzleFromFindingEmptyCell) {
         newState = _toggleOrientation(newState);

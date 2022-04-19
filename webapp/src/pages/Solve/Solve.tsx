@@ -15,7 +15,7 @@ import {
 import { useLoggedInUser } from "../../models/User";
 import { SessionActionTypes } from "../../reducers/session";
 import EndSessionModal from "./EndSessionModal";
-import ShareUserModal from "./ShareModal";
+import ShareModal from "./ShareModal";
 import SolveToolbarItems from "./SolveToolbarItems";
 
 export type SelectionState = {
@@ -104,7 +104,7 @@ const Solve: React.FC = () => {
       }
     >
       {inviteUsersModalOpen && (
-        <ShareUserModal
+        <ShareModal
           modalShowing={inviteUsersModalOpen}
           session={session}
           user={user}

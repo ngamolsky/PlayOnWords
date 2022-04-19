@@ -29,6 +29,7 @@ import {
   getSizeFromCellKeys,
   getPreviousEmptyCellKey,
   getFirstSelectableCellKey,
+  getPreviousClue,
 } from "../utils/sessionUtils";
 
 // #region State
@@ -531,15 +532,43 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
     case SessionActionTypes.PREVIOUS_CLUE: {
       const { puzzle, boardState } = _requireSession(session);
 
-      const { previousEmptyCellKey, didLoopPuzzle } = getPreviousEmptyCellKey(
+      const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
+        selectedCellKey,
+        orientation,
+        puzzle
+      );
+
+      const { previousClue, didLoopPuzzle } = getPreviousClue(
+        puzzle,
+        currentSelectedClue,
+        orientation
+      );
+
+      let newState = { ...state };
+      if (didLoopPuzzle) {
+        newState = _toggleOrientation(newState);
+      }
+
+      if (isPuzzleComplete(boardState, puzzle.solutions)) {
+        return _selectCell(
+          newState,
+          [previousClue.x, previousClue.y].toString()
+        );
+      }
+
+      const {
+        previousEmptyCellKey,
+        didLoopPuzzle: didLoopPuzzleFromEmptyClue,
+      } = getPreviousEmptyCellKey(
         selectedCellKey,
         puzzle,
         boardState,
         orientation
       );
 
-      let newState = { ...state };
-      if (didLoopPuzzle) {
+      console.log(didLoopPuzzle, didLoopPuzzleFromEmptyClue);
+
+      if (didLoopPuzzleFromEmptyClue && !didLoopPuzzle) {
         newState = _toggleOrientation(newState);
       }
 

@@ -7,6 +7,13 @@ import {
   Unsubscribe,
 } from "firebase/auth";
 import {
+  ref,
+  set,
+  serverTimestamp,
+  onValue,
+  onDisconnect,
+} from "firebase/database";
+import {
   collection,
   query,
   where,
@@ -19,10 +26,11 @@ import {
   Timestamp,
   deleteDoc,
   getDocs,
+  updateDoc,
 } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
-import { auth, db } from "../config/firebase";
+import { auth, db, rtDb } from "../config/firebase";
 import { USERS_COLLECTION } from "../constants";
 import { UserContext } from "../contexts/UserContext";
 import { ManyUserFoundForFirebaseIDError } from "../errors";
@@ -36,6 +44,7 @@ export type User = {
   firebaseAuthID: string;
   loginType: LoginType;
   createDate: Timestamp;
+  isOnline?: boolean;
 };
 
 export enum LoginType {
@@ -107,6 +116,15 @@ export const getUsersByID = async (
     );
   }
   return users;
+};
+
+export const setUserOnlineStatus = async (
+  userID: string,
+  isOnline: boolean
+): Promise<void> => {
+  await updateDoc(doc(db, USERS_COLLECTION, userID), {
+    isOnline,
+  });
 };
 
 export const createGoogleUser = async (username: string): Promise<User> => {
@@ -211,8 +229,6 @@ export const useAuth = (): [User | undefined, boolean] => {
             if (!users) {
               throw new Error(`No user found for firebase ID: ${authUser.uid}`);
             } else if (users.length > 1) {
-              console.log(users.map((user) => JSON.stringify(user)));
-
               throw ManyUserFoundForFirebaseIDError(authUser.uid);
             } else {
               const user = users[0];
@@ -222,6 +238,35 @@ export const useAuth = (): [User | undefined, boolean] => {
                   JSON.stringify(user)
                 );
               }
+
+              // In order to add a "presence feature" that can monitor whether a user is online, we use the firebase
+              // real time database as per https://firebase.google.com/docs/firestore/solutions/presence#solution_cloud_functions_with_realtime_database
+              const userStatusDatabaseRef = ref(
+                rtDb,
+                "/status/" + authUser.uid
+              );
+
+              const connectedRef = ref(rtDb, ".info/connected");
+
+              onValue(connectedRef, async (snapshot) => {
+                const data = snapshot.val();
+
+                if (data == false) {
+                  setUserOnlineStatus(user.userID, false);
+                  return;
+                }
+
+                await onDisconnect(userStatusDatabaseRef).set({
+                  state: "offline",
+                  last_changed: serverTimestamp(),
+                });
+
+                set(userStatusDatabaseRef, {
+                  state: "online",
+                  last_changed: serverTimestamp(),
+                });
+                setUserOnlineStatus(user.userID, true);
+              });
 
               setUserState({
                 user,

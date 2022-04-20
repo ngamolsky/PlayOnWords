@@ -1,12 +1,9 @@
 import React from "react";
 import Modal from "../../components/Modal";
 import { Session } from "../../models/Session";
-import {
-  checkPuzzle,
-  getSessionCompletionPercentages,
-  getSessionRevealedPercentage,
-} from "../../utils/sessionUtils";
+import { checkPuzzle } from "../../utils/sessionUtils";
 import { secondsToTimeString } from "../../utils/timeAndDateUtils";
+import UserPercentageCompleteTable from "./UserPercentageCompleteTable";
 
 type EndSessionModalProps = {
   setIsOpen: (isOpen: boolean) => void;
@@ -27,8 +24,7 @@ const EndSessionModal: React.FC<EndSessionModalProps> = ({
 };
 
 const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
-  const sessionResults = getSessionCompletionPercentages(session);
-  const sessionPercentRevealed = getSessionRevealedPercentage(session);
+
   if (!session.endTime)
     throw new Error(
       "Tried to show SessionCompleteModal without session end time"
@@ -42,36 +38,7 @@ const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
       className="p-4"
     >
       <>
-        <div className="flex-col p-4 rounded-md bg-slate-200 dark:bg-slate-700 ">
-          <table className="w-full table-fixed">
-            <thead>
-              <tr>
-                <th className="py-2">Participants</th>
-                <th className="py-2">Percent Complete</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(sessionResults).map(
-                ([username, percentComplete], index) => (
-                  <tr key={index}>
-                    <td className="py-2">{username}</td>
-                    <td className="py-2">{`${(percentComplete * 100).toFixed(
-                      2
-                    )}%`}</td>
-                  </tr>
-                )
-              )}
-              {sessionPercentRevealed > 0 && (
-                <tr key={"revealed"} className="text-red-600 dark:text-red-400">
-                  <td className="py-2">Revealed</td>
-                  <td className="py-2">{`${sessionPercentRevealed.toFixed(
-                    2
-                  )}%`}</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <UserPercentageCompleteTable session={session} />
         <div className="flex p-4 mt-2 rounded-md bg-slate-200 dark:bg-slate-700">
           <table className="w-full table-fixed">
             <tbody>

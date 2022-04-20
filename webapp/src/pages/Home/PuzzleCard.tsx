@@ -45,9 +45,13 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({
       )}
       onClick={onClick}
     >
-      <XWordIcon className="w-full pointer-events-none" />
+      <XWordIcon
+        className="w-full pointer-events-none"
+        isMini={puzzle.type == "mini"}
+      />
       <p className="mt-2 ml-1 text-lg text-ellipsis">
         {toXWordDate(puzzle.puzzleTimestamp.toDate())}
+        {puzzle.type == "mini" && " - Mini"}
       </p>
       <div className="flex justify-between">
         <p className="ml-1 text-slate-500">New York Times</p>

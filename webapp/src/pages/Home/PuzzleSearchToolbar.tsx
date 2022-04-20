@@ -1,4 +1,4 @@
-import { Listbox, Switch } from "@headlessui/react";
+import { Listbox, RadioGroup } from "@headlessui/react";
 import { SelectorIcon, CheckIcon } from "@heroicons/react/solid";
 import classNames from "classnames";
 import React from "react";
@@ -87,22 +87,36 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
           ))}
         </Listbox.Options>
       </Listbox>
-      <Switch
-        checked={puzzleType == "mini"}
-        onChange={() => {
-          setPuzzleType(puzzleType == "mini" ? "daily" : "mini");
-        }}
-        className={`${
-          puzzleType == "mini" ? "bg-blue-600" : "bg-gray-200"
-        } relative inline-flex items-center h-6 rounded-full w-11`}
-      >
-        <span className="sr-only">Enable notifications</span>
-        <span
-          className={`${
-            puzzleType == "mini" ? "translate-x-6" : "translate-x-1"
-          } inline-block w-4 h-4 transform bg-white rounded-full`}
-        />
-      </Switch>
+      <div className="flex justify-end grow">
+        <RadioGroup
+          value={puzzleType}
+          onChange={setPuzzleType}
+          className="flex my-auto mr-2 space-x-2 overflow-hidden bg-white rounded-md dark:bg-slate-800 ring-1 ring-slate-300"
+        >
+          <RadioGroup.Option value="mini">
+            {({ checked }) => (
+              <div
+                className={classNames("px-4 p-2", {
+                  "dark:bg-slate-900 bg-slate-200": checked,
+                })}
+              >
+                Mini
+              </div>
+            )}
+          </RadioGroup.Option>
+          <RadioGroup.Option value="daily">
+            {({ checked }) => (
+              <div
+                className={classNames("px-4 p-2", {
+                  "dark:bg-slate-900 bg-slate-200": checked,
+                })}
+              >
+                Daily
+              </div>
+            )}
+          </RadioGroup.Option>
+        </RadioGroup>
+      </div>
     </>
   );
 };

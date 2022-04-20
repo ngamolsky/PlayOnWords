@@ -78,6 +78,7 @@ export const copyNYTPuzzle = async (
     }
 
     const puzzle = await loadPuzzleFromNYTPuzzle(nytPuzzleID, type);
+    console.log("adding puzzle", puzzle.type, type);
 
     await addPuzzle(puzzle);
 

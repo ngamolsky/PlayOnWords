@@ -22,6 +22,8 @@ export type Puzzle = {
   nytID: string;
   collection: string;
   specialCells?: SpecialCells;
+  hasRebus: boolean;
+  type: "daily" | "mini";
 };
 
 export type ClueList = {
@@ -49,7 +51,6 @@ export enum SpecialCellType {
 }
 
 export type SpecialCells = Record<string, SpecialCellType>;
-
 
 export const usePuzzlesBySearch = (
   dayOfWeek?: number,

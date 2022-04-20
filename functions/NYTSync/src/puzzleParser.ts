@@ -33,6 +33,7 @@ type NYTPuzzleData = {
   nytID: string;
   height: number;
   width: number;
+  type: "daily" | "mini";
 };
 
 export const convertPuzzleDataToPuzzle = async ({
@@ -42,6 +43,7 @@ export const convertPuzzleDataToPuzzle = async ({
   date,
   nytID,
   width,
+  type,
 }: NYTPuzzleData): Promise<Puzzle> => {
   const specialCells: SpecialCells = {};
   const solutions: Solutions = cells.reduce<Solutions>((result, each, i) => {
@@ -169,7 +171,8 @@ export const convertPuzzleDataToPuzzle = async ({
     solutions,
     nytID,
     collection: "nyt",
-    isRebusPuzzle: hasRebus,
+    hasRebus,
+    type,
   };
 
   if (Object.keys(specialCells).length > 0) {

@@ -11,7 +11,8 @@ export type Puzzle = {
   nytID: string;
   collection: string;
   specialCells?: SpecialCells;
-  isRebusPuzzle: boolean;
+  hasRebus: boolean;
+  type: "daily" | "mini";
 };
 
 export type ClueList = {

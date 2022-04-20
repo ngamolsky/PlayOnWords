@@ -420,8 +420,6 @@ export const getCombinedBoardState = (
     horizontalClues
       .filter((clue): clue is Clue => !!clue)
       .forEach((clue) => {
-        console.log(clue);
-
         relatedCellKeys.push(
           ...getCellKeysForClueAndOrientation(clue, OrientationType.HORIZONTAL)
         );
@@ -430,8 +428,6 @@ export const getCombinedBoardState = (
     verticalClues
       .filter((clue): clue is Clue => !!clue)
       .forEach((clue) => {
-        console.log(clue);
-
         relatedCellKeys.push(
           ...getCellKeysForClueAndOrientation(clue, OrientationType.VERTICAL)
         );

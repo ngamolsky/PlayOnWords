@@ -93,8 +93,16 @@ export const usePuzzlesBySearch = (
     const unsub = onSnapshot(q, (querySnapshot) => {
       const puzzles: Puzzle[] = [];
       querySnapshot.forEach((doc) => {
+
         puzzles.push(doc.data());
       });
+
+
+      console.log(
+        "Loaded Puzzles",
+        puzzles.map((puzzle) => puzzle.puzzleID)
+      );
+      
 
       setPuzzleState({
         puzzles,

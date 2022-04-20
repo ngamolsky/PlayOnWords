@@ -417,15 +417,25 @@ export const getCombinedBoardState = (
       }
     );
 
-    const allClues = horizontalClues
-      .concat(verticalClues)
-      .filter((clue): clue is Clue => !!clue);
+    horizontalClues
+      .filter((clue): clue is Clue => !!clue)
+      .forEach((clue) => {
+        console.log(clue);
 
-    allClues.forEach((clue) => {
-      relatedCellKeys.push(
-        ...getCellKeysForClueAndOrientation(clue, orientation)
-      );
-    });
+        relatedCellKeys.push(
+          ...getCellKeysForClueAndOrientation(clue, OrientationType.HORIZONTAL)
+        );
+      });
+
+    verticalClues
+      .filter((clue): clue is Clue => !!clue)
+      .forEach((clue) => {
+        console.log(clue);
+
+        relatedCellKeys.push(
+          ...getCellKeysForClueAndOrientation(clue, OrientationType.VERTICAL)
+        );
+      });
   }
 
   const activeCellKeys = getCellKeysForClueAndOrientation(

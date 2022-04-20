@@ -33,11 +33,6 @@ import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
 import { getBoardStateFromSolutions } from "../utils/sessionUtils";
 import { User } from "./User";
 
-export enum SessionStatus {
-  STARTED = "STARTED",
-  COMPLETE = "COMPLETE",
-}
-
 export type Session = {
   sessionID: string;
   puzzle: Puzzle;
@@ -73,6 +68,11 @@ export enum CellSelectionState {
   UNSELECTED = "unselected",
   UNSELECTABLE = "unselectable",
   RELATED_CLUE_SELECTED = "related_clue_selected",
+}
+
+export enum SessionStatus {
+  STARTED = "started",
+  COMPLETE = "complete",
 }
 
 export type CombinedCellState = CellState & {

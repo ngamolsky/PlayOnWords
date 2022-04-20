@@ -9,7 +9,8 @@ import {
 import { convertPuzzleDataToPuzzle } from "./puzzleParser";
 
 const LATEST_PUZZLE_URL =
-  "https://nyt-games-prd.appspot.com/svc/crosswords/v3/36569100/puzzles.json?publish_type=daily&sort_order=desc&sort_by=print_date";
+  "https://nyt-games-prd.appspot.com/svc/crosswords/v3/36569100/puzzles.json?sort_order=desc&sort_by=print_date";
+
 const LATEST_PUZZLE_DATA_BASE_URL =
   "https://www.nytimes.com/svc/crosswords/v6/puzzle/";
 
@@ -23,19 +24,42 @@ export const NYTSync: HttpFunction = async (_, response) => {
       process.env.OVERWRITE_PUZZLE_ID
     );
   } else {
-    console.log("Loading latest puzzle metadata");
-    const latestPuzzleMetadata = (await getRecentNYTPuzzles(2))[0];
+    console.log("Loading latest daily puzzle metadata");
+    const latestPuzzleMetadata = (await getRecentNYTPuzzles(2, "daily"))[0];
 
     console.log(latestPuzzleMetadata);
     nytPuzzleID = latestPuzzleMetadata.puzzle_id.toString();
   }
 
-  const puzzleIDs = await copyNYTPuzzle(nytPuzzleID);
+  const puzzleID = await copyNYTPuzzle(nytPuzzleID, "daily");
 
-  response.send(puzzleIDs);
+  let nytMiniPuzzleID: string;
+  if (process.env.OVERWRITE_MINI_PUZZLE_ID) {
+    nytMiniPuzzleID = process.env.OVERWRITE_MINI_PUZZLE_ID;
+    console.log(
+      "Overwrite latest puzzle ID: ",
+      process.env.OVERWRITE_MINI_PUZZLE_ID
+    );
+  } else {
+    console.log("Loading latest mini puzzle metadata");
+    const latestPuzzleMetadata = (await getRecentNYTPuzzles(2, "mini"))[0];
+
+    console.log(latestPuzzleMetadata);
+    nytMiniPuzzleID = latestPuzzleMetadata.puzzle_id.toString();
+  }
+
+  const miniPuzzleID = await copyNYTPuzzle(nytMiniPuzzleID, "mini");
+
+  response.send({
+    daily: puzzleID,
+    mini: miniPuzzleID,
+  });
 };
 
-export const copyNYTPuzzle = async (nytPuzzleID: string): Promise<string> => {
+export const copyNYTPuzzle = async (
+  nytPuzzleID: string,
+  type: "mini" | "daily"
+): Promise<string> => {
   try {
     const existingPuzzle = await getPuzzleByNYTPuzzleID(nytPuzzleID);
 
@@ -53,7 +77,7 @@ export const copyNYTPuzzle = async (nytPuzzleID: string): Promise<string> => {
       );
     }
 
-    const puzzle = await loadPuzzleFromNYTPuzzle(nytPuzzleID);
+    const puzzle = await loadPuzzleFromNYTPuzzle(nytPuzzleID, type);
 
     await addPuzzle(puzzle);
 
@@ -64,14 +88,20 @@ export const copyNYTPuzzle = async (nytPuzzleID: string): Promise<string> => {
   }
 };
 
-export const getRecentNYTPuzzles = async (limit: number): Promise<any[]> => {
+export const getRecentNYTPuzzles = async (
+  limit: number,
+  type: "mini" | "daily"
+): Promise<any[]> => {
   const latestPuzzleMetadata = await axios.get(
-    `${LATEST_PUZZLE_URL}&limit=${limit}`
+    `${LATEST_PUZZLE_URL}&limit=${limit}&type=${type}`
   );
   return latestPuzzleMetadata.data.results;
 };
 
-export const loadPuzzleFromNYTPuzzle = async (latestPuzzleID: any) => {
+export const loadPuzzleFromNYTPuzzle = async (
+  latestPuzzleID: any,
+  type: "mini" | "daily"
+) => {
   const puzzleResults = (
     await axios.get(`${LATEST_PUZZLE_DATA_BASE_URL}/${latestPuzzleID}.json`, {
       headers: {
@@ -104,6 +134,7 @@ export const loadPuzzleFromNYTPuzzle = async (latestPuzzleID: any) => {
     nytID: latestPuzzleID,
     width: latestPuzzleWidth,
     height: latestPuzzleHeight,
+    type: type,
   });
   return puzzle;
 };

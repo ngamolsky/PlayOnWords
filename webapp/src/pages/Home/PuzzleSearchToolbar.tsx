@@ -91,13 +91,13 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
         <RadioGroup
           value={puzzleType}
           onChange={setPuzzleType}
-          className="flex my-auto overflow-hidden bg-white rounded-md pace-x-2 dark:bg-slate-800 ring-1 ring-slate-300"
+          className="flex my-auto overflow-hidden rounded-md pace-x-2 ring-1 ring-slate-300"
         >
           <RadioGroup.Option value="mini">
             {({ checked }) => (
               <div
                 className={classNames("px-4 p-2", {
-                  "dark:bg-slate-900 bg-slate-200": checked,
+                  "dark:bg-slate-600 bg-slate-200": checked,
                 })}
               >
                 Mini
@@ -108,7 +108,7 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
             {({ checked }) => (
               <div
                 className={classNames("px-4 p-2", {
-                  "dark:bg-slate-900 bg-slate-200": checked,
+                  "dark:bg-slate-600 bg-slate-200": checked,
                 })}
               >
                 Daily

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import React, { Fragment, ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { APP_NAME } from "../constants";
 import { Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/solid";
@@ -27,7 +27,6 @@ export const XWordToolbar: React.FC<{
           <div className="flex justify-end flex-1 mx-2 my-auto">{children}</div>
         </div>
         <Transition
-          as={Fragment}
           show={!!belowToolbarContent}
           enter="transition ease-out duration-100"
           enterFrom="transform opacity-0 scale-y-50 origin-top"
@@ -36,9 +35,8 @@ export const XWordToolbar: React.FC<{
           leaveFrom="transform opacity-100 scale-y-100 origin-top"
           leaveTo="transform opacity-0 scale-y-50 origin-top"
         >
-          <div className="flex w-full p-2 dark:bg-slate-700 bg-slate-300">
-            {belowToolbarContent}
-          </div>
+          <div className="flex w-full p-2 ">{belowToolbarContent}</div>
+          <hr className="" />
         </Transition>
       </div>
     </header>

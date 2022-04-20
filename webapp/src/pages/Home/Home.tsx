@@ -22,8 +22,6 @@ const Home: React.FC = () => {
   const [date, setDate] = useState<Date>();
   const [puzzleType, setPuzzleType] = useState<PuzzleType>("daily");
 
-  console.log(puzzleType);
-
   const user = useLoggedInUser();
   const [puzzles, puzzleLoadingMessage] = usePuzzlesBySearch(
     puzzleType,

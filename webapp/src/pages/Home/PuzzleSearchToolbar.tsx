@@ -1,11 +1,13 @@
-import { Listbox, Transition } from "@headlessui/react";
+import { Listbox, Switch } from "@headlessui/react";
 import { SelectorIcon, CheckIcon } from "@heroicons/react/solid";
 import classNames from "classnames";
-import React, { Fragment } from "react";
+import React from "react";
 import { DAYS } from "../../utils/timeAndDateUtils";
-import "react-datepicker/dist/react-datepicker.css";
+import { PuzzleType } from "../../models/Puzzle";
 
 type PuzzleSearchToolbarProps = {
+  puzzleType: PuzzleType;
+  setPuzzleType: (puzzleType: PuzzleType) => void;
   dayOfWeek?: number;
   setDayOfWeek: (dayOfWeek: number | undefined) => void;
   date?: Date;
@@ -17,8 +19,9 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
   dayOfWeek,
   setDayOfWeek,
   mostRecentPuzzleDate,
+  puzzleType,
+  setPuzzleType,
 }) => {
-
   const maxPuzzleDate: Date = mostRecentPuzzleDate
     ? new Date(mostRecentPuzzleDate)
     : new Date();
@@ -51,45 +54,55 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
             />
           </span>
         </Listbox.Button>
-        <Transition
-          as={Fragment}
-          leave="transition ease-in duration-100"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <Listbox.Options className="absolute w-40 overflow-auto bg-white divide-y rounded-md shadow-lg outline-none cursor-pointer dark:divide-slate-500 dark:bg-slate-800 ring-1 dark:ring-white ring-slate-200">
-            {["Any Day"].concat(DAYS).map((day, index) => (
-              <Listbox.Option
-                key={index}
-                value={day}
-                className={({ active }) =>
-                  `w-full p-3 ${active ? "dark:bg-slate-700 bg-slate-200" : ""}`
-                }
-              >
-                {({ selected }) => {
-                  return (
-                    <div className="flex">
-                      {selected && (
-                        <CheckIcon
-                          className="w-5 h-5 my-auto mr-2"
-                          aria-hidden="true"
-                        />
-                      )}
-                      <span
-                        className={classNames("relative", {
-                          "left-8": !selected,
-                        })}
-                      >
-                        {day}
-                      </span>
-                    </div>
-                  );
-                }}
-              </Listbox.Option>
-            ))}
-          </Listbox.Options>
-        </Transition>
+
+        <Listbox.Options className="absolute w-40 overflow-auto bg-white divide-y rounded-md shadow-lg outline-none cursor-pointer dark:divide-slate-500 dark:bg-slate-800 ring-1 dark:ring-white ring-slate-200">
+          {["Any Day"].concat(DAYS).map((day, index) => (
+            <Listbox.Option
+              key={index}
+              value={day}
+              className={({ active }) =>
+                `w-full p-3 ${active ? "dark:bg-slate-700 bg-slate-200" : ""}`
+              }
+            >
+              {({ selected }) => {
+                return (
+                  <div className="flex">
+                    {selected && (
+                      <CheckIcon
+                        className="w-5 h-5 my-auto mr-2"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span
+                      className={classNames("relative", {
+                        "left-8": !selected,
+                      })}
+                    >
+                      {day}
+                    </span>
+                  </div>
+                );
+              }}
+            </Listbox.Option>
+          ))}
+        </Listbox.Options>
       </Listbox>
+      <Switch
+        checked={puzzleType == "mini"}
+        onChange={() => {
+          setPuzzleType(puzzleType == "mini" ? "daily" : "mini");
+        }}
+        className={`${
+          puzzleType == "mini" ? "bg-blue-600" : "bg-gray-200"
+        } relative inline-flex items-center h-6 rounded-full w-11`}
+      >
+        <span className="sr-only">Enable notifications</span>
+        <span
+          className={`${
+            puzzleType == "mini" ? "translate-x-6" : "translate-x-1"
+          } inline-block w-4 h-4 transform bg-white rounded-full`}
+        />
+      </Switch>
     </>
   );
 };

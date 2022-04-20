@@ -76,9 +76,7 @@ export const copyNYTPuzzle = async (
         `Found existing puzzle with id ${existingPuzzle.puzzleID}`
       );
     }
-
     const puzzle = await loadPuzzleFromNYTPuzzle(nytPuzzleID, type);
-    console.log("adding puzzle", puzzle.type, type);
 
     await addPuzzle(puzzle);
 
@@ -94,7 +92,7 @@ export const getRecentNYTPuzzles = async (
   type: "mini" | "daily"
 ): Promise<any[]> => {
   const latestPuzzleMetadata = await axios.get(
-    `${LATEST_PUZZLE_URL}&limit=${limit}&type=${type}`
+    `${LATEST_PUZZLE_URL}&limit=${limit}&publish_type=${type}`
   );
   return latestPuzzleMetadata.data.results;
 };

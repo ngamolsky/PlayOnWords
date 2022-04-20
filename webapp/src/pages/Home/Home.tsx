@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { XWordContainer } from "../../components/XWordContainer";
 import { useHistory } from "react-router-dom";
-import { Puzzle, usePuzzlesBySearch } from "../../models/Puzzle";
+import { Puzzle, PuzzleType, usePuzzlesBySearch } from "../../models/Puzzle";
 import { useLoggedInUser } from "../../models/User";
 import Avatar from "../../components/Avatar";
 import { PuzzleCard } from "./PuzzleCard";
@@ -9,7 +9,6 @@ import StartSessionModal from "./StartSessionModal";
 import { AdjustmentsIcon } from "@heroicons/react/outline";
 import IconButton from "../../components/IconButton";
 import PuzzleSearchToolbar from "./PuzzleSearchToolbar";
-
 
 const Home: React.FC = () => {
   const history = useHistory();
@@ -21,9 +20,16 @@ const Home: React.FC = () => {
   const [selectedPuzzle, setSelectedPuzzle] = useState<Puzzle>();
   const [dayOfWeek, setDayOfWeek] = useState<number>();
   const [date, setDate] = useState<Date>();
+  const [puzzleType, setPuzzleType] = useState<PuzzleType>("daily");
+
+  console.log(puzzleType);
 
   const user = useLoggedInUser();
-  const [puzzles, puzzleLoadingMessage] = usePuzzlesBySearch(dayOfWeek, date);
+  const [puzzles, puzzleLoadingMessage] = usePuzzlesBySearch(
+    puzzleType,
+    dayOfWeek,
+    date
+  );
 
   useEffect(() => {
     setModalShowing(!!selectedPuzzle);
@@ -62,6 +68,8 @@ const Home: React.FC = () => {
       belowToolbarContent={
         isFilterShowing && (
           <PuzzleSearchToolbar
+            puzzleType={puzzleType}
+            setPuzzleType={setPuzzleType}
             setDayOfWeek={setDayOfWeek}
             dayOfWeek={dayOfWeek}
             setDate={setDate}

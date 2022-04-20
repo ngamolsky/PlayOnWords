@@ -23,8 +23,10 @@ export type Puzzle = {
   collection: string;
   specialCells?: SpecialCells;
   hasRebus: boolean;
-  type: "daily" | "mini";
+  type: PuzzleType;
 };
+
+export type PuzzleType = "daily" | "mini";
 
 export type ClueList = {
   horizontal: Clue[];
@@ -53,6 +55,7 @@ export enum SpecialCellType {
 export type SpecialCells = Record<string, SpecialCellType>;
 
 export const usePuzzlesBySearch = (
+  type: PuzzleType,
   dayOfWeek?: number,
   date?: Date,
   title?: string
@@ -66,7 +69,7 @@ export const usePuzzlesBySearch = (
   });
 
   useEffect(() => {
-    const whereConstraints = [];
+    const whereConstraints = [where("type", "==", type)];
     const orderConstraints = [orderBy("puzzleTimestamp", "desc")];
     if (dayOfWeek != null)
       whereConstraints.push(where("dayOfWeek", "==", dayOfWeek));
@@ -99,7 +102,7 @@ export const usePuzzlesBySearch = (
       });
     });
     return unsub;
-  }, [dayOfWeek, date, title]);
+  }, [dayOfWeek, date, title, type]);
 
   return [puzzleState.puzzles, puzzleState.loadingMessage];
 };

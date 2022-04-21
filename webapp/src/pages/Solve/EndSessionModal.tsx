@@ -24,7 +24,6 @@ const EndSessionModal: React.FC<EndSessionModalProps> = ({
 };
 
 const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
-
   if (!session.endTime)
     throw new Error(
       "Tried to show SessionCompleteModal without session end time"

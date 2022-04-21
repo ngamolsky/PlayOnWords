@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../components/Modal";
 import { User } from "../../models/User";
 import { Session } from "../../models/Session";
-import { BASE_URL } from "../../constants";
 import { Transition } from "@headlessui/react";
 import { ClipboardCopyIcon } from "@heroicons/react/outline";
 import UserPercentageCompleteTable from "./UserPercentageCompleteTable";
@@ -27,7 +26,9 @@ const ShareModal = ({
     }
   }, [showCopied]);
 
-  const shareURL = `${BASE_URL}/solve/${session.sessionID}`;
+  const shareURL = `${window.location.origin.toString()}/solve/${
+    session.sessionID
+  }`;
 
   return (
     <Modal

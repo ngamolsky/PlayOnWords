@@ -73,7 +73,6 @@ export const getFirstSelectableCellKey = (puzzle: Puzzle): string => {
   throw new Error(`No Selectable Key found for puzzle ${puzzle.puzzleID}`);
 };
 
-
 export const getNextCellKey = (
   currentCellKey: string,
   puzzle: Puzzle,
@@ -467,8 +466,8 @@ export const getCombinedBoardState = (
 };
 
 export const isUserInSession = (session: Session, userID: string): boolean => {
-  const matchingUser = session.participants.find(
-    (currentUser) => currentUser.userID === userID
+  const matchingUser = session.participantData.find(
+    (userData) => userData.userID === userID
   );
   return !!matchingUser;
 };
@@ -552,13 +551,13 @@ export const getSessionCompletionPercentages = (
     (each) => !!each
   ).length;
 
-  session.participants.forEach((participant) => {
+  session.participantData.forEach((userData) => {
     const participantCellCount = Object.values(session.boardState).filter(
-      (each) => each.lastEditedBy == participant.userID
+      (each) => each.lastEditedBy == userData.userID
     ).length;
 
-    userPercentages[participant.username] =
-      participantCellCount / totalSelectableCellCount;
+    const userID = userData.userID;
+    userPercentages[userID] = participantCellCount / totalSelectableCellCount;
   });
 
   return userPercentages;

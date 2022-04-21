@@ -36,13 +36,20 @@ import { User } from "./User";
 export type Session = {
   sessionID: string;
   puzzle: Puzzle;
-  participants: User[];
+  participantData: SessionParticipantData[];
+  participantIDs: string[];
   startedBy: User;
   startTime: Timestamp;
   boardState: BoardState;
   sessionStatus: SessionStatus;
   endTime?: Timestamp;
   lastUpdatedTime: Timestamp;
+};
+
+export type SessionParticipantData = {
+  username: string;
+  userID: string;
+  isOnline: boolean;
 };
 
 export type BoardState = {
@@ -94,10 +101,27 @@ export const startSession = async (
     sessionConverter
   );
 
+  const currentUserData = {
+    username: user.username,
+    userID: user.userID,
+    isOnline: true,
+  };
+
   const session: Session = {
     sessionID,
     puzzle,
-    participants: participants ? [user].concat(participants) : [user],
+    participantData: participants
+      ? [currentUserData].concat(
+          participants.map((user) => ({
+            username: user.username,
+            userID: user.userID,
+            isOnline: false,
+          }))
+        )
+      : [currentUserData],
+    participantIDs: participants
+      ? [currentUserData.userID].concat(participants.map((user) => user.userID))
+      : [currentUserData.userID],
     startedBy: user,
     startTime: Timestamp.now(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),
@@ -111,7 +135,6 @@ export const startSession = async (
 
   await setDoc(sessionRef, session);
 };
-
 
 export const deleteSession = async (sessionID: string): Promise<void> => {
   const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID).withConverter(
@@ -168,7 +191,6 @@ export const updateCellState = async (
 
   fieldData[fieldPath] = cellState;
 
-
   if (deleteFieldName) {
     const result = `${fieldPath}.${deleteFieldName}`;
     fieldData[result] = deleteField();
@@ -209,8 +231,49 @@ export const joinSessionParticipants = async (
   );
 
   return updateDoc<Session>(sessionRef, {
-    participants: arrayUnion(user),
+    participantData: arrayUnion({
+      username: user.username,
+      userID: user.userID,
+      isOnline: true,
+    }),
+    participantIDs: arrayUnion(user.userID),
   });
+};
+
+export const setUserOnlineForSession = async (
+  sessionID: string,
+  userID: string,
+  isOnline: boolean
+): Promise<void> => {
+  const existingSession = await getSession(sessionID);
+
+  const newParticipantData = existingSession.participantData.reduce<
+    SessionParticipantData[]
+  >((result, userData) => {
+    if (userData.userID == userID) {
+      result.push({
+        ...userData,
+        isOnline,
+      });
+    } else {
+      result.push({
+        ...userData,
+      });
+    }
+
+    return result;
+  }, []);
+
+  const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID).withConverter(
+    sessionConverter
+  );
+  await setDoc<Session>(
+    sessionRef,
+    {
+      participantData: newParticipantData,
+    },
+    { merge: true }
+  );
 };
 
 //#region Hooks
@@ -249,7 +312,11 @@ export const useSessionState = (
       }
     };
 
+    setUserOnlineForSession(sessionID, currentUserID, true);
     setInitialState(sessionID, dispatch);
+    return () => {
+      setUserOnlineForSession(sessionID, currentUserID, false);
+    };
   }, []);
 
   useEffect(() => {
@@ -317,7 +384,7 @@ export const useRecentSessionsForUser = (
     if (puzzle) {
       const q = query(
         collection(db, SESSIONS_COLLECTION).withConverter(sessionConverter),
-        where("participants", "array-contains", participant),
+        where("participantIDs", "array-contains", participant.userID),
         where(
           "sessionStatus",
           "==",

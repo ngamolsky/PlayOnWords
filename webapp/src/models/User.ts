@@ -301,6 +301,8 @@ export const useUsersByID = (userIDs: string[] | undefined): User[] => {
   const [userState, setUserState] = useState<User[]>([]);
 
   useEffect(() => {
+    console.log("Setting listnere", userIDs);
+    
     if (userIDs) {
       const q = query(
         collection(db, USERS_COLLECTION).withConverter(userConverter),

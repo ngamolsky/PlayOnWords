@@ -1,6 +1,7 @@
 import React from "react";
 import Modal from "../../components/Modal";
 import { Session } from "../../models/Session";
+import { User } from "../../models/User";
 import { checkPuzzle } from "../../utils/sessionUtils";
 import { secondsToTimeString } from "../../utils/timeAndDateUtils";
 import UserPercentageCompleteTable from "./UserPercentageCompleteTable";
@@ -8,23 +9,32 @@ import UserPercentageCompleteTable from "./UserPercentageCompleteTable";
 type EndSessionModalProps = {
   setIsOpen: (isOpen: boolean) => void;
   session: Session;
+  participants: User[];
 };
 
 const EndSessionModal: React.FC<EndSessionModalProps> = ({
   setIsOpen,
   session,
+  participants,
 }) => {
   const isCorrect = checkPuzzle(session.boardState, session.puzzle.solutions);
 
   return session.endTime && isCorrect ? (
-    <SessionCompleteModal session={session} setIsOpen={setIsOpen} />
+    <SessionCompleteModal
+      session={session}
+      setIsOpen={setIsOpen}
+      participants={participants}
+    />
   ) : (
     <IncorrectModal setIsOpen={setIsOpen} />
   );
 };
 
-const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
-
+const SessionCompleteModal = ({
+  session,
+  setIsOpen,
+  participants,
+}: EndSessionModalProps) => {
   if (!session.endTime)
     throw new Error(
       "Tried to show SessionCompleteModal without session end time"
@@ -38,7 +48,10 @@ const SessionCompleteModal = ({ session, setIsOpen }: EndSessionModalProps) => {
       className="p-4"
     >
       <>
-        <UserPercentageCompleteTable session={session} />
+        <UserPercentageCompleteTable
+          session={session}
+          participants={participants}
+        />
         <div className="flex p-4 mt-2 rounded-md bg-slate-200 dark:bg-slate-700">
           <table className="w-full table-fixed">
             <tbody>

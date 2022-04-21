@@ -12,7 +12,7 @@ import {
   getPercentageComplete,
   isUserInSession,
 } from "../../utils/sessionUtils";
-import { useLoggedInUser } from "../../models/User";
+import { useLoggedInUser, useUsersByID } from "../../models/User";
 import { SessionActionTypes } from "../../reducers/session";
 import EndSessionModal from "./EndSessionModal";
 import ShareModal from "./ShareModal";
@@ -44,6 +44,10 @@ const Solve: React.FC = () => {
     localState: { selectedCellKey, orientation, pencilMode, rebus, autocheck },
     loadingMessage,
   } = sessionState;
+
+  // console.log(session);
+
+  const users = useUsersByID(session?.participantIDs);
 
   // Join puzzle session if the user isn't already in it when joining
   useEffect(() => {
@@ -108,11 +112,16 @@ const Solve: React.FC = () => {
           modalShowing={inviteUsersModalOpen}
           session={session}
           user={user}
+          participants={users}
           setModalShowing={setInviteUsersModalOpen}
         />
       )}
       {endSessionModalOpen && (
-        <EndSessionModal setIsOpen={setEndSessionModalOpen} session={session} />
+        <EndSessionModal
+          setIsOpen={setEndSessionModalOpen}
+          session={session}
+          participants={users}
+        />
       )}
 
       <XBoard

@@ -1,11 +1,16 @@
-import { HttpFunction } from "@google-cloud/functions-framework";
 import axios from "axios";
+import { pubsub, database } from "firebase-functions";
+
 import {
   addPuzzle,
   deletePuzzle,
   getPuzzleByNYTPuzzleID,
   Puzzle,
 } from "./models/Puzzle";
+import {
+  getUserByFirebaseAuthUserId,
+  setUserOnlineStatus,
+} from "./models/User";
 import { convertPuzzleDataToPuzzle } from "./puzzleParser";
 
 const LATEST_PUZZLE_URL =
@@ -14,47 +19,70 @@ const LATEST_PUZZLE_URL =
 const LATEST_PUZZLE_DATA_BASE_URL =
   "https://www.nytimes.com/svc/crosswords/v6/puzzle/";
 
-export const NYTSync: HttpFunction = async (_, response) => {
-  console.log("Starting NYTSync function");
-  let nytPuzzleID: string;
-  if (process.env.OVERWRITE_PUZZLE_ID) {
-    nytPuzzleID = process.env.OVERWRITE_PUZZLE_ID;
-    console.log(
-      "Overwrite latest puzzle ID: ",
-      process.env.OVERWRITE_PUZZLE_ID
-    );
-  } else {
-    console.log("Loading latest daily puzzle metadata");
-    const latestPuzzleMetadata = (await getRecentNYTPuzzles(2, "daily"))[0];
+export const NYTSync = pubsub
+  .schedule("25 22 * * *")
+  .timeZone("America/New_York")
+  .onRun(async () => {
+    console.log("Starting NYTSync function");
+    let nytPuzzleID: string;
+    if (process.env.OVERWRITE_PUZZLE_ID) {
+      nytPuzzleID = process.env.OVERWRITE_PUZZLE_ID;
+      console.log(
+        "Overwrite latest puzzle ID: ",
+        process.env.OVERWRITE_PUZZLE_ID
+      );
+    } else {
+      console.log("Loading latest daily puzzle metadata");
+      const latestPuzzleMetadata = (await getRecentNYTPuzzles(2, "daily"))[0];
 
-    console.log(latestPuzzleMetadata);
-    nytPuzzleID = latestPuzzleMetadata.puzzle_id.toString();
-  }
+      console.log(latestPuzzleMetadata);
+      nytPuzzleID = latestPuzzleMetadata.puzzle_id.toString();
+    }
 
-  const puzzleID = await copyNYTPuzzle(nytPuzzleID, "daily");
+    const puzzleID = await copyNYTPuzzle(nytPuzzleID, "daily");
 
-  let nytMiniPuzzleID: string;
-  if (process.env.OVERWRITE_MINI_PUZZLE_ID) {
-    nytMiniPuzzleID = process.env.OVERWRITE_MINI_PUZZLE_ID;
-    console.log(
-      "Overwrite latest puzzle ID: ",
-      process.env.OVERWRITE_MINI_PUZZLE_ID
-    );
-  } else {
-    console.log("Loading latest mini puzzle metadata");
-    const latestPuzzleMetadata = (await getRecentNYTPuzzles(2, "mini"))[0];
+    let nytMiniPuzzleID: string;
+    if (process.env.OVERWRITE_MINI_PUZZLE_ID) {
+      nytMiniPuzzleID = process.env.OVERWRITE_MINI_PUZZLE_ID;
+      console.log(
+        "Overwrite latest puzzle ID: ",
+        process.env.OVERWRITE_MINI_PUZZLE_ID
+      );
+    } else {
+      console.log("Loading latest mini puzzle metadata");
+      const latestPuzzleMetadata = (await getRecentNYTPuzzles(2, "mini"))[0];
 
-    console.log(latestPuzzleMetadata);
-    nytMiniPuzzleID = latestPuzzleMetadata.puzzle_id.toString();
-  }
+      console.log(latestPuzzleMetadata);
+      nytMiniPuzzleID = latestPuzzleMetadata.puzzle_id.toString();
+    }
 
-  const miniPuzzleID = await copyNYTPuzzle(nytMiniPuzzleID, "mini");
+    const miniPuzzleID = await copyNYTPuzzle(nytMiniPuzzleID, "mini");
 
-  response.send({
-    daily: puzzleID,
-    mini: miniPuzzleID,
+    return {
+      daily: puzzleID,
+      mini: miniPuzzleID,
+    };
   });
-};
+
+export const PresenceMonitor = database
+  .ref("/status/{uid}")
+  .onWrite(async (change, context) => {
+    const eventStatus = change.after.val();
+
+    const user = await getUserByFirebaseAuthUserId(context.params.uid);
+
+    const statusSnapshot = await change.after.ref.once("value");
+    const status = statusSnapshot.val();
+    console.log(status, eventStatus);
+
+    // If the current timestamp for this data is newer than
+    // the data that triggered this event, we exit this function.
+    if (status.last_changed > eventStatus.last_changed) {
+      return null;
+    }
+
+    return setUserOnlineStatus(user, eventStatus.state == "online");
+  });
 
 export const copyNYTPuzzle = async (
   nytPuzzleID: string,
@@ -90,6 +118,7 @@ export const copyNYTPuzzle = async (
 export const getRecentNYTPuzzles = async (
   limit: number,
   type: "mini" | "daily"
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any[]> => {
   const latestPuzzleMetadata = await axios.get(
     `${LATEST_PUZZLE_URL}&limit=${limit}&publish_type=${type}`
@@ -98,7 +127,7 @@ export const getRecentNYTPuzzles = async (
 };
 
 export const loadPuzzleFromNYTPuzzle = async (
-  latestPuzzleID: any,
+  latestPuzzleID: string,
   type: "mini" | "daily"
 ) => {
   const puzzleResults = (

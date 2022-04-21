@@ -36,7 +36,8 @@ import { User } from "./User";
 export type Session = {
   sessionID: string;
   puzzle: Puzzle;
-  participants: User[];
+  participantUsernames: string[];
+  participantIDs: string[];
   startedBy: User;
   startTime: Timestamp;
   boardState: BoardState;
@@ -97,7 +98,12 @@ export const startSession = async (
   const session: Session = {
     sessionID,
     puzzle,
-    participants: participants ? [user].concat(participants) : [user],
+    participantIDs: participants?.map((user) => user.userID)
+      ? [user.userID].concat(participants.map((user) => user.userID))
+      : [user.userID],
+    participantUsernames: participants?.map((user) => user.username)
+      ? [user.username].concat(participants.map((user) => user.username))
+      : [user.username],
     startedBy: user,
     startTime: Timestamp.now(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),
@@ -111,7 +117,6 @@ export const startSession = async (
 
   await setDoc(sessionRef, session);
 };
-
 
 export const deleteSession = async (sessionID: string): Promise<void> => {
   const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID).withConverter(
@@ -209,7 +214,8 @@ export const joinSessionParticipants = async (
   );
 
   return updateDoc<Session>(sessionRef, {
-    participants: arrayUnion(user),
+    participantIDs: arrayUnion(user.userID),
+    participantUsernames: arrayUnion(user.username),
   });
 };
 

@@ -1,12 +1,19 @@
 import React from "react";
 import { Session } from "../../models/Session";
+import { User } from "../../models/User";
 import {
   getPercentageComplete,
   getSessionCompletionPercentages,
   getSessionRevealedPercentage,
 } from "../../utils/sessionUtils";
 
-const UserPercentageCompleteTable = ({ session }: { session: Session }) => {
+const UserPercentageCompleteTable = ({
+  session,
+  participants,
+}: {
+  session: Session;
+  participants: User[];
+}) => {
   const sessionResults = getSessionCompletionPercentages(session);
   const sessionPercentRevealed = getSessionRevealedPercentage(session);
   return (
@@ -24,14 +31,26 @@ const UserPercentageCompleteTable = ({ session }: { session: Session }) => {
               ([, percentComplete1], [, percentComplete2]) =>
                 percentComplete2 - percentComplete1
             )
-            .map(([username, percentComplete], index) => (
-              <tr key={index}>
-                <td className="py-2">{username}</td>
-                <td className="py-2">{`${(percentComplete * 100).toFixed(
-                  2
-                )}%`}</td>
-              </tr>
-            ))}
+            .map(([username, percentComplete], index) => {
+              const isOnline = participants.find(
+                (user) => user.username == username
+              )?.isOnline;
+              return (
+                <tr key={index}>
+                  <td className="flex py-2">
+                    {username}
+                    {isOnline && (
+                      <>
+                        <span className="w-2 h-2 my-auto ml-2 rounded-full bg-emerald-500 animate-pulse-fast"></span>
+                      </>
+                    )}
+                  </td>
+                  <td className="py-2">{`${(percentComplete * 100).toFixed(
+                    2
+                  )}%`}</td>
+                </tr>
+              );
+            })}
           {sessionPercentRevealed > 0 && (
             <tr key={"revealed"} className="text-red-600 dark:text-red-400">
               <td className="py-2">Revealed</td>

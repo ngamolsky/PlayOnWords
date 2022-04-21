@@ -11,11 +11,13 @@ import UserPercentageCompleteTable from "./UserPercentageCompleteTable";
 const ShareModal = ({
   modalShowing,
   session,
+  participants,
   setModalShowing,
 }: {
   modalShowing: boolean;
   session: Session;
   user: User;
+  participants: User[];
   setModalShowing: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const [showCopied, setShowCopied] = useState<boolean>(false);
@@ -48,7 +50,10 @@ const ShareModal = ({
         />
         <p className="my-auto ml-3 font-mono whitespace-nowrap">{shareURL}</p>
       </div>
-      <UserPercentageCompleteTable session={session} />
+      <UserPercentageCompleteTable
+        session={session}
+        participants={participants}
+      />
       <Transition
         show={showCopied}
         enter="transition-opacity duration-75"

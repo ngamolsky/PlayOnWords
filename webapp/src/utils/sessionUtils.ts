@@ -9,6 +9,7 @@ import {
   Session,
   CellState,
 } from "../models/Session";
+import { User } from "../models/User";
 import { OrientationType, SessionState } from "../reducers/session";
 
 export const getBoardStateFromSolutions = (
@@ -72,7 +73,6 @@ export const getFirstSelectableCellKey = (puzzle: Puzzle): string => {
   }
   throw new Error(`No Selectable Key found for puzzle ${puzzle.puzzleID}`);
 };
-
 
 export const getNextCellKey = (
   currentCellKey: string,
@@ -467,8 +467,8 @@ export const getCombinedBoardState = (
 };
 
 export const isUserInSession = (session: Session, userID: string): boolean => {
-  const matchingUser = session.participants.find(
-    (currentUser) => currentUser.userID === userID
+  const matchingUser = session.participantIDs.find(
+    (currentUserID) => currentUserID === userID
   );
   return !!matchingUser;
 };
@@ -552,13 +552,13 @@ export const getSessionCompletionPercentages = (
     (each) => !!each
   ).length;
 
-  session.participants.forEach((participant) => {
+  session.participantIDs.forEach((participantID, index) => {
     const participantCellCount = Object.values(session.boardState).filter(
-      (each) => each.lastEditedBy == participant.userID
+      (each) => each.lastEditedBy == participantID
     ).length;
 
-    userPercentages[participant.username] =
-      participantCellCount / totalSelectableCellCount;
+    const username = session.participantUsernames[index];
+    userPercentages[username] = participantCellCount / totalSelectableCellCount;
   });
 
   return userPercentages;

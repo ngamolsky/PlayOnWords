@@ -1,4 +1,4 @@
-import { loadAllPuzzles, updatePuzzle } from "../models/Puzzle";
+import { loadAllPuzzles, updatePuzzle } from "../../models/Puzzle";
 
 export const backfillPuzzleDayOfWeek = async (): Promise<string[]> => {
   const puzzleIDs = await loadAllPuzzles(async (puzzle) => {

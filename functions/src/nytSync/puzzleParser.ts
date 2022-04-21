@@ -1,13 +1,13 @@
 import { v4 } from "uuid";
 import { Timestamp } from "firebase-admin/firestore";
 import {
-  Clue,
-  ClueList,
   Puzzle,
-  Solutions,
   SpecialCells,
+  Solutions,
   SpecialCellType,
-} from "./models/Puzzle";
+  ClueList,
+  Clue,
+} from "../models/Puzzle";
 
 type NYTClue = {
   cells: number[];

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Timestamp, FieldValue } from "@google-cloud/firestore";
+import { Timestamp } from "@google-cloud/firestore";
 import { Puzzle } from "./Puzzle";
 import { User } from "./User";
 import db from "../config/firebase";

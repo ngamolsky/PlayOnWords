@@ -3,11 +3,9 @@ import React, { useEffect, useState } from "react";
 import Modal from "../../components/Modal";
 import { User } from "../../models/User";
 import { Session } from "../../models/Session";
-import { BASE_URL } from "../../constants";
 import { Transition } from "@headlessui/react";
 import { ClipboardCopyIcon } from "@heroicons/react/outline";
 import UserPercentageCompleteTable from "./UserPercentageCompleteTable";
-import { useLocation } from "react-router";
 
 const ShareModal = ({
   modalShowing,

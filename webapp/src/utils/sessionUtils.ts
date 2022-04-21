@@ -9,7 +9,6 @@ import {
   Session,
   CellState,
 } from "../models/Session";
-import { User } from "../models/User";
 import { OrientationType, SessionState } from "../reducers/session";
 
 export const getBoardStateFromSolutions = (

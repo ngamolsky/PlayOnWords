@@ -7,10 +7,8 @@ import {
   getPuzzleByNYTPuzzleID,
   Puzzle,
 } from "./models/Puzzle";
-import {
-  getUserByFirebaseAuthUserId,
-  setUserOnlineStatus,
-} from "./models/User";
+import { getUserSessions, setUserOnlineForSession } from "./models/Session";
+import { getUserByID, setUserOnlineStatus } from "./models/User";
 import { convertPuzzleDataToPuzzle } from "./puzzleParser";
 
 const LATEST_PUZZLE_URL =
@@ -65,15 +63,17 @@ export const NYTSync = pubsub
   });
 
 export const PresenceMonitor = database
-  .ref("/status/{uid}")
+  .ref("/status/{sanitizedUserID}")
   .onWrite(async (change, context) => {
     const eventStatus = change.after.val();
 
-    const user = await getUserByFirebaseAuthUserId(context.params.uid);
+    const sanitizedUserID = context.params.sanitizedUserID;
+
+    const userID = sanitizedUserID.replace("%%%", ".");
+    const user = await getUserByID(userID);
 
     const statusSnapshot = await change.after.ref.once("value");
     const status = statusSnapshot.val();
-    console.log(status, eventStatus);
 
     // If the current timestamp for this data is newer than
     // the data that triggered this event, we exit this function.
@@ -81,7 +81,28 @@ export const PresenceMonitor = database
       return null;
     }
 
-    return setUserOnlineStatus(user, eventStatus.state == "online");
+    const isOnline = eventStatus.state == "online";
+
+    if (isOnline) {
+      console.log(
+        "User is online, updating global status to online for user",
+        userID
+      );
+
+      return setUserOnlineStatus(user, true);
+    } else {
+      console.log(
+        "User is offline, removing online status from all sessions and on user",
+        userID
+      );
+
+      const userSessions = await getUserSessions(user);
+      userSessions.forEach((session) => {
+        setUserOnlineForSession(session.sessionID, user, false);
+      });
+
+      return setUserOnlineStatus(user, false);
+    }
   });
 
 export const copyNYTPuzzle = async (

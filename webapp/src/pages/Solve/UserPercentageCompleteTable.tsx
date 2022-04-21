@@ -1,21 +1,20 @@
+import classNames from "classnames";
 import React from "react";
 import { Session } from "../../models/Session";
-import { User } from "../../models/User";
+import { useUsersByID } from "../../models/User";
 import {
   getPercentageComplete,
   getSessionCompletionPercentages,
   getSessionRevealedPercentage,
 } from "../../utils/sessionUtils";
 
-const UserPercentageCompleteTable = ({
-  session,
-  participants,
-}: {
-  session: Session;
-  participants: User[];
-}) => {
+const UserPercentageCompleteTable = ({ session }: { session: Session }) => {
   const sessionResults = getSessionCompletionPercentages(session);
   const sessionPercentRevealed = getSessionRevealedPercentage(session);
+  const participants = useUsersByID(
+    session.participantData.map((user) => user.userID)
+  );
+
   return (
     <div className="flex-col p-4 mt-4 rounded-md bg-slate-200 dark:bg-slate-700">
       <table className="w-full table-fixed">
@@ -32,16 +31,28 @@ const UserPercentageCompleteTable = ({
                 percentComplete2 - percentComplete1
             )
             .map(([username, percentComplete], index) => {
-              const isOnline = participants.find(
-                (user) => user.username == username
+              const isInSession = session.participantData.find(
+                (userData) => userData.username == username
               )?.isOnline;
+
+              const user = participants.find(
+                (user) => user.username == username
+              );
+
+              const isUserOnline = user?.isOnline;
               return (
                 <tr key={index}>
                   <td className="flex py-2">
                     {username}
-                    {isOnline && (
+                    {(isInSession || isUserOnline) && (
                       <>
-                        <span className="w-2 h-2 my-auto ml-2 rounded-full bg-emerald-500 animate-pulse-fast"></span>
+                        <span
+                          className={classNames(
+                            "w-2 h-2 my-auto ml-2 rounded-full animate-pulse-fast",
+                            { "bg-orange-300": isUserOnline && !isInSession },
+                            { "bg-emerald-500": isInSession }
+                          )}
+                        ></span>
                       </>
                     )}
                   </td>

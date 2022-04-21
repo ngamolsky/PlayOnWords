@@ -7,14 +7,19 @@ import db from "../config/firebase";
 export type Session = {
   sessionID: string;
   puzzle: Puzzle;
-  participantUsernames: string[];
-  participantIDs: string[];
+  participantData: SessionParticipantData[];
   startedBy: User;
   startTime: Timestamp;
   boardState: BoardState;
   sessionStatus: SessionStatus;
   endTime?: Timestamp;
   lastUpdatedTime: Timestamp;
+};
+
+export type SessionParticipantData = {
+  username: string;
+  userID: string;
+  isOnline: boolean;
 };
 
 export type BoardState = {
@@ -61,6 +66,57 @@ export const getUserSessions = async (user: User): Promise<Session[]> => {
   });
 
   return sessions;
+};
+
+export const getSessionByID = async (sessionID: string): Promise<Session> => {
+  const snapshot = await db
+    .collection(SESSIONS_COLLECTION)
+    .withConverter(sessionConverter)
+    .doc(sessionID)
+    .get();
+
+  const session = snapshot.data();
+
+  if (!session) {
+    throw new Error(`No session found for ID: ${sessionID}`);
+  }
+
+  return session;
+};
+
+export const setUserOnlineForSession = async (
+  sessionID: string,
+  user: User,
+  isOnline: boolean
+): Promise<void> => {
+  const existingSession = await getSessionByID(sessionID);
+
+  const newParticipantData = existingSession.participantData.reduce<
+    SessionParticipantData[]
+  >((result, userData) => {
+    if (userData.userID == user.userID) {
+      result.push({
+        ...userData,
+        isOnline,
+      });
+    } else {
+      result.push({
+        ...userData,
+      });
+    }
+
+    return result;
+  }, []);
+
+  console.log(newParticipantData);
+
+  await db
+    .collection(SESSIONS_COLLECTION)
+    .withConverter(sessionConverter)
+    .doc(sessionID)
+    .update({
+      participantData: newParticipantData,
+    });
 };
 
 export const sessionConverter = {

@@ -60,6 +60,23 @@ export const getUserByFirebaseAuthUserId = async (
   }
 };
 
+
+export const getUserByID = async (userID: string): Promise<User> => {
+  const snapshot = await db
+    .collection(USERS_COLLECTION)
+    .doc(userID)
+    .withConverter(userConverter)
+    .get();
+
+  const user = snapshot.data();
+
+  if (!user) {
+    throw new Error(`No user found for userID: ${userID}`);
+  } else {
+    return user;
+  }
+};
+
 export const userConverter = {
   toFirestore(user: User): User {
     return user;

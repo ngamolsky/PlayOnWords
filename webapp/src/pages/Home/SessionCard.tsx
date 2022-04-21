@@ -16,7 +16,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   session,
   onClick,
 }) => {
-  const { sessionStatus, participantUsernames, boardState, puzzle } = session;
+  const { sessionStatus, participantData, boardState, puzzle } = session;
   const completed = sessionStatus == SessionStatus.COMPLETE;
 
   const percentComplete = getPercentageComplete(boardState, puzzle.solutions);
@@ -33,7 +33,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
         <XWordIcon className="w-2/5 my-auto pointer-events-none" />
         <div className="flex flex-col px-4 grow">
           <p className="mt-2 text-md text-ellipsis">
-            {participantUsernames.join(", ")}
+            {participantData.map((userData) => userData.username).join(", ")}
           </p>
           <p className="text-sm opacity-50 ">
             {completed ? "Completed On: " : "Last Updated: "}

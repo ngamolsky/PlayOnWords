@@ -466,8 +466,8 @@ export const getCombinedBoardState = (
 };
 
 export const isUserInSession = (session: Session, userID: string): boolean => {
-  const matchingUser = session.participantIDs.find(
-    (currentUserID) => currentUserID === userID
+  const matchingUser = session.participantData.find(
+    (userData) => userData.userID === userID
   );
   return !!matchingUser;
 };
@@ -551,12 +551,12 @@ export const getSessionCompletionPercentages = (
     (each) => !!each
   ).length;
 
-  session.participantIDs.forEach((participantID, index) => {
+  session.participantData.forEach((userData) => {
     const participantCellCount = Object.values(session.boardState).filter(
-      (each) => each.lastEditedBy == participantID
+      (each) => each.lastEditedBy == userData.userID
     ).length;
 
-    const username = session.participantUsernames[index];
+    const username = userData.username;
     userPercentages[username] = participantCellCount / totalSelectableCellCount;
   });
 

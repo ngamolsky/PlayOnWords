@@ -6,13 +6,7 @@ import {
   signOut as firebaseSignOut,
   Unsubscribe,
 } from "firebase/auth";
-import {
-  ref,
-  set,
-  serverTimestamp,
-  onValue,
-  onDisconnect,
-} from "firebase/database";
+import { ref, onValue, onDisconnect, set } from "firebase/database";
 import {
   collection,
   query,
@@ -27,6 +21,7 @@ import {
   deleteDoc,
   getDocs,
   updateDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
@@ -239,13 +234,17 @@ export const useAuth = (): [User | undefined, boolean] => {
                 );
               }
 
+              setUserState({
+                user,
+                userLoading: false,
+              });
+
               // In order to add a "presence feature" that can monitor whether a user is online, we use the firebase
               // real time database as per https://firebase.google.com/docs/firestore/solutions/presence#solution_cloud_functions_with_realtime_database
-              const userStatusDatabaseRef = ref(
-                rtDb,
-                "/status/" + authUser.uid
-              );
 
+              const sanitizedUserID = user.userID.replace(/\./g, "%%%");
+              const statusPath = `/status/${sanitizedUserID}`;
+              const userStatusDatabaseRef = ref(rtDb, statusPath);
               const connectedRef = ref(rtDb, ".info/connected");
 
               onValue(connectedRef, async (snapshot) => {
@@ -266,11 +265,6 @@ export const useAuth = (): [User | undefined, boolean] => {
                   last_changed: serverTimestamp(),
                 });
                 setUserOnlineStatus(user.userID, true);
-              });
-
-              setUserState({
-                user,
-                userLoading: false,
               });
             }
           }
@@ -301,8 +295,6 @@ export const useUsersByID = (userIDs: string[] | undefined): User[] => {
   const [userState, setUserState] = useState<User[]>([]);
 
   useEffect(() => {
-    console.log("Setting listnere", userIDs);
-    
     if (userIDs) {
       const q = query(
         collection(db, USERS_COLLECTION).withConverter(userConverter),
@@ -333,7 +325,7 @@ export const useUsersByID = (userIDs: string[] | undefined): User[] => {
       });
       return unsub;
     }
-  }, [userIDs]);
+  }, []);
 
   return userState;
 };

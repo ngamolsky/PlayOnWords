@@ -168,11 +168,13 @@ export const updateCellState = async (
 
   fieldData[fieldPath] = cellState;
 
-  if (deleteFieldName) {
-    fieldData[fieldPath][deleteFieldName] = deleteField();
-  }
-  fieldData.lastUpdatedTime = Timestamp.now();
 
+  if (deleteFieldName) {
+    const result = `${fieldPath}.${deleteFieldName}`;
+    fieldData[result] = deleteField();
+  }
+
+  fieldData.lastUpdatedTime = Timestamp.now();
   return updateDoc(sessionRef, fieldData);
 };
 

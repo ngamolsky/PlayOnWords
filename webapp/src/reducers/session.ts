@@ -162,7 +162,7 @@ const _updateCellState = (
   cellState: CellState,
   deleteFieldName?: keyof CellState
 ): void => {
-  updateCellState(sessionID, cellKey, cellState), deleteFieldName;
+  updateCellState(sessionID, cellKey, cellState, deleteFieldName);
 };
 
 export const _joinSessionParticipants = (
@@ -722,8 +722,8 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
       const solutionState = _checkCell(cellSolution, currentCellValue);
 
       const newCell: CellState = {
-        ...boardState[selectedCellKey],
         solutionState,
+        currentLetter: currentCellValue,
       };
 
       _updateCellState(sessionID, selectedCellKey, newCell, "lastEditedBy");

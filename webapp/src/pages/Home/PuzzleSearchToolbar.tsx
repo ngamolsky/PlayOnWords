@@ -91,7 +91,7 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
         <RadioGroup
           value={puzzleType}
           onChange={setPuzzleType}
-          className="flex my-auto overflow-hidden rounded-md cursor-pointer pace-x-2 ring-1 ring-slate-300"
+          className="flex my-auto overflow-hidden rounded-md cursor-pointer ring-1 ring-slate-300"
         >
           <RadioGroup.Option value="mini">
             {({ checked }) => (

@@ -50,7 +50,7 @@ const Home: React.FC = () => {
       toolbarContent={
         <>
           <IconButton
-            className="w-8 h-8 my-auto mr-4 rounded-md"
+            className="w-8 h-8 my-auto mr-2 rounded-md"
             onClick={() => {
               setOnlineUserModalShowing(!isOnlineUserModalShowing);
             }}

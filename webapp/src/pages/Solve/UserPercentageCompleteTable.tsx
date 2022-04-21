@@ -37,7 +37,6 @@ const UserPercentageCompleteTable = ({ session }: { session: Session }) => {
               const isInSession = currentUserData?.isOnline;
 
               const user = participants.find((user) => user.userID == userID);
-              console.log(user?.username, user?.isOnline);
 
               const isUserOnline = user?.isOnline;
               return (

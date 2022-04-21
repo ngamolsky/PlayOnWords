@@ -7,6 +7,7 @@ type DropdownProps = {
   items: {
     node: React.ReactNode;
     onClick?: () => void;
+    disabled?: boolean;
   }[];
   selectedItemIndex?: number;
 };
@@ -35,8 +36,12 @@ const Dropdown: React.FC<DropdownProps> = ({
         >
           {items.map((item, index) => {
             return (
-              <Menu.Item key={index} onClick={item.onClick}>
-                {({ active }) => (
+              <Menu.Item
+                key={index}
+                onClick={item.onClick}
+                disabled={item.disabled}
+              >
+                {({ active, disabled }) => (
                   <div
                     className={classNames(
                       "p-2 active:bg-slate-200",
@@ -51,6 +56,10 @@ const Dropdown: React.FC<DropdownProps> = ({
                       {
                         "bg-slate-200 dark:bg-slate-600 first:rounded-t-md last:rounded-b-md":
                           active,
+                      },
+                      {
+                        "select-none dark:bg-slate-600 first:rounded-t-md":
+                          disabled,
                       }
                     )}
                   >

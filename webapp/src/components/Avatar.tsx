@@ -18,6 +18,7 @@ const Avatar: React.FC<AvatarProps> = ({ user, onClick }) => {
       items={[
         {
           node: <p className="px-4 cursor-default">{user.username}</p>,
+          disabled: true,
         },
         {
           node: <button className="px-4 cursor-pointer">Sign Out</button>,

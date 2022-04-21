@@ -556,8 +556,8 @@ export const getSessionCompletionPercentages = (
       (each) => each.lastEditedBy == userData.userID
     ).length;
 
-    const username = userData.username;
-    userPercentages[username] = participantCellCount / totalSelectableCellCount;
+    const userID = userData.userID;
+    userPercentages[userID] = participantCellCount / totalSelectableCellCount;
   });
 
   return userPercentages;

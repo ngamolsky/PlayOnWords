@@ -30,21 +30,21 @@ const UserPercentageCompleteTable = ({ session }: { session: Session }) => {
               ([, percentComplete1], [, percentComplete2]) =>
                 percentComplete2 - percentComplete1
             )
-            .map(([username, percentComplete], index) => {
-              const isInSession = session.participantData.find(
-                (userData) => userData.username == username
-              )?.isOnline;
-
-              const user = participants.find(
-                (user) => user.username == username
+            .map(([userID, percentComplete], index) => {
+              const currentUserData = session.participantData.find(
+                (userData) => userData.userID == userID
               );
+              const isInSession = currentUserData?.isOnline;
+
+              const user = participants.find((user) => user.userID == userID);
+              console.log(user?.username, user?.isOnline);
 
               const isUserOnline = user?.isOnline;
               return (
                 <tr key={index}>
                   <td className="flex py-2">
-                    {username}
-                    {(isInSession || isUserOnline) && (
+                    {currentUserData?.username}
+                      {(isInSession || isUserOnline) && (
                       <>
                         <span
                           className={classNames(

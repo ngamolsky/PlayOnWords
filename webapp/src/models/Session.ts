@@ -37,6 +37,7 @@ export type Session = {
   sessionID: string;
   puzzle: Puzzle;
   participantData: SessionParticipantData[];
+  participantIDs: string[];
   startedBy: User;
   startTime: Timestamp;
   boardState: BoardState;
@@ -118,6 +119,9 @@ export const startSession = async (
           }))
         )
       : [currentUserData],
+    participantIDs: participants
+      ? [currentUserData.userID].concat(participants.map((user) => user.userID))
+      : [currentUserData.userID],
     startedBy: user,
     startTime: Timestamp.now(),
     boardState: getBoardStateFromSolutions(puzzle.solutions),
@@ -232,6 +236,7 @@ export const joinSessionParticipants = async (
       userID: user.userID,
       isOnline: true,
     }),
+    participantIDs: arrayUnion(user.userID),
   });
 };
 

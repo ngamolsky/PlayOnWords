@@ -7,6 +7,7 @@ import { BASE_URL } from "../../constants";
 import { Transition } from "@headlessui/react";
 import { ClipboardCopyIcon } from "@heroicons/react/outline";
 import UserPercentageCompleteTable from "./UserPercentageCompleteTable";
+import { useLocation } from "react-router";
 
 const ShareModal = ({
   modalShowing,
@@ -29,7 +30,10 @@ const ShareModal = ({
     }
   }, [showCopied]);
 
-  const shareURL = `${BASE_URL}/solve/${session.sessionID}`;
+  
+  const shareURL = `${window.location.origin.toString()}/solve/${
+    session.sessionID
+  }`;
 
   return (
     <Modal

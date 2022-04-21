@@ -36,6 +36,13 @@ export const toXWordTime = (date: Date): string => {
   }`;
 };
 
+export const calcDiffInSeconds = (dateA: Date, dateB: Date) => {
+  return Math.max(
+    Math.floor((dateA.getTime() - dateB.getTime()) / 1000 + 1),
+    0
+  );
+};
+
 export const secondsToTimeString = (seconds: number): string => {
   const durationDate = new Date(seconds * 1000);
 

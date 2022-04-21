@@ -108,8 +108,6 @@ export const setUserOnlineForSession = async (
     return result;
   }, []);
 
-  console.log(newParticipantData);
-
   await db
     .collection(SESSIONS_COLLECTION)
     .withConverter(sessionConverter)

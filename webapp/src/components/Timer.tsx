@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { secondsToTimeString } from "../utils/timeAndDateUtils";
+import {
+  calcDiffInSeconds,
+  secondsToTimeString,
+} from "../utils/timeAndDateUtils";
 
-const calcDiffInSeconds = (dateA: Date, dateB: Date) => {
-  return Math.max(
-    Math.floor((dateA.getTime() - dateB.getTime()) / 1000 + 1),
-    0
-  );
-};
 
 const Timer = ({ sessionStartDate }: { sessionStartDate: Date }) => {
   const [currentDate, setCurrentDate] = useState(new Date());

@@ -1,5 +1,9 @@
 import React from "react";
-import { toXWordTime } from "../../utils/timeAndDateUtils";
+import {
+  calcDiffInSeconds,
+  secondsToTimeString,
+  toXWordTime,
+} from "../../utils/timeAndDateUtils";
 import { deleteSession, Session, SessionStatus } from "../../models/Session";
 import classNames from "classnames";
 import XWordIcon from "../../images/XWordIcon";
@@ -44,6 +48,17 @@ export const SessionCard: React.FC<SessionCardProps> = ({
           <p className="text-sm opacity-50">
             Percent complete: {percentComplete.toFixed(2)}%
           </p>
+          {session.endTime && (
+            <p className="text-sm opacity-50">
+              Duration:{" "}
+              {secondsToTimeString(
+                calcDiffInSeconds(
+                  session.endTime.toDate(),
+                  session.startTime.toDate()
+                )
+              )}
+            </p>
+          )}
           <div className="flex items-end justify-end grow">
             <IconButton
               className="rounded-full"

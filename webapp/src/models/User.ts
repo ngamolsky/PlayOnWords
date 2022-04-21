@@ -241,7 +241,6 @@ export const useAuth = (): [User | undefined, boolean] => {
 
               // In order to add a "presence feature" that can monitor whether a user is online, we use the firebase
               // real time database as per https://firebase.google.com/docs/firestore/solutions/presence#solution_cloud_functions_with_realtime_database
-
               const sanitizedUserID = user.userID.replace(/\./g, "%%%");
               const statusPath = `/status/${sanitizedUserID}`;
               const userStatusDatabaseRef = ref(rtDb, statusPath);
@@ -337,6 +336,42 @@ export const useLoggedInUser = (): User => {
   }
 
   return user;
+};
+
+export const useOnlineUsers = (): User[] => {
+  const [userState, setUserState] = useState<User[]>([]);
+
+  useEffect(() => {
+    const q = query(
+      collection(db, USERS_COLLECTION).withConverter(userConverter),
+      where("isOnline", "==", true)
+    );
+
+    if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+      console.log(
+        "Firestore Request: useOnlineUsers. Getting all online users"
+      );
+    }
+
+    const unsub = onSnapshot(q, (querySnapshot) => {
+      const users: User[] = [];
+      querySnapshot.docs.forEach((doc) => {
+        users.push(doc.data());
+      });
+
+      setUserState(users);
+
+      if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+        console.log(
+          "Firestore Request: useOnlineUsers. Updating Users:",
+          JSON.stringify(users)
+        );
+      }
+    });
+    return unsub;
+  }, []);
+
+  return userState;
 };
 //#endregion
 

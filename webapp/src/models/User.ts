@@ -242,30 +242,33 @@ export const useAuth = (): [User | undefined, boolean] => {
 
               // In order to add a "presence feature" that can monitor whether a user is online, we use the firebase
               // real time database as per https://firebase.google.com/docs/firestore/solutions/presence#solution_cloud_functions_with_realtime_database
-              const sanitizedUserID = user.userID.replace(/\./g, "%%%");
-              const statusPath = `/status/${sanitizedUserID}`;
-              const userStatusDatabaseRef = ref(rtDb, statusPath);
-              const connectedRef = ref(rtDb, ".info/connected");
 
-              onValue(connectedRef, async (snapshot) => {
-                const data = snapshot.val();
+              if (user) {
+                const sanitizedUserID = user.userID.replace(/\./g, "%%%");
+                const statusPath = `/status/${sanitizedUserID}`;
+                const userStatusDatabaseRef = ref(rtDb, statusPath);
+                const connectedRef = ref(rtDb, ".info/connected");
 
-                if (data == false) {
-                  setUserOnlineStatus(user.userID, false);
-                  return;
-                }
+                onValue(connectedRef, async (snapshot) => {
+                  const data = snapshot.val();
 
-                await onDisconnect(userStatusDatabaseRef).set({
-                  state: "offline",
-                  last_changed: serverTimestamp(),
+                  if (data == false) {
+                    setUserOnlineStatus(user.userID, false);
+                    return;
+                  }
+
+                  await onDisconnect(userStatusDatabaseRef).set({
+                    state: "offline",
+                    last_changed: serverTimestamp(),
+                  });
+
+                  set(userStatusDatabaseRef, {
+                    state: "online",
+                    last_changed: serverTimestamp(),
+                  });
+                  setUserOnlineStatus(user.userID, true);
                 });
-
-                set(userStatusDatabaseRef, {
-                  state: "online",
-                  last_changed: serverTimestamp(),
-                });
-                setUserOnlineStatus(user.userID, true);
-              });
+              }
             }
           }
         });

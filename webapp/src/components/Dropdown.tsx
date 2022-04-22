@@ -44,7 +44,7 @@ const Dropdown: React.FC<DropdownProps> = ({
                 {({ active, disabled }) => (
                   <div
                     className={classNames(
-                      "p-2 active:bg-slate-200",
+                      "p-2",
                       {
                         "bg-blue-300 dark:bg-blue-600 first:rounded-t-md last:rounded-b-md":
                           index == selectedItemIndex,

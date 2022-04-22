@@ -294,21 +294,8 @@ export const useAuth = (): [User | undefined, boolean] => {
   return [userState.user, userState.userLoading];
 };
 
-export const useUsersByID = (
-  userIDs?: string[],
-  currentSessionID?: string
-): User[] => {
+export const useUsersByID = (userIDs?: string[]): User[] => {
   const [userState, setUserState] = useState<User[]>([]);
-
-  useEffect(() => {
-    if (userIDs && currentSessionID) {
-      console.log("useUsersByID sesion update");
-
-      userIDs.forEach((userID) => {
-        setUserOnlineForSession(currentSessionID, userID, true);
-      });
-    }
-  }, []);
 
   useEffect(() => {
     if (userIDs) {

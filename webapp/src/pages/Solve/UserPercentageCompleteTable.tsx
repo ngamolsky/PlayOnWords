@@ -12,8 +12,7 @@ const UserPercentageCompleteTable = ({ session }: { session: Session }) => {
   const sessionResults = getSessionCompletionPercentages(session);
   const sessionPercentRevealed = getSessionRevealedPercentage(session);
   const participants = useUsersByID(
-    session.participantData.map((user) => user.userID),
-    session.sessionID
+    session.participantData.map((user) => user.userID)
   );
 
   return (

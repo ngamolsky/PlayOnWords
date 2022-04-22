@@ -307,24 +307,6 @@ export const useSessionState = (
     },
   });
 
-  const onVisibilityChange = () => {
-    setUserOnlineForSession(
-      sessionID,
-      currentUserID,
-      document.visibilityState === "visible"
-    );
-  };
-
-  useLayoutEffect(() => {
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    setUserOnlineForSession(sessionID, currentUserID, true);
-
-    return () => {
-      setUserOnlineForSession(sessionID, currentUserID, false);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, []);
-
   useEffect(() => {
     const setInitialState = async (
       sessionID: string,
@@ -343,8 +325,11 @@ export const useSessionState = (
         );
       }
     };
-
+    setUserOnlineForSession(sessionID, currentUserID, true);
     setInitialState(sessionID, dispatch);
+    return () => {
+      setUserOnlineForSession(sessionID, currentUserID, false);
+    };
   }, []);
 
   useEffect(() => {
@@ -375,6 +360,21 @@ export const useSessionState = (
     );
 
     return unsub;
+  }, []);
+
+  const onVisibilityChange = () => {
+    setUserOnlineForSession(
+      sessionID,
+      currentUserID,
+      document.visibilityState === "visible"
+    );
+  };
+
+  useEffect(() => {
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, []);
 
   return [sessionState, dispatch];

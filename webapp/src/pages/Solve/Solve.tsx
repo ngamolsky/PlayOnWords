@@ -30,8 +30,6 @@ const Solve: React.FC = () => {
     throw new Error("Puzzle Session ID not found");
   }
 
-  console.log("solve loaded");
-
   const user = useLoggedInUser();
 
   const [sessionState, dispatch] = useSessionState(sessionID, user.userID);

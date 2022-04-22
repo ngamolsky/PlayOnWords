@@ -30,6 +30,7 @@ import { USERS_COLLECTION } from "../constants";
 import { UserContext } from "../contexts/UserContext";
 import { ManyUserFoundForFirebaseIDError } from "../errors";
 import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
+import { setUserOnlineForSession } from "./Session";
 
 export type User = {
   userID: string;
@@ -290,8 +291,21 @@ export const useAuth = (): [User | undefined, boolean] => {
   return [userState.user, userState.userLoading];
 };
 
-export const useUsersByID = (userIDs: string[] | undefined): User[] => {
+export const useUsersByID = (
+  userIDs?: string[],
+  currentSessionID?: string
+): User[] => {
   const [userState, setUserState] = useState<User[]>([]);
+
+  useEffect(() => {
+    if (userIDs && currentSessionID) {
+      console.log("useUsersByID sesion update");
+
+      userIDs.forEach((userID) => {
+        setUserOnlineForSession(currentSessionID, userID, true);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (userIDs) {

@@ -16,7 +16,13 @@ import {
   arrayUnion,
   deleteDoc,
 } from "firebase/firestore";
-import { useState, useEffect, Dispatch, useReducer } from "react";
+import {
+  useState,
+  useEffect,
+  Dispatch,
+  useReducer,
+  useLayoutEffect,
+} from "react";
 import { db } from "../config/firebase";
 import {
   SESSIONS_COLLECTION,
@@ -267,6 +273,14 @@ export const setUserOnlineForSession = async (
   const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID).withConverter(
     sessionConverter
   );
+
+  if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+    console.log(
+      "Firestore action: setting user online for session",
+      JSON.stringify(newParticipantData),
+      sessionID
+    );
+  }
   await setDoc<Session>(
     sessionRef,
     {
@@ -293,6 +307,24 @@ export const useSessionState = (
     },
   });
 
+  const onVisibilityChange = () => {
+    setUserOnlineForSession(
+      sessionID,
+      currentUserID,
+      document.visibilityState === "visible"
+    );
+  };
+
+  useLayoutEffect(() => {
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    setUserOnlineForSession(sessionID, currentUserID, true);
+
+    return () => {
+      setUserOnlineForSession(sessionID, currentUserID, false);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
+
   useEffect(() => {
     const setInitialState = async (
       sessionID: string,
@@ -312,11 +344,7 @@ export const useSessionState = (
       }
     };
 
-    setUserOnlineForSession(sessionID, currentUserID, true);
     setInitialState(sessionID, dispatch);
-    return () => {
-      setUserOnlineForSession(sessionID, currentUserID, false);
-    };
   }, []);
 
   useEffect(() => {

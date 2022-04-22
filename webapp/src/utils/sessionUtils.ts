@@ -466,8 +466,8 @@ export const getCombinedBoardState = (
 };
 
 export const isUserInSession = (session: Session, userID: string): boolean => {
-  const matchingUser = session.participantData.find(
-    (userData) => userData.userID === userID
+  const matchingUser = session.participantIDs.find(
+    (currentUserID) => currentUserID === userID
   );
   return !!matchingUser;
 };

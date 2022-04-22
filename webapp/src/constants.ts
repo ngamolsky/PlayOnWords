@@ -10,7 +10,7 @@ export const PUZZLES_COLLECTION = "puzzles";
 export const SESSIONS_COLLECTION = "sessions";
 export const USERS_COLLECTION = "users";
 
-export const NUM_PUZZLES_TO_SHOW_ON_HOME = 12;
+export const NUM_PUZZLES_TO_SHOW_ON_HOME = 10;
 
 export const BASE_URL = __prod__
   ? "https://playonwords.gamolsky.net"

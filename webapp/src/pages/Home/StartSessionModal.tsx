@@ -87,8 +87,8 @@ const NewTab = (
 
           const sessionID = `session.${v4()}`;
 
-          await startSession(sessionID, selectedPuzzle, user);
-          setSessionID(sessionID);
+          const session = await startSession(sessionID, selectedPuzzle, user);
+          setSessionID(session.readableID);
         }}
       >
         Start Session

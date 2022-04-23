@@ -566,8 +566,6 @@ export const sessionReducer: Reducer<SessionState, SessionActions> = (
         orientation
       );
 
-      console.log(didLoopPuzzle, didLoopPuzzleFromEmptyClue);
-
       if (didLoopPuzzleFromEmptyClue && !didLoopPuzzle) {
         newState = _toggleOrientation(newState);
       }

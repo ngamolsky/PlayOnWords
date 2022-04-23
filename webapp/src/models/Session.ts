@@ -235,6 +235,8 @@ export const updateCellState = async (
     fieldData[result] = deleteField();
   }
 
+  console.log("here", sessionID, cellState);
+
   fieldData.lastUpdatedTime = Timestamp.now();
   return updateDoc(sessionRef, fieldData);
 };
@@ -380,14 +382,16 @@ export const useSessionStateByReadableID = (
   }, [session]);
 
   useEffect(() => {
+    console.log("HAS Smo ESSIOn");
+
     if (session) {
       const unsub = onSnapshot(
         doc(db, SESSIONS_COLLECTION, session.sessionID).withConverter(
           sessionConverter
         ),
         (doc) => {
-          const session = doc.data();
-          if (session) {
+          const newSession = doc.data();
+          if (newSession) {
             if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
               console.log(
                 "Firestore Request: useSessionState. Session updated:",
@@ -396,7 +400,7 @@ export const useSessionStateByReadableID = (
             }
             dispatch({
               type: SessionActionTypes.SET_SHARED_STATE,
-              session: session,
+              session: newSession,
               currentUserID,
             });
           } else {
@@ -410,7 +414,7 @@ export const useSessionStateByReadableID = (
       );
       return unsub;
     }
-  }, []);
+  }, [session]);
 
   const onVisibilityChange = () => {
     if (session) {

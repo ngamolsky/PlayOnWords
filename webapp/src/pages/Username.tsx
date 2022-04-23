@@ -4,7 +4,7 @@ import { XWordContainer } from "../components/XWordContainer";
 import { InputField } from "../components/InputField";
 import { validateUsername } from "../utils/validationUtils";
 import { useHistory } from "react-router-dom";
-import { createAnonymousUser, createGoogleUser } from "../models/User";
+import { createAnonymousUser, createOrSignInGoogleUser } from "../models/User";
 import useQueryParams from "../hooks/useQueryParams";
 import { UserContext } from "../contexts/UserContext";
 import { APP_NAME } from "../constants";
@@ -39,7 +39,7 @@ const Login: React.FC = () => {
         onSubmit={async ({ username, type }) => {
           setCreatingUser(true);
           if (type == "google") {
-            await createGoogleUser(username);
+            await createOrSignInGoogleUser(username);
           } else {
             await createAnonymousUser(username);
           }
@@ -66,6 +66,16 @@ const Login: React.FC = () => {
               }}
             >
               Start
+            </Button>
+            <Button
+              type="button"
+              className="mt-4"
+              onClick={() => {
+                setFieldValue("type", "google");
+                handleSubmit();
+              }}
+            >
+              Start with Google
             </Button>
           </Form>
         )}

@@ -16,13 +16,7 @@ import {
   arrayUnion,
   deleteDoc,
 } from "firebase/firestore";
-import {
-  useState,
-  useEffect,
-  Dispatch,
-  useReducer,
-  useLayoutEffect,
-} from "react";
+import { useState, useEffect, Dispatch, useReducer } from "react";
 import { db } from "../config/firebase";
 import {
   SESSIONS_COLLECTION,

@@ -30,7 +30,6 @@ import { USERS_COLLECTION } from "../constants";
 import { UserContext } from "../contexts/UserContext";
 import { ManyUserFoundForFirebaseIDError } from "../errors";
 import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
-import { setUserOnlineForSession } from "./Session";
 
 export type User = {
   userID: string;
@@ -123,10 +122,28 @@ export const setUserOnlineStatus = async (
   });
 };
 
-export const createGoogleUser = async (username: string): Promise<User> => {
+export const updateUsername = async (userID: string, newUsername: string) => {
+  await updateDoc(doc(db, USERS_COLLECTION, userID), {
+    username: newUsername,
+  });
+};
+
+export const createOrSignInGoogleUser = async (
+  username: string
+): Promise<User> => {
   const provider = new GoogleAuthProvider();
 
   const googleUser = await signInWithPopup(auth, provider);
+
+  const existingUser = await getUserByFirebaseAuthID(googleUser.user.uid);
+
+  if (existingUser) {
+    await updateUsername(existingUser.userID, username);
+    return {
+      ...existingUser,
+      username,
+    };
+  }
 
   const userID = `user.${v4()}`;
   const user: User = {

@@ -27,7 +27,7 @@ const ShareModal = ({
   }, [showCopied]);
 
   const shareURL = `${window.location.origin.toString()}/solve/${
-    session.sessionID
+    session.readableID
   }`;
 
   return (

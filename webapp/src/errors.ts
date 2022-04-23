@@ -18,3 +18,14 @@ export const ManyUserFoundForFirebaseIDError = (
     name: "ManyUserFoundForFirebaseIDError",
   };
 };
+
+
+export const ManySessionsFoundForReadableIDError = (
+  readableID: string
+): XWordError => {
+  return {
+    code: 602,
+    message: `Found more than one sessoion for readableID: ${readableID}`,
+    name: "ManySessionsFoundForReadableIDError",
+  };
+};

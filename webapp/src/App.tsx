@@ -17,7 +17,7 @@ export const App = () => {
           <Route path="/username">
             <Login />
           </Route>
-          <ProtectedRoute path="/solve/:sessionID">
+          <ProtectedRoute path="/solve/:sessionReadableID">
             <Solve />
           </ProtectedRoute>
           <ProtectedRoute path="/signOut">

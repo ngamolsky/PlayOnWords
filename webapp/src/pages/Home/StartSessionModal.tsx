@@ -74,8 +74,8 @@ const NewTab = (
 
           const sessionID = `session.${v4()}`;
 
-          await startSession(sessionID, selectedPuzzle, user);
-          setSessionID(sessionID);
+          const session = await startSession(sessionID, selectedPuzzle, user);
+          setSessionID(session.readableID);
         }}
       />
       <Button
@@ -169,7 +169,7 @@ const CompletedTab = (
                 key={session.sessionID}
                 session={session}
                 onClick={() => {
-                  setSessionID(session.sessionID);
+                  setSessionID(session.readableID);
                 }}
               />
             ))

@@ -125,7 +125,7 @@ const InProgressTab = (
                 key={session.sessionID}
                 session={session}
                 onClick={() => {
-                  setSessionID(session.sessionID);
+                  setSessionID(session.readableID);
                 }}
               />
             ))

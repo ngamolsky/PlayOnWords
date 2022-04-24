@@ -15,7 +15,6 @@ import {
   where,
   arrayUnion,
   deleteDoc,
-  getDocs,
 } from "firebase/firestore";
 import { useState, useEffect, Dispatch, useReducer } from "react";
 import { db } from "../config/firebase";
@@ -33,12 +32,9 @@ import {
 import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
 import { getBoardStateFromSolutions } from "../utils/sessionUtils";
 import { User } from "./User";
-import id from "uuid-readable";
-import { ManySessionsFoundForReadableIDError } from "../errors";
 
 export type Session = {
   sessionID: string;
-  readableID: string;
   puzzle: Puzzle;
   participantData: SessionParticipantData[];
   participantIDs: string[];
@@ -111,13 +107,8 @@ export const startSession = async (
     isOnline: true,
   };
 
-  const uuid = sessionID.replace("session.", "");
-  const readableID = id.short(uuid).split(" ").join("-");
-  console.log("Created short ID", readableID);
-
   const session: Session = {
     sessionID,
-    readableID,
     puzzle,
     participantData: participants
       ? [currentUserData].concat(
@@ -173,35 +164,6 @@ export const getSession = async (sessionID: string): Promise<Session> => {
     throw Error("No session found");
   }
   return session;
-};
-
-export const getSessionByReadableID = async (
-  readableID: string
-): Promise<Session> => {
-  const q = query(
-    collection(db, SESSIONS_COLLECTION).withConverter(sessionConverter),
-    where("readableID", "==", readableID)
-  );
-  if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
-    console.log("Getting Session by readable ID:", readableID);
-  }
-
-  const sessions = (await getDocs(q)).docs.map((snapshot) => snapshot.data());
-
-  if (!sessions || sessions.length == 0) {
-    throw new Error(`No session found for readable ID: ${readableID}`);
-  } else if (sessions.length > 1) {
-    throw ManySessionsFoundForReadableIDError(readableID);
-  } else {
-    const session = sessions[0];
-    if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
-      console.log(
-        "Firestore Request: loaded session from readable ID",
-        session.sessionID
-      );
-    }
-    return session;
-  }
 };
 
 export const updateBoardState = async (
@@ -327,11 +289,10 @@ export const setUserOnlineForSession = async (
 
 //#region Hooks
 
-export const useSessionStateByReadableID = (
-  readableID: string,
+export const useSessionState = (
+  sessionID: string,
   currentUserID: string
 ): [SessionState, Dispatch<SessionActions>] => {
-  const [session, setSession] = useState<Session>();
   const [sessionState, dispatch] = useReducer(sessionReducer, {
     loadingMessage: "Starting your session...",
     localState: {
@@ -344,82 +305,65 @@ export const useSessionStateByReadableID = (
   });
 
   useEffect(() => {
-    const setSessionFromReadableID = async (readableID: string) => {
-      const session = await getSessionByReadableID(readableID);
-      setSession(session);
+    const setInitialState = async (
+      sessionID: string,
+      dispatch: Dispatch<SessionActions>
+    ) => {
+      const session = await getSession(sessionID);
+      dispatch({
+        type: SessionActionTypes.SET_ORIGINAL_STATE,
+        session,
+      });
+
+      if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+        console.log(
+          "Firestore Request: useSessionState. Loaded initial session",
+          session.sessionID
+        );
+      }
     };
 
-    setSessionFromReadableID(readableID);
+    setUserOnlineForSession(sessionID, currentUserID, true);
+    setInitialState(sessionID, dispatch);
+    return () => {
+      setUserOnlineForSession(sessionID, currentUserID, false);
+    };
   }, []);
 
   useEffect(() => {
-    const setInitialState = async () => {
-      if (session) {
-        dispatch({
-          type: SessionActionTypes.SET_ORIGINAL_STATE,
-          session,
-        });
-
-        if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
-          console.log(
-            "Firestore Request: useSessionState. Loaded initial session",
-            session.sessionID
-          );
-        }
-      }
-    };
-
-    if (session) {
-      setUserOnlineForSession(session.sessionID, currentUserID, true);
-      setInitialState();
-    }
-
-    return () => {
-      if (session) {
-        setUserOnlineForSession(session.sessionID, currentUserID, false);
-      }
-    };
-  }, [session]);
-
-  useEffect(() => {
-    console.log("HAS Smo ESSIOn");
-
-    if (session) {
-      const unsub = onSnapshot(
-        doc(db, SESSIONS_COLLECTION, session.sessionID).withConverter(
-          sessionConverter
-        ),
-        (doc) => {
-          const newSession = doc.data();
-          if (newSession) {
-            if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
-              console.log(
-                "Firestore Request: useSessionState. Session updated:",
-                session.sessionID
-              );
-            }
-            dispatch({
-              type: SessionActionTypes.SET_SHARED_STATE,
-              session: newSession,
-              currentUserID,
-            });
-          } else {
-            if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
-              console.log(
-                "Firestore Request: useSessionState. No Session Found."
-              );
-            }
+    const unsub = onSnapshot(
+      doc(db, SESSIONS_COLLECTION, sessionID).withConverter(sessionConverter),
+      (doc) => {
+        const session = doc.data();
+        if (session) {
+          if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+            console.log(
+              "Firestore Request: useSessionState. Session updated:",
+              session.sessionID
+            );
+          }
+          dispatch({
+            type: SessionActionTypes.SET_SHARED_STATE,
+            session: session,
+            currentUserID,
+          });
+        } else {
+          if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
+            console.log(
+              "Firestore Request: useSessionState. No Session Found."
+            );
           }
         }
-      );
-      return unsub;
-    }
-  }, [session]);
+      }
+    );
+
+    return unsub;
+  }, []);
 
   const onVisibilityChange = () => {
-    if (session) {
+    if (sessionState.session) {
       setUserOnlineForSession(
-        session.sessionID,
+        sessionState.session.sessionID,
         currentUserID,
         document.visibilityState === "visible"
       );

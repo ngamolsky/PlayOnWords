@@ -11,6 +11,7 @@ import { startSession, useRecentSessionsForUser } from "../../models/Session";
 import { SessionCard } from "./SessionCard";
 import { toXWordDate } from "../../utils/timeAndDateUtils";
 import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../../constants";
+import id from "uuid-readable";
 
 const StartSessionModal = ({
   modalShowing,
@@ -72,10 +73,10 @@ const NewTab = (
           setSessionLoading(true);
           setModalShowing(false);
 
-          const sessionID = `session.${v4()}`;
+          const sessionID = id.short(v4()).split(" ").join("-");
 
           const session = await startSession(sessionID, selectedPuzzle, user);
-          setSessionID(session.readableID);
+          setSessionID(session.sessionID);
         }}
       />
       <Button
@@ -88,7 +89,7 @@ const NewTab = (
           const sessionID = `session.${v4()}`;
 
           const session = await startSession(sessionID, selectedPuzzle, user);
-          setSessionID(session.readableID);
+          setSessionID(session.sessionID);
         }}
       >
         Start Session
@@ -125,7 +126,7 @@ const InProgressTab = (
                 key={session.sessionID}
                 session={session}
                 onClick={() => {
-                  setSessionID(session.readableID);
+                  setSessionID(session.sessionID);
                 }}
               />
             ))
@@ -169,7 +170,7 @@ const CompletedTab = (
                 key={session.sessionID}
                 session={session}
                 onClick={() => {
-                  setSessionID(session.readableID);
+                  setSessionID(session.sessionID);
                 }}
               />
             ))

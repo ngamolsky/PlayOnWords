@@ -2,10 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { XWordContainer } from "../../components/XWordContainer";
-import {
-  CellSolutionState,
-  useSessionStateByReadableID,
-} from "../../models/Session";
+import { CellSolutionState, useSessionState } from "../../models/Session";
 import { XBoard } from "../../components/XBoard/XBoard";
 import { ACTION_KEYS, Keyboard } from "../../components/mobile/Keyboard";
 import { ClueSelector } from "../../components/mobile/ClueSelector";
@@ -27,9 +24,9 @@ export type SelectionState = {
 };
 
 const Solve: React.FC = () => {
-  const { sessionReadableID } = useParams<{ sessionReadableID?: string }>();
+  const { sessionID } = useParams<{ sessionID?: string }>();
 
-  if (!sessionReadableID) {
+  if (!sessionID) {
     return (
       <XWordContainer
         loadingMessage={"No session identifier in URL."}
@@ -40,10 +37,7 @@ const Solve: React.FC = () => {
 
   const user = useLoggedInUser();
 
-  const [sessionState, dispatch] = useSessionStateByReadableID(
-    sessionReadableID,
-    user.userID
-  );
+  const [sessionState, dispatch] = useSessionState(sessionID, user.userID);
 
   const [endSessionModalOpen, setEndSessionModalOpen] =
     useState<boolean>(false);

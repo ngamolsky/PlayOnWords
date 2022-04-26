@@ -5,7 +5,7 @@ import XWordIcon from "../../images/XWordIcon";
 import classNames from "classnames";
 import { BadgeCheckIcon } from "@heroicons/react/solid";
 import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../../constants";
-import { useRecentSessionsForUser } from "../../models/Session";
+import { useRecentSessionsForUserAndPuzzle } from "../../models/Session";
 import { useLoggedInUser } from "../../models/User";
 
 interface PuzzleCardProps {
@@ -26,7 +26,7 @@ export const PuzzleCard: React.FC<PuzzleCardProps> = ({
   className,
 }) => {
   const user = useLoggedInUser();
-  const [completedSessions] = useRecentSessionsForUser(
+  const [completedSessions] = useRecentSessionsForUserAndPuzzle(
     NUM_PUZZLES_TO_SHOW_ON_HOME,
     user,
     puzzle,

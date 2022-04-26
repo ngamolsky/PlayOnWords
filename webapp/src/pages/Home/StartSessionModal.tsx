@@ -7,7 +7,10 @@ import { Puzzle } from "../../models/Puzzle";
 import { User } from "../../models/User";
 import Tabs from "../../components/Tabs";
 import { PuzzleCard } from "./PuzzleCard";
-import { startSession, useRecentSessionsForUser } from "../../models/Session";
+import {
+  startSession,
+  useRecentSessionsForUserAndPuzzle,
+} from "../../models/Session";
 import { SessionCard } from "./SessionCard";
 import { toXWordDate } from "../../utils/timeAndDateUtils";
 import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../../constants";
@@ -103,7 +106,7 @@ const InProgressTab = (
   puzzle: Puzzle,
   setSessionID: (sessionID: string) => void
 ) => {
-  const [sessions, loadingMessage] = useRecentSessionsForUser(
+  const [sessions, loadingMessage] = useRecentSessionsForUserAndPuzzle(
     NUM_PUZZLES_TO_SHOW_ON_HOME,
     user,
     puzzle
@@ -146,7 +149,7 @@ const CompletedTab = (
   puzzle: Puzzle,
   setSessionID: (sessionID: string) => void
 ) => {
-  const [sessions, loadingMessage] = useRecentSessionsForUser(
+  const [sessions, loadingMessage] = useRecentSessionsForUserAndPuzzle(
     NUM_PUZZLES_TO_SHOW_ON_HOME,
     user,
     puzzle,

@@ -34,7 +34,6 @@ const UserPercentageCompleteTable = ({ session }: { session: Session }) => {
               const currentUserData = session.participantData.find(
                 (userData) => userData.userID == userID
               );
-              const isInSession = currentUserData?.isOnline;
 
               const user = participants.find((user) => user.userID == userID);
 
@@ -43,13 +42,12 @@ const UserPercentageCompleteTable = ({ session }: { session: Session }) => {
                 <tr key={index}>
                   <td className="flex py-2">
                     {currentUserData?.username}
-                      {(isInSession || isUserOnline) && (
+                    {isUserOnline && (
                       <>
                         <span
                           className={classNames(
                             "w-2 h-2 my-auto ml-2 rounded-full animate-pulse-fast",
-                            { "bg-orange-300": isUserOnline && !isInSession },
-                            { "bg-emerald-500": isInSession }
+                            { "bg-emerald-500": isUserOnline }
                           )}
                         ></span>
                       </>

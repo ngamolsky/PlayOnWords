@@ -1,10 +1,9 @@
 import { database } from "firebase-functions";
-import { getUserSessions, setUserOnlineForSession } from "../models/Session";
 import { getUserByID, setUserOnlineStatus } from "../models/User";
 
 export const PresenceMonitor = database
   .ref("/status/{sanitizedUserID}")
-  .onWrite(async (change, context) => {
+  .onUpdate(async (change, context) => {
     const eventStatus = change.after.val();
 
     const sanitizedUserID = context.params.sanitizedUserID;
@@ -35,11 +34,6 @@ export const PresenceMonitor = database
         "User is offline, removing online status from all sessions and on user",
         userID
       );
-
-      const userSessions = await getUserSessions(user);
-      userSessions.forEach((session) => {
-        setUserOnlineForSession(session.sessionID, user, false);
-      });
 
       return setUserOnlineStatus(user, false);
     }

@@ -323,11 +323,7 @@ export const useSessionState = (
       }
     };
 
-    setUserOnlineForSession(sessionID, currentUserID, true);
     setInitialState(sessionID, dispatch);
-    return () => {
-      setUserOnlineForSession(sessionID, currentUserID, false);
-    };
   }, []);
 
   useEffect(() => {
@@ -360,23 +356,6 @@ export const useSessionState = (
     return unsub;
   }, []);
 
-  const onVisibilityChange = () => {
-    if (sessionState.session) {
-      setUserOnlineForSession(
-        sessionState.session.sessionID,
-        currentUserID,
-        document.visibilityState === "visible"
-      );
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, []);
-
   return [sessionState, dispatch];
 };
 
@@ -394,7 +373,7 @@ export const useSessionActions = (): Dispatch<SessionActions> => {
   return dispatch;
 };
 
-export const useRecentSessionsForUser = (
+export const useRecentSessionsForUserAndPuzzle = (
   numSessions: number,
   participant: User,
   puzzle?: Puzzle,
@@ -432,6 +411,7 @@ export const useRecentSessionsForUser = (
         if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
           console.log(
             "Firestore Request: useRecentSessionsForUser. Sessions updated:",
+            puzzle.puzzleID,
             JSON.stringify(sessions.map((session) => session.sessionID))
           );
         }

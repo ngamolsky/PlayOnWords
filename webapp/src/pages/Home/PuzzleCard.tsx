@@ -4,7 +4,7 @@ import { Puzzle } from "../../models/Puzzle";
 import XWordIcon from "../../images/XWordIcon";
 import classNames from "classnames";
 import { BadgeCheckIcon } from "@heroicons/react/solid";
-import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../../constants";
+import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../../utils/constants";
 import { useRecentSessionsForUserAndPuzzle } from "../../models/Session";
 import { useLoggedInUser } from "../../models/User";
 

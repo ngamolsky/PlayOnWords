@@ -5,9 +5,9 @@ import { InputField } from "../components/InputField";
 import { validateUsername } from "../utils/validationUtils";
 import { useHistory } from "react-router-dom";
 import { createAnonymousUser, createOrSignInGoogleUser } from "../models/User";
-import useQueryParams from "../hooks/useQueryParams";
+import useQueryParams from "../utils/useQueryParams";
 import { UserContext } from "../contexts/UserContext";
-import { APP_NAME } from "../constants";
+import { APP_NAME } from "../utils/constants";
 import Button from "../components/Button";
 import XWordIcon from "../images/XWordIcon";
 

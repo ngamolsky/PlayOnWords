@@ -1,11 +1,11 @@
 import classNames from "classnames";
 import React from "react";
-import { Puzzle } from "../../models/Puzzle";
-import { CombinedBoardState } from "../../models/Session";
+import { Puzzle } from "../../../models/Puzzle";
+import { CombinedBoardState } from "../../../models/Session";
 import {
   getClueNumberForCellKeyAndPuzzle,
   getSizeFromCellKeys,
-} from "../../utils/sessionUtils";
+} from "../../../utils/sessionUtils";
 import { XCell } from "./XCell";
 
 type XBoardProps = {

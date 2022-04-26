@@ -1,4 +1,4 @@
-import { MIN_PASSWORD_LENGTH } from "../constants";
+import { MIN_PASSWORD_LENGTH } from "./constants";
 
 export type UserPasswordInput = {
   email: string;

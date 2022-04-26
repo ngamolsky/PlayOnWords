@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import React, { ReactNode } from "react";
-import { APP_NAME } from "../constants";
+import { APP_NAME } from "../utils/constants";
 import { Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/solid";
 import IconButton from "./IconButton";

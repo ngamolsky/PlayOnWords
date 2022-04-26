@@ -26,10 +26,10 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import { auth, db, rtDb } from "../config/firebase";
-import { USERS_COLLECTION } from "../constants";
+import { USERS_COLLECTION } from "../utils/constants";
 import { UserContext } from "../contexts/UserContext";
-import { ManyUserFoundForFirebaseIDError } from "../errors";
-import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
+import { ManyUserFoundForFirebaseIDError } from "../utils/errors";
+import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../utils/settings";
 
 export type User = {
   userID: string;
@@ -283,7 +283,6 @@ export const useAuth = (): [User | undefined, boolean] => {
       const user = userState.user;
       // In order to add a "presence feature" that can monitor whether a user is online, we use the firebase
       // real time database as per https://firebase.google.com/docs/firestore/solutions/presence#solution_cloud_functions_with_realtime_database
-
       if (user) {
         const sanitizedUserID = user.userID.replace(/\./g, "%%%");
         const statusPath = `/status/${sanitizedUserID}`;

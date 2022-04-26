@@ -3,9 +3,9 @@ import { useParams } from "react-router-dom";
 
 import { XWordContainer } from "../../components/XWordContainer";
 import { CellSolutionState, useSessionState } from "../../models/Session";
-import { XBoard } from "../../components/XBoard/XBoard";
-import { ACTION_KEYS, Keyboard } from "../../components/mobile/Keyboard";
-import { ClueSelector } from "../../components/mobile/ClueSelector";
+import { XBoard } from "./XBoard/XBoard";
+import { ACTION_KEYS, Keyboard } from "./mobile/Keyboard";
+import { ClueSelector } from "./mobile/ClueSelector";
 import {
   getClueFromCellKeyOrientationAndPuzzle,
   getCombinedBoardState,

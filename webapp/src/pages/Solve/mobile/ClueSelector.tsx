@@ -1,6 +1,6 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
 import React from "react";
-import { Clue } from "../../models/Puzzle";
+import { Clue } from "../../../models/Puzzle";
 type ClueSelectorProps = {
   clue: Clue;
   onNextClue: () => void;

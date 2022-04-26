@@ -1,11 +1,11 @@
 import React from "react";
-import { SpecialCellType } from "../../models/Puzzle";
+import { SpecialCellType } from "../../../models/Puzzle";
 import {
   CellSelectionState,
   CellSolutionState,
   CombinedCellState,
-} from "../../models/Session";
-import { getCellCoordinatesFromKey } from "../../utils/sessionUtils";
+} from "../../../models/Session";
+import { getCellCoordinatesFromKey } from "../../../utils/sessionUtils";
 
 type XCellProps = {
   cellKey: string;

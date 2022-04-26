@@ -13,7 +13,7 @@ import {
 } from "../../models/Session";
 import { SessionCard } from "./SessionCard";
 import { toXWordDate } from "../../utils/timeAndDateUtils";
-import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../../constants";
+import { NUM_PUZZLES_TO_SHOW_ON_HOME } from "../../utils/constants";
 import id from "uuid-readable";
 
 const StartSessionModal = ({

@@ -1,6 +1,6 @@
 import { diff } from "deep-object-diff";
 import { Reducer } from "react";
-import { FIRST_CELL_KEY } from "../constants";
+import { FIRST_CELL_KEY } from "../utils/constants";
 import {
   BoardState,
   Session,
@@ -13,7 +13,7 @@ import {
   CellState,
 } from "../models/Session";
 import { User } from "../models/User";
-import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
+import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../utils/settings";
 import {
   getNextCellKey,
   getPreviousCellKey,

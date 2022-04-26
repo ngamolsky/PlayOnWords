@@ -10,7 +10,10 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../config/firebase";
-import { NUM_PUZZLES_TO_SHOW_ON_HOME, PUZZLES_COLLECTION } from "../constants";
+import {
+  NUM_PUZZLES_TO_SHOW_ON_HOME,
+  PUZZLES_COLLECTION,
+} from "../utils/constants";
 
 export type Puzzle = {
   puzzleID: string;

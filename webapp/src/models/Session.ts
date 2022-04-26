@@ -22,14 +22,14 @@ import {
   SESSIONS_COLLECTION,
   STARTING_ORIENTATION,
   FIRST_CELL_KEY,
-} from "../constants";
+} from "../utils/constants";
 import {
   SessionActions,
   SessionActionTypes,
   SessionState,
   sessionReducer,
 } from "../reducers/session";
-import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../settings";
+import { LOG_LEVEL, LOG_LEVEL_TYPES } from "../utils/settings";
 import { getBoardStateFromSolutions } from "../utils/sessionUtils";
 import { User } from "./User";
 

@@ -1,4 +1,4 @@
-import { OrientationType } from "./reducers/session";
+import { OrientationType } from "../reducers/session";
 
 export const APP_NAME = "Play On Words";
 

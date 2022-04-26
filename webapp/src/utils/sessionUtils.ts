@@ -1,4 +1,4 @@
-import { FIRST_CELL_KEY } from "../constants";
+import { FIRST_CELL_KEY } from "./constants";
 import { Clue, Puzzle, Solutions } from "../models/Puzzle";
 import {
   CellSelectionState,
@@ -625,4 +625,3 @@ export const getMostlyFinishedBoardState = (
 
   return newBoardState;
 };
-

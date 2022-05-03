@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import { XWordContainer } from "../../components/XWordContainer";
 import { useHistory } from "react-router-dom";
 import { Puzzle, PuzzleType, usePuzzlesBySearch } from "../../models/Puzzle";
-import { useLoggedInUser, useOnlineUsers } from "../../models/User";
+import { useLoggedInUser } from "../../models/User";
 import Avatar from "../../components/Avatar";
 import { PuzzleCard } from "./PuzzleCard";
 import StartSessionModal from "./StartSessionModal";
 import { AdjustmentsIcon, UserGroupIcon } from "@heroicons/react/outline";
 import IconButton from "../../components/IconButton";
 import PuzzleSearchToolbar from "./PuzzleSearchToolbar";
-import Modal from "../../components/Modal";
 
 const Home: React.FC = () => {
   const history = useHistory();
@@ -26,7 +25,6 @@ const Home: React.FC = () => {
   const [puzzleType, setPuzzleType] = useState<PuzzleType>("daily");
 
   const user = useLoggedInUser();
-  const onlineUsers = useOnlineUsers();
   const [puzzles, puzzleLoadingMessage] = usePuzzlesBySearch(
     puzzleType,
     dayOfWeek,
@@ -94,16 +92,6 @@ const Home: React.FC = () => {
         )
       }
     >
-      <Modal
-        title="Online Users:"
-        isOpen={isOnlineUserModalShowing}
-        setIsOpen={setOnlineUserModalShowing}
-        className="p-4 w-fit"
-      >
-        {onlineUsers.map((user) => (
-          <div key={user.userID}>{user.username}</div>
-        ))}
-      </Modal>
       {selectedPuzzle && (
         <StartSessionModal
           modalShowing={modalShowing}

@@ -6,7 +6,6 @@ import {
   signOut as firebaseSignOut,
   Unsubscribe,
 } from "firebase/auth";
-import { ref, onValue, onDisconnect, set } from "firebase/database";
 import {
   collection,
   query,
@@ -21,11 +20,10 @@ import {
   deleteDoc,
   getDocs,
   updateDoc,
-  serverTimestamp,
 } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
-import { auth, db, rtDb } from "../config/firebase";
+import { auth, db } from "../config/firebase";
 import { USERS_COLLECTION } from "../utils/constants";
 import { UserContext } from "../contexts/UserContext";
 import { ManyUserFoundForFirebaseIDError } from "../utils/errors";
@@ -39,7 +37,6 @@ export type User = {
   firebaseAuthID: string;
   loginType: LoginType;
   createDate: Timestamp;
-  isOnline?: boolean;
 };
 
 export enum LoginType {
@@ -278,40 +275,6 @@ export const useAuth = (): [User | undefined, boolean] => {
     return authUnsub;
   }, []);
 
-  useEffect(() => {
-    if (userState.user) {
-      const user = userState.user;
-      // In order to add a "presence feature" that can monitor whether a user is online, we use the firebase
-      // real time database as per https://firebase.google.com/docs/firestore/solutions/presence#solution_cloud_functions_with_realtime_database
-      if (user) {
-        const sanitizedUserID = user.userID.replace(/\./g, "%%%");
-        const statusPath = `/status/${sanitizedUserID}`;
-        const userStatusDatabaseRef = ref(rtDb, statusPath);
-        const connectedRef = ref(rtDb, ".info/connected");
-
-        onValue(connectedRef, async (snapshot) => {
-          const data = snapshot.val();
-
-          if (data == false) {
-            setUserOnlineStatus(user.userID, false);
-            return;
-          }
-
-          await onDisconnect(userStatusDatabaseRef).set({
-            state: "offline",
-            last_changed: serverTimestamp(),
-          });
-
-          set(userStatusDatabaseRef, {
-            state: "online",
-            last_changed: serverTimestamp(),
-          });
-          setUserOnlineStatus(user.userID, true);
-        });
-      }
-    }
-  }, [userState.user]);
-
   return [userState.user, userState.userLoading];
 };
 
@@ -319,36 +282,45 @@ export const useUsersByID = (userIDs?: string[]): User[] => {
   const [userState, setUserState] = useState<User[]>([]);
 
   useEffect(() => {
-    if (userIDs) {
-      const q = query(
-        collection(db, USERS_COLLECTION).withConverter(userConverter),
-        where(documentId(), "in", userIDs)
-      );
+    const unsubs: Unsubscribe[] = [];
 
+    if (userIDs) {
       if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
         console.log(
           "Firestore Request: useUsersByID. Watching Users Collection for Users with IDs:",
           userIDs
         );
       }
+      const queries = [];
+      for (let i = 0; i < userIDs.length; i += 10) {
+        const chunk = userIDs.slice(i, i + 10);
+        const q = query(
+          collection(db, USERS_COLLECTION).withConverter(userConverter),
+          where(documentId(), "in", chunk)
+        );
+        queries.push(q);
+      }
 
-      const unsub = onSnapshot(q, (querySnapshot) => {
-        const users: User[] = [];
-        querySnapshot.docs.forEach((doc) => {
-          users.push(doc.data());
-        });
+      const users: Set<User> = new Set();
 
-        setUserState(users);
-
-        if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
-          console.log(
-            "Firestore Request: useUsersByID. Updating Users:",
-            JSON.stringify(users)
-          );
-        }
+      queries.forEach((q) => {
+        unsubs.push(
+          onSnapshot(q, (snapshot) => {
+            snapshot.docs.forEach((doc) => {
+              users.add(doc.data());
+            });
+          })
+        );
       });
-      return unsub;
+
+      setUserState(Array.from(users));
     }
+
+    return () => {
+      unsubs.forEach((unsub) => {
+        unsub();
+      });
+    };
   }, []);
 
   return userState;
@@ -363,41 +335,6 @@ export const useLoggedInUser = (): User => {
   return user;
 };
 
-export const useOnlineUsers = (): User[] => {
-  const [userState, setUserState] = useState<User[]>([]);
-
-  useEffect(() => {
-    const q = query(
-      collection(db, USERS_COLLECTION).withConverter(userConverter),
-      where("isOnline", "==", true)
-    );
-
-    if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
-      console.log(
-        "Firestore Request: useOnlineUsers. Getting all online users"
-      );
-    }
-
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      const users: User[] = [];
-      querySnapshot.docs.forEach((doc) => {
-        users.push(doc.data());
-      });
-
-      setUserState(users);
-
-      if (LOG_LEVEL == LOG_LEVEL_TYPES.DEBUG) {
-        console.log(
-          "Firestore Request: useOnlineUsers. Updating Users:",
-          JSON.stringify(users)
-        );
-      }
-    });
-    return unsub;
-  }, []);
-
-  return userState;
-};
 //#endregion
 
 export const userConverter: FirestoreDataConverter<User> = {

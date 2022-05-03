@@ -54,7 +54,7 @@ export const convertPuzzleDataToPuzzle = async ({
 
     result[cellKey] =
       each.moreAnswers && each.moreAnswers.valid.length > 0
-        ? [each.answer].concat(each.moreAnswers.valid)
+        ? [each.answer ? each.answer : " "].concat(each.moreAnswers.valid)
         : each.answer
         ? each.answer
         : null;

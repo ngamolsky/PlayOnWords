@@ -11,7 +11,7 @@ const UserPercentageCompleteTable = ({ session }: { session: Session }) => {
   const sessionResults = getSessionCompletionPercentages(session);
   const sessionPercentRevealed = getSessionRevealedPercentage(session);
   return (
-    <div className="flex-col p-4 mt-4 rounded-md bg-slate-200 dark:bg-slate-700">
+    <div className="flex-col p-4 mt-4 overflow-auto rounded-md bg-slate-200 dark:bg-slate-700">
       <table className="w-full table-fixed">
         <thead>
           <tr>

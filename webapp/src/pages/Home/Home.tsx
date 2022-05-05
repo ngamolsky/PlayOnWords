@@ -6,7 +6,7 @@ import { useLoggedInUser } from "../../models/User";
 import Avatar from "../../components/Avatar";
 import { PuzzleCard } from "./PuzzleCard";
 import StartSessionModal from "./StartSessionModal";
-import { AdjustmentsIcon, UserGroupIcon } from "@heroicons/react/outline";
+import { AdjustmentsIcon } from "@heroicons/react/outline";
 import IconButton from "../../components/IconButton";
 import PuzzleSearchToolbar from "./PuzzleSearchToolbar";
 
@@ -15,8 +15,6 @@ const Home: React.FC = () => {
 
   const [sessionLoading, setSessionLoading] = useState<boolean>(false);
   const [modalShowing, setModalShowing] = useState<boolean>(false);
-  const [isOnlineUserModalShowing, setOnlineUserModalShowing] =
-    useState<boolean>(false);
   const [isFilterShowing, setIsFilterShowing] = useState<boolean>(false);
 
   const [selectedPuzzle, setSelectedPuzzle] = useState<Puzzle>();
@@ -47,14 +45,6 @@ const Home: React.FC = () => {
       }
       toolbarContent={
         <>
-          <IconButton
-            className="w-8 h-8 my-auto mr-2 rounded-md"
-            onClick={() => {
-              setOnlineUserModalShowing(!isOnlineUserModalShowing);
-            }}
-          >
-            <UserGroupIcon className="stroke-1 " />
-          </IconButton>
           <IconButton
             selected={isFilterShowing}
             className="w-8 h-8 my-auto mr-4 rounded-md"

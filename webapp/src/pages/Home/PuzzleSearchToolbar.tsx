@@ -41,7 +41,7 @@ const PuzzleSearchToolbar: React.FC<PuzzleSearchToolbarProps> = ({
       >
         <Listbox.Button
           className={
-            "bg-white dark:bg-slate-800 p-2 flex rounded-md outline-none w-40 dark:ring-white ring-1 ring-slate-300 text-left"
+            "bg-white dark:bg-slate-800 p-2 flex rounded-md outline-none w-40 dark:ring-white ring-1 ring-slate-300 text-left ml-4"
           }
         >
           <span className="mx-2 grow">

@@ -112,6 +112,17 @@ const Home: React.FC = () => {
             );
           })}
       </div>
+      <div className="mx-auto my-8 dark:text-slate-500">
+        Created by{" "}
+        <a
+          href="https://gamolsky.net"
+          target={"_blank"}
+          className=" hover:underline"
+        >
+          Nikita Gamolsky
+        </a>{" "}
+        - Copyright 2022 ©
+      </div>
     </XWordContainer>
   );
 };

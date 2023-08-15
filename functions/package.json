@@ -6,7 +6,7 @@
     "serve": "yarn build && firebase emulators:start",
     "shell": "yarn build && firebase functions:shell",
     "start": "yarn shell",
-    "deploy": "firebase deploy --only functions",
+    "deploy": "yarn build && firebase deploy --only functions",
     "logs": "firebase functions:log"
   },
   "engines": {
@@ -14,13 +14,15 @@
   },
   "main": "build/index.js",
   "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
     "axios": "^0.21.1",
-    "firebase-admin": "^10.0.2",
-    "firebase-functions": "^3.18.0",
+    "firebase-admin": "^11.10.1",
+    "firebase-functions": "^4.4.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@google-cloud/functions-framework": "^3.3.0",
+    "@types/nodemailer": "^6.4.9",
     "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",

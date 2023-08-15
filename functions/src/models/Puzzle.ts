@@ -104,6 +104,8 @@ export const getPuzzleByNYTPuzzleID = async (
   nytID: string
 ): Promise<Puzzle | null> => {
   let puzzle = null;
+  console.log("GETTING PUZZLE BY NYT ID: ", nytID);
+
   const results = (
     await db
       .collection("puzzles")

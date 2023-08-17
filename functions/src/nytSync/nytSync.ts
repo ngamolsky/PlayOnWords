@@ -88,8 +88,8 @@ export const syncDailyNYTPuzzles = pubsub
 
     // Email results
     const subject = hasError
-      ? `[PlayOnWords]: ⚠️ ${dateString}`
-      : `[PlayOnWords]: ✅ ${dateString}`;
+      ? `🤖 [PlayOnWords]: ⚠️ ${dateString}`
+      : `🤖 [PlayOnWords]: ✅ ${dateString}`;
 
     let html = `
         <h1>${subject}</h1>

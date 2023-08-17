@@ -89,7 +89,7 @@ const NewTab = (
           setSessionLoading(true);
           setModalShowing(false);
 
-          const sessionID = `session.${v4()}`;
+          const sessionID = id.short(v4()).split(" ").join("-");
 
           const session = await startSession(sessionID, selectedPuzzle, user);
           setSessionID(session.sessionID);
@@ -187,8 +187,5 @@ const CompletedTab = (
     </div>
   );
 };
-
-
-
 
 export default StartSessionModal;

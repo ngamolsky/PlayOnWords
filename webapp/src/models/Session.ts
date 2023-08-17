@@ -43,6 +43,7 @@ export type Session = {
   boardState: BoardState;
   sessionStatus: SessionStatus;
   endTime?: Timestamp;
+  ttl?: Timestamp;
   lastUpdatedTime: Timestamp;
 };
 
@@ -210,9 +211,12 @@ export const updateSessionStatus = async (
   const sessionRef = doc(db, SESSIONS_COLLECTION, sessionID);
 
   if (sessionStatus == SessionStatus.COMPLETE) {
+    const now = Timestamp.now();
+    const in30DaysMillis = 1000 * 60 * 60 * 24 * 30 + now.toMillis();
     return updateDoc(sessionRef, {
       sessionStatus,
       endTime: Timestamp.now(),
+      ttl: Timestamp.fromMillis(in30DaysMillis),
       lastUpdatedTime: Timestamp.now(),
     });
   } else {

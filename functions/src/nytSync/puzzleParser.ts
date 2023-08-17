@@ -146,22 +146,10 @@ export const convertPuzzleDataToPuzzle = async ({
       }),
   };
 
-  console.log(
-    `Puzzle has ${clues.horizontal.length + clues.vertical.length} clues`
-  );
-
   const hasRebus =
     Object.values(solutions).filter(
       (solution) => solution && solution.length > 1
     ).length > 0;
-
-  if (hasRebus) {
-    console.log("This puzzle has a rebus");
-  }
-
-  console.log(
-    Object.values(solutions).filter((solution) => Array.isArray(solution))
-  );
 
   const puzzle: Puzzle = {
     puzzleID: `puzzle.${v4()}`,
@@ -177,7 +165,7 @@ export const convertPuzzleDataToPuzzle = async ({
 
   if (Object.keys(specialCells).length > 0) {
     puzzle.specialCells = specialCells;
-    console.log("Puzzle has special cells");
+    ``;
   }
 
   if (title) {

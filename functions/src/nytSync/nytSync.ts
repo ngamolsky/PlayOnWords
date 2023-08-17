@@ -1,98 +1,152 @@
 import axios from "axios";
 import { pubsub } from "firebase-functions";
-import {
-  addPuzzle,
-  deletePuzzle,
-  getPuzzleByNYTPuzzleID,
-  Puzzle,
-} from "../models/Puzzle";
+import { addPuzzle, getPuzzleByNYTPuzzleID, Puzzle } from "../models/Puzzle";
 import { LATEST_PUZZLE_DATA_BASE_URL, LATEST_PUZZLE_URL } from "./constants";
 import { convertPuzzleDataToPuzzle } from "./puzzleParser";
+import { sendEmail } from "../email";
 
-export const NYTSync = pubsub
+const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+export const syncDailyNYTPuzzles = pubsub
   .schedule("25 22 * * *")
   .timeZone("America/New_York")
   .onRun(async () => {
-    console.log("Starting NYTSync function");
-    let nytPuzzleID: string;
-    if (process.env.OVERWRITE_PUZZLE_ID) {
-      nytPuzzleID = process.env.OVERWRITE_PUZZLE_ID;
-      console.log(
-        "Overwrite latest puzzle ID: ",
-        process.env.OVERWRITE_PUZZLE_ID
-      );
-    } else {
-      console.log("Loading latest daily puzzle metadata");
-      const latestPuzzleMetadata = (await getRecentNYTPuzzles(2, "daily"))[0];
-
-      console.log(latestPuzzleMetadata);
-      nytPuzzleID = latestPuzzleMetadata.puzzle_id.toString();
-    }
-
-    const puzzleID = await copyNYTPuzzle(nytPuzzleID, "daily");
-
-    let nytMiniPuzzleID: string;
-    if (process.env.OVERWRITE_MINI_PUZZLE_ID) {
-      nytMiniPuzzleID = process.env.OVERWRITE_MINI_PUZZLE_ID;
-      console.log(
-        "Overwrite latest puzzle ID: ",
-        process.env.OVERWRITE_MINI_PUZZLE_ID
-      );
-    } else {
-      console.log("Loading latest mini puzzle metadata");
-      const latestPuzzleMetadata = (await getRecentNYTPuzzles(2, "mini"))[0];
-
-      console.log(latestPuzzleMetadata);
-      nytMiniPuzzleID = latestPuzzleMetadata.puzzle_id.toString();
-    }
-
-    const miniPuzzleID = await copyNYTPuzzle(nytMiniPuzzleID, "mini");
-
-    return {
-      daily: puzzleID,
-      mini: miniPuzzleID,
+    const result = {
+      puzzleDate: "",
+      daily: {
+        puzzleID: "",
+        nytID: "",
+        error: "",
+      },
+      mini: {
+        puzzleID: "",
+        nytID: "",
+        error: "",
+      },
     };
+
+    const developerEmail = process.env.DEVELOPER_EMAIL;
+
+    if (!developerEmail) {
+      throw new Error("Developer email not set");
+    }
+
+    let hasError = false;
+    let puzzleDate;
+
+    // Sync daily puzzle
+    try {
+      const latestPuzzleMetadata = (await getRecentNYTPuzzles("daily", 1))[0];
+
+      puzzleDate = new Date(Date.parse(latestPuzzleMetadata.print_date));
+      const nytPuzzleID = latestPuzzleMetadata.puzzle_id.toString();
+      const puzzleID = await copyNYTPuzzle(nytPuzzleID, "daily");
+      result.daily.puzzleID = puzzleID;
+      result.daily.nytID = nytPuzzleID;
+    } catch (err) {
+      if (err instanceof Error) {
+        result.daily.error = err.toString();
+      } else {
+        result.daily.error = JSON.stringify(err);
+      }
+      hasError = true;
+    }
+
+    // Sync mini puzzle
+    try {
+      const latestMiniMetadata = (await getRecentNYTPuzzles("mini", 1))[0];
+
+      if (!puzzleDate) {
+        puzzleDate = new Date(Date.parse(latestMiniMetadata.print_date));
+      }
+      const nytMiniID = latestMiniMetadata.puzzle_id.toString();
+      const miniPuzzleID = await copyNYTPuzzle(nytMiniID, "mini");
+      result.mini.puzzleID = miniPuzzleID;
+      result.mini.nytID = nytMiniID;
+    } catch (err) {
+      if (err instanceof Error) {
+        result.mini.error = err.toString();
+      } else {
+        result.mini.error = JSON.stringify(err);
+      }
+      hasError = true;
+    }
+    let dateString;
+    if (puzzleDate) {
+      const year = puzzleDate.getFullYear();
+      const month = String(puzzleDate.getMonth() + 1).padStart(2, "0"); // Month is zero-based
+      const day = String(puzzleDate.getDate()).padStart(2, "0");
+      const dayOfWeek = puzzleDate.getDay();
+
+      dateString = `${DAYS_OF_WEEK[dayOfWeek]}: ${year}-${month}-${day}`;
+      result.puzzleDate = dateString;
+    } else {
+      hasError = true;
+      result.puzzleDate = "Unknown";
+      dateString = "Unknown";
+    }
+
+    // Email results
+    const subject = hasError
+      ? `[PlayOnWords]: ⚠️ ${dateString}`
+      : `[PlayOnWords]: ✅ ${dateString}`;
+
+    let html = `
+        <h1>${subject}</h1>
+        <h2>Daily</h2>
+    `;
+
+    if (result.daily.error) {
+      html += `<p>${result.daily.error}</p>`;
+    } else {
+      html += `<p>Puzzle ID: ${result.daily.puzzleID}</p>`;
+      html += `<p>NYT ID: ${result.daily.nytID}</p>`;
+    }
+
+    html += `
+        <h2>Mini</h2>
+    `;
+
+    if (result.mini.error) {
+      html += `<p>${result.mini.error}</p>`;
+    } else {
+      html += `<p>Puzzle ID: ${result.mini.puzzleID}</p>`;
+      html += `<p>NYT ID: ${result.mini.nytID}</p>`;
+    }
+
+    console.log(JSON.stringify(result, null, 2));
+    await sendEmail(developerEmail, subject, html);
+    return result;
   });
 
 const copyNYTPuzzle = async (
   nytPuzzleID: string,
   type: "mini" | "daily"
 ): Promise<string> => {
-  try {
-    const existingPuzzle = await getPuzzleByNYTPuzzleID(nytPuzzleID);
+  const existingPuzzle = await getPuzzleByNYTPuzzleID(nytPuzzleID);
 
-    const replacePuzzleIfExists =
-      process.env.REPLACE_EXISTING_PUZZLE === "true";
-
-    console.log("Replace existing puzzle: ", replacePuzzleIfExists);
-
-    if (replacePuzzleIfExists && existingPuzzle) {
-      console.log("Deleting existing puzzle", existingPuzzle.puzzleID);
-      await deletePuzzle(existingPuzzle.puzzleID);
-    } else if (existingPuzzle) {
-      throw new Error(
-        `Found existing puzzle with id ${existingPuzzle.puzzleID}`
-      );
-    }
-    const puzzle = await loadPuzzleFromNYTPuzzle(nytPuzzleID, type);
-
-    await addPuzzle(puzzle);
-
-    return puzzle.puzzleID;
-  } catch (err) {
-    console.error(err);
-    return err as string;
+  if (existingPuzzle) {
+    throw new Error(`Found existing puzzle with id ${existingPuzzle.puzzleID}`);
   }
+
+  const puzzle = await loadPuzzleFromNYTPuzzle(nytPuzzleID, type);
+
+  await addPuzzle(puzzle);
+  return puzzle.puzzleID;
 };
 
-const getRecentNYTPuzzles = async (
-  limit: number,
-  type: "mini" | "daily"
+export const getRecentNYTPuzzles = async (
+  type: "mini" | "daily",
+  limit?: number
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any[]> => {
-  const latestPuzzleMetadata = await axios.get(
-    `${LATEST_PUZZLE_URL}&limit=${limit}&publish_type=${type}`
-  );
+  let url = `${LATEST_PUZZLE_URL}&publish_type=${type}`;
+
+  if (limit) {
+    url += `&limit=${limit}`;
+  }
+
+  const latestPuzzleMetadata = await axios.get(url);
   return latestPuzzleMetadata.data.results;
 };
 
@@ -109,22 +163,10 @@ const loadPuzzleFromNYTPuzzle = async (
   ).data;
 
   const puzzleBody = puzzleResults.body[0];
-
   const latestPuzzleTitle = puzzleResults.title;
   const latestPuzzleDate = new Date(Date.parse(puzzleResults.publicationDate));
   const latestPuzzleWidth = puzzleBody.dimensions.width;
   const latestPuzzleHeight = puzzleBody.dimensions.height;
-
-  console.log("NYT Puzzle ID: ", latestPuzzleID);
-  console.log("Date: ", latestPuzzleDate);
-  if (latestPuzzleTitle) {
-    console.log("Title: ", latestPuzzleTitle);
-  }
-  console.log("Height: ", latestPuzzleHeight);
-  console.log("Width: ", latestPuzzleWidth);
-
-  console.log(`Loaded latest puzzle data for puzzle ID: ${latestPuzzleID}`);
-
   const puzzle: Puzzle = await convertPuzzleDataToPuzzle({
     ...puzzleBody,
     title: latestPuzzleTitle,

@@ -1,4 +1,3 @@
-import { sendEmail } from "./email";
-import { NYTSync } from "./nytSync/nytSync";
+import { syncDailyNYTPuzzles } from "./nytSync/nytSync";
 
-export { NYTSync, sendEmail };
+export { syncDailyNYTPuzzles };

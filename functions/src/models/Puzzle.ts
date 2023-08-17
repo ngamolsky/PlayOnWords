@@ -51,7 +51,6 @@ export const addPuzzle = async (puzzle: Puzzle): Promise<boolean> => {
     .doc(puzzle.puzzleID)
     .set(puzzle);
 
-  console.log(`Wrote puzzle to db with id: ${puzzle.puzzleID}`);
   return true;
 };
 
@@ -69,9 +68,6 @@ export const updatePuzzle = async (
     .doc(puzzleID)
     .update(update);
 
-  console.log(
-    `Update puzzle to db with id: ${puzzleID}, with fieldName: ${fieldName} and fieldValue: ${fieldValue}`
-  );
   return true;
 };
 
@@ -82,7 +78,6 @@ export const deletePuzzle = async (puzzleID: string): Promise<boolean> => {
     .doc(puzzleID)
     .delete();
 
-  console.log(`Deleted puzzle from db with id: ${puzzleID}`);
   return true;
 };
 
@@ -104,8 +99,6 @@ export const getPuzzleByNYTPuzzleID = async (
   nytID: string
 ): Promise<Puzzle | null> => {
   let puzzle = null;
-  console.log("GETTING PUZZLE BY NYT ID: ", nytID);
-
   const results = (
     await db
       .collection("puzzles")
@@ -115,34 +108,35 @@ export const getPuzzleByNYTPuzzleID = async (
   ).docs;
 
   if (results.length > 1) {
-    console.log(
-      "FOUND PUZZLES: ",
-      results.map(async (each) => {
-        await deletePuzzle(each.data().puzzleID);
-      })
-    );
-
     throw new Error(
       `Found more than one result for nytID ${nytID}. Num results: ${results.length}`
     );
   } else if (results.length == 1) {
     puzzle = results[0].data();
-    console.log(`Found puzzle with ID ${puzzle.puzzleID} for nytID: ${nytID}`);
   }
 
   return puzzle;
 };
 
 export const loadAllPuzzles = async (
-  puzzleCallback: (puzzle: Puzzle) => Promise<string>
+  puzzleCallback: (puzzle: Puzzle) => Promise<string>,
+  limit?: number,
+  loadUntil?: Date
 ): Promise<string[]> => {
-  const results = (
-    await db
-      .collection("puzzles")
-      .withConverter(puzzleConverter)
-      .orderBy("puzzleTimestamp")
-      .get()
-  ).docs;
+  const query = db
+    .collection("puzzles")
+    .withConverter(puzzleConverter)
+    .orderBy("puzzleTimestamp");
+
+  if (limit) {
+    query.limit(limit);
+  }
+
+  if (loadUntil) {
+    query.endAt(loadUntil);
+  }
+
+  const results = (await query.get()).docs;
 
   const promises = results.map((each) => {
     const puzzle = each.data();
@@ -150,7 +144,6 @@ export const loadAllPuzzles = async (
   });
 
   const updatedPuzzleIDs = await Promise.all(promises);
-
   return updatedPuzzleIDs;
 };
 

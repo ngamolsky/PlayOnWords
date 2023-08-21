@@ -17,6 +17,7 @@ import { SessionActionTypes } from "../../reducers/session";
 import EndSessionModal from "./EndSessionModal";
 import ShareModal from "./ShareModal";
 import SolveToolbarItems from "./SolveToolbarItems";
+import { dumbDownClue } from "../../config/openAi";
 
 export type SelectionState = {
   orientation: OrientationType;
@@ -75,6 +76,20 @@ const Solve: React.FC = () => {
     }
   }, [session]);
 
+  useEffect(() => {
+    if (session) {
+      const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
+        selectedCellKey,
+        orientation,
+        session.puzzle
+      );
+
+      dumbDownClue(currentSelectedClue).then((dumbedDownClue) => {
+        console.log("dumbedDownClue", dumbedDownClue);
+      });
+    }
+  }, [selectedCellKey, orientation, session]);
+
   if (!session) {
     if (loadingMessage) {
       return <XWordContainer loadingMessage={loadingMessage} showToolbar />;
@@ -90,6 +105,7 @@ const Solve: React.FC = () => {
     orientation,
     session.puzzle
   );
+
   const boardState = getCombinedBoardState(sessionState);
 
   return (

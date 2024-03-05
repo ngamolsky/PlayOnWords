@@ -1822,12 +1822,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^16.9.0":
-  version: 16.9.24
-  resolution: "@types/react-dom@npm:16.9.24"
+"@types/react-dom@npm:^18.2.20":
+  version: 18.2.20
+  resolution: "@types/react-dom@npm:18.2.20"
   dependencies:
-    "@types/react": "npm:^16"
-  checksum: 10c0/987ee2ba06e49064cbc498d6631c14634628558cf90c2efee4b53b0df96c24f54e5dc8a7794d28a92ef47ade39c6ac4fa79329dc8807cb508c6bbb3ab62b852d
+    "@types/react": "npm:*"
+  checksum: 10c0/d352fb9c4fbb773f1db1e463b0228dfb0dc0a670a742983ae840d77f54ad9d4ac38084b23c975487fc37814f44425fc6d1adafbb432a7c48957669c124b5f8df
   languageName: node
   linkType: hard
 
@@ -1852,7 +1852,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^18.2.20":
+"@types/react@npm:*, @types/react@npm:^18.2.63":
   version: 18.2.63
   resolution: "@types/react@npm:18.2.63"
   dependencies:
@@ -1860,17 +1860,6 @@ __metadata:
     "@types/scheduler": "npm:*"
     csstype: "npm:^3.0.2"
   checksum: 10c0/53d86727b966a3ba097553b5ef75a1f2bea78bd8c54ebcf6d00bd338000112b208ab30536c8c0a9f5fc61055cc3fbabbc7a23910c55092341602845de4c13714
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^16":
-  version: 16.14.57
-  resolution: "@types/react@npm:16.14.57"
-  dependencies:
-    "@types/prop-types": "npm:*"
-    "@types/scheduler": "npm:*"
-    csstype: "npm:^3.0.2"
-  checksum: 10c0/fcdc09bb1c015235b7c86278ed426e4247cc4458073e68182734e292ae4a15e94ef6b455796ffe000ebac488e334925312fa80a530b8a96e4b06c9d4665546b7
   languageName: node
   linkType: hard
 
@@ -2369,6 +2358,13 @@ __metadata:
   version: 3.9.0
   resolution: "ci-info@npm:3.9.0"
   checksum: 10c0/6f0109e36e111684291d46123d491bc4e7b7a1934c3a20dea28cba89f1d4a03acd892f5f6a81ed3855c38647e285a150e3c9ba062e38943bef57fee6c1554c3a
+  languageName: node
+  linkType: hard
+
+"classnames@npm:^2.5.1":
+  version: 2.5.1
+  resolution: "classnames@npm:2.5.1"
+  checksum: 10c0/afff4f77e62cea2d79c39962980bf316bacb0d7c49e13a21adaadb9221e1c6b9d3cdb829d8bb1b23c406f4e740507f37e1dcf506f7e3b7113d17c5bab787aa69
   languageName: node
   linkType: hard
 
@@ -5639,14 +5635,15 @@ __metadata:
     "@testing-library/react": "npm:^10.2.1"
     "@testing-library/user-event": "npm:^12.0.2"
     "@types/jest": "npm:^25.0.0"
-    "@types/react": "npm:^18.2.20"
-    "@types/react-dom": "npm:^16.9.0"
+    "@types/react": "npm:^18.2.63"
+    "@types/react-dom": "npm:^18.2.20"
     "@types/react-router-dom": "npm:^5.1.8"
     "@types/uuid": "npm:^8.3.1"
     "@types/uuid-readable": "npm:^0.0.1"
     "@typescript-eslint/parser": "npm:^5.8.0"
     "@vitejs/plugin-react": "npm:^4.0.4"
     autoprefixer: "npm:^10.4.15"
+    classnames: "npm:^2.5.1"
     deep-object-diff: "npm:^1.1.7"
     eslint: "npm:^8.5.0"
     firebase: "npm:9.5.0"

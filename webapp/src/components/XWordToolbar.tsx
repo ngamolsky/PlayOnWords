@@ -8,6 +8,7 @@ import IconButton from "./IconButton";
 export const XWordToolbar: React.FC<{
   belowToolbarContent?: ReactNode;
   homeMode?: "icon" | "text";
+  children: ReactNode;
 }> = ({ children, belowToolbarContent, homeMode }) => {
   return (
     <header className="sticky top-0 flex min-w-full bg-white dark:bg-slate-800 dark:shadow-white">

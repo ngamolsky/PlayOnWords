@@ -1,14 +1,20 @@
 import axios from "axios";
-import { pubsub } from "firebase-functions";
+import { runWith } from "firebase-functions";
 import { addPuzzle, getPuzzleByNYTPuzzleID, Puzzle } from "../models/Puzzle";
-import { LATEST_PUZZLE_DATA_BASE_URL, LATEST_PUZZLE_URL } from "./constants";
+import {
+  LATEST_PUZZLE_DATA_BASE_URL,
+  LATEST_PUZZLE_URL,
+  PUZZLE_URL,
+} from "./constants";
 import { convertPuzzleDataToPuzzle } from "./puzzleParser";
 import { sendEmail } from "../email";
 
 const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export const syncDailyNYTPuzzles = pubsub
-  .schedule("25 22 * * *")
+export const syncDailyNYTPuzzles = runWith({
+  secrets: ["NYT_COOKIE", "SENDGRID_API_KEY"],
+})
+  .pubsub.schedule("25 22 * * *")
   .timeZone("America/New_York")
   .onRun(async () => {
     const result = {
@@ -119,6 +125,55 @@ export const syncDailyNYTPuzzles = pubsub
     return result;
   });
 
+export const syncNYTPuzzleByDate = runWith({
+  secrets: ["NYT_COOKIE", "SENDGRID_API_KEY"],
+}).https.onRequest(async (req, res): Promise<void> => {
+  const result = {
+    puzzleDate: "",
+    puzzleID: "",
+    nytID: "",
+    error: "",
+    type: "",
+  };
+
+  try {
+    const dateString = req.query.date as string | undefined;
+    const type = (req.query.type || "daily") as "mini" | "daily";
+
+    if (!dateString) {
+      res.status(400).send("Date is required");
+      return;
+    }
+
+    const date = new Date(dateString);
+    const nytPuzzle = await getNYTPuzzleByDate(date, type as "mini" | "daily");
+
+    if (!nytPuzzle) {
+      res.status(404).send("Puzzle not found");
+      return;
+    }
+
+    const puzzleID = await copyNYTPuzzle(
+      nytPuzzle.puzzle_id.toString(),
+      type as "mini" | "daily"
+    );
+
+    result.puzzleDate = dateString;
+    result.puzzleID = puzzleID;
+    result.nytID = nytPuzzle.puzzle_id.toString();
+    result.type = type;
+  } catch (err) {
+    if (err instanceof Error) {
+      result.error = err.toString();
+    } else {
+      result.error = JSON.stringify(err);
+    }
+  }
+
+  const status = result.error ? 500 : 200;
+  res.status(status).send(result);
+});
+
 const copyNYTPuzzle = async (
   nytPuzzleID: string,
   type: "mini" | "daily"
@@ -135,7 +190,26 @@ const copyNYTPuzzle = async (
   return puzzle.puzzleID;
 };
 
-export const getRecentNYTPuzzles = async (
+const getNYTPuzzleByDate = async (
+  date: Date,
+  type: "mini" | "daily"
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> => {
+  // Get date in format YYYY-MM-DD
+  const dateString = date.toISOString().split("T")[0];
+
+  const url = `${PUZZLE_URL}?publish_type=${type}&date_end=${dateString}&limit=1`;
+
+  const puzzleData = await axios.get(url);
+  const results = puzzleData.data.results;
+
+  if (results.length === 0) {
+    return undefined;
+  }
+  return puzzleData.data.results[0];
+};
+
+const getRecentNYTPuzzles = async (
   type: "mini" | "daily",
   limit?: number
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

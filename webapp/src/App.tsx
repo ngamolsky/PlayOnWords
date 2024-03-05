@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Login from "./pages/Username";

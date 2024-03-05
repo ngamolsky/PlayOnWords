@@ -2,7 +2,7 @@ import { OrientationType } from "../reducers/session";
 
 export const APP_NAME = "Play On Words";
 
-export const __prod__ = process.env.NODE_ENV === "production";
+export const __prod__ = import.meta.env.PROD;
 
 export const MIN_PASSWORD_LENGTH = 6;
 

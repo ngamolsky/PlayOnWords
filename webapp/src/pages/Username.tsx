@@ -47,7 +47,7 @@ const Login: React.FC = () => {
       >
         {({ setFieldValue, handleSubmit }) => (
           <Form className="flex flex-col grow">
-            <XWordIcon />
+            <XWordIcon className="w-1/ mx-auto" />
             <div className="grow" />
 
             <InputField

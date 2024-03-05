@@ -36,13 +36,10 @@ const Dropdown: React.FC<DropdownProps> = ({
         >
           {items.map((item, index) => {
             return (
-              <Menu.Item
-                key={index}
-                onClick={item.onClick}
-                disabled={item.disabled}
-              >
+              <Menu.Item key={index} disabled={item.disabled}>
                 {({ active, disabled }) => (
                   <div
+                    onClick={item.onClick}
                     className={classNames(
                       "p-2",
                       {

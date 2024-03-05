@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { XWordContainer } from "../../components/XWordContainer";
@@ -17,7 +17,6 @@ import { SessionActionTypes } from "../../reducers/session";
 import EndSessionModal from "./EndSessionModal";
 import ShareModal from "./ShareModal";
 import SolveToolbarItems from "./SolveToolbarItems";
-import { dumbDownClue } from "../../config/openAi";
 
 export type SelectionState = {
   orientation: OrientationType;
@@ -76,19 +75,16 @@ const Solve: React.FC = () => {
     }
   }, [session]);
 
-  useEffect(() => {
-    if (session) {
-      const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
+  const currentSelectedClue = useMemo(() => {
+    if (session && selectedCellKey && orientation) {
+      const clue = getClueFromCellKeyOrientationAndPuzzle(
         selectedCellKey,
         orientation,
         session.puzzle
       );
-
-      dumbDownClue(currentSelectedClue).then((dumbedDownClue) => {
-        console.log("dumbedDownClue", dumbedDownClue);
-      });
+      return clue;
     }
-  }, [selectedCellKey, orientation, session]);
+  }, [selectedCellKey, orientation, session?.puzzle]);
 
   if (!session) {
     if (loadingMessage) {
@@ -99,12 +95,6 @@ const Solve: React.FC = () => {
       );
     }
   }
-
-  const currentSelectedClue = getClueFromCellKeyOrientationAndPuzzle(
-    selectedCellKey,
-    orientation,
-    session.puzzle
-  );
 
   const boardState = getCombinedBoardState(sessionState);
 
@@ -146,7 +136,7 @@ const Solve: React.FC = () => {
 
       <div className="flex flex-col justify-end grow">
         <ClueSelector
-          clue={currentSelectedClue}
+          clue={currentSelectedClue!}
           onNextClue={() => {
             dispatch({
               type: SessionActionTypes.NEXT_CLUE,

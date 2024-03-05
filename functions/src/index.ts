@@ -1,3 +1,3 @@
-import { syncDailyNYTPuzzles } from "./nytSync/nytSync";
+import { syncDailyNYTPuzzles, syncNYTPuzzleByDate } from "./nytSync/nytSync";
 
-export { syncDailyNYTPuzzles };
+export { syncDailyNYTPuzzles, syncNYTPuzzleByDate };

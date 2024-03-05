@@ -10,14 +10,14 @@
     "logs": "firebase functions:log"
   },
   "engines": {
-    "node": "16"
+    "node": "18"
   },
   "main": "build/index.js",
   "dependencies": {
     "@sendgrid/mail": "^7.7.0",
     "axios": "^0.21.1",
     "firebase-admin": "^11.10.1",
-    "firebase-functions": "^4.4.1",
+    "firebase-functions": "^4.7.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

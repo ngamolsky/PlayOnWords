@@ -9,6 +9,7 @@ type XWordContainerProps = {
   belowToolbarContent?: ReactNode;
   className?: string;
   homeMode?: "icon" | "text";
+  children?: ReactNode;
 };
 
 export const XWordContainer: React.FC<XWordContainerProps> = ({

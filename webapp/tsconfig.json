@@ -17,5 +17,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src"]
+  "include": ["src", "../play-on-words/src/components/InputField copy.tsx"]
 }

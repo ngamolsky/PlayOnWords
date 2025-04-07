@@ -228,10 +228,20 @@ const loadPuzzleFromNYTPuzzle = async (
   latestPuzzleID: string,
   type: "mini" | "daily"
 ) => {
+  if (!process.env.NYT_COOKIE) {
+    throw new Error("NYT_COOKIE environment variable is not set");
+  }
+
+  // Clean and validate the cookie value
+  const cookieValue = process.env.NYT_COOKIE.trim();
+  if (!cookieValue) {
+    throw new Error("NYT_COOKIE environment variable is empty");
+  }
+
   const puzzleResults = (
     await axios.get(`${LATEST_PUZZLE_DATA_BASE_URL}/${latestPuzzleID}.json`, {
       headers: {
-        Cookie: process.env.NYT_COOKIE,
+        Cookie: cookieValue,
       },
     })
   ).data;
